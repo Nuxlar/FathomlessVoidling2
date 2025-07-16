@@ -2,6 +2,7 @@ using BepInEx;
 using R2API;
 using RoR2;
 using RoR2.ContentManagement;
+using RoR2.Mecanim;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -84,6 +85,9 @@ namespace FathomlessVoidling
             printController.startingFlowmapPower = 0f;
             printController.maxFlowmapPower = 0f;
             printController.printCurve = AnimationCurve.EaseInOut(0.0f, 0.0f, 1f, 1f);
+
+            // Add eye blinking
+            model.AddComponent<RandomBlinkController>();
           };
     }
 

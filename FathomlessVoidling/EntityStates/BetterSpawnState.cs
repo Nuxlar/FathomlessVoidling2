@@ -34,22 +34,6 @@ namespace FathomlessVoidling
             this.characterModel = this.GetModelTransform().GetComponent<CharacterModel>();
             if ((bool)this.spawnEffectPrefab)
                 EffectManager.SpawnEffect(this.spawnEffectPrefab, new EffectData() { origin = new Vector3(0, -60, 0), scale = 2, rotation = Quaternion.identity }, false);
-            if (!this.doLegs || !NetworkServer.active)
-                return;
-            ChildLocator modelChildLocator = this.GetModelChildLocator();
-            if (!(bool)this.jointSpawnCard || !(bool)modelChildLocator)
-                return;
-            DirectorPlacementRule placementRule = new DirectorPlacementRule()
-            {
-                placementMode = DirectorPlacementRule.PlacementMode.Direct,
-                spawnOnTarget = this.GetModelTransform()
-            };
-            this.SpawnJointBodyForLegServer(this.leg1Name, modelChildLocator, placementRule);
-            this.SpawnJointBodyForLegServer(this.leg2Name, modelChildLocator, placementRule);
-            this.SpawnJointBodyForLegServer(this.leg3Name, modelChildLocator, placementRule);
-            this.SpawnJointBodyForLegServer(this.leg4Name, modelChildLocator, placementRule);
-            this.SpawnJointBodyForLegServer(this.leg5Name, modelChildLocator, placementRule);
-            this.SpawnJointBodyForLegServer(this.leg6Name, modelChildLocator, placementRule);
             if ((bool)this.characterModel)
                 ++this.characterModel.invisibilityCount;
         }
@@ -87,6 +71,22 @@ namespace FathomlessVoidling
                 this.playedAnim = true;
                 if ((bool)this.characterModel)
                     --this.characterModel.invisibilityCount;
+                if (!this.doLegs || !NetworkServer.active)
+                    return;
+                ChildLocator modelChildLocator = this.GetModelChildLocator();
+                if (!(bool)this.jointSpawnCard || !(bool)modelChildLocator)
+                    return;
+                DirectorPlacementRule placementRule = new DirectorPlacementRule()
+                {
+                    placementMode = DirectorPlacementRule.PlacementMode.Direct,
+                    spawnOnTarget = this.GetModelTransform()
+                };
+                this.SpawnJointBodyForLegServer(this.leg1Name, modelChildLocator, placementRule);
+                this.SpawnJointBodyForLegServer(this.leg2Name, modelChildLocator, placementRule);
+                this.SpawnJointBodyForLegServer(this.leg3Name, modelChildLocator, placementRule);
+                this.SpawnJointBodyForLegServer(this.leg4Name, modelChildLocator, placementRule);
+                this.SpawnJointBodyForLegServer(this.leg5Name, modelChildLocator, placementRule);
+                this.SpawnJointBodyForLegServer(this.leg6Name, modelChildLocator, placementRule);
             }
             if ((double)this.fixedAge < (double)this.duration || !this.isAuthority)
                 return;
