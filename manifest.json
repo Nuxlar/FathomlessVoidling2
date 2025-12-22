@@ -1,8 +1,8 @@
 ﻿{
 	"name": "FathomlessVoidling",
 	"version_number": "1.0.0",
-	"website_url": "",
-	"description": "Template",
+	"website_url": "https://github.com/Nuxlar/FathomlessVoidling2/issues",
+	"description": "Umbral Voidling. A reworked voidling fight.",
 	"dependencies": [
 		"bbepis-BepInExPack-5.4.2117",
 		"RiskofThunder-HookGenPatcher-1.2.4"

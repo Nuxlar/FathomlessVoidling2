@@ -17,6 +17,7 @@ namespace FathomlessVoidling
         public string animationStateName = "Spawn";
         public string animationPlaybackRateParam = "Spawn.playbackRate";
         public bool doLegs = true;
+        public bool activatedEye = false;
         public bool playedAnim = false;
         public CharacterSpawnCard jointSpawnCard = Main.jointCard;
         public string leg1Name = "FrontLegL";
@@ -32,10 +33,28 @@ namespace FathomlessVoidling
             base.OnEnter();
             Util.PlaySound(this.spawnSoundString, GameObject.Find("SpawnCamera"));
             this.characterModel = this.GetModelTransform().GetComponent<CharacterModel>();
-            if ((bool)this.spawnEffectPrefab)
-                EffectManager.SpawnEffect(this.spawnEffectPrefab, new EffectData() { origin = new Vector3(0, -60, 0), scale = 2, rotation = Quaternion.identity }, false);
+
             if ((bool)this.characterModel)
                 ++this.characterModel.invisibilityCount;
+            if ((bool)this.spawnEffectPrefab)
+                EffectManager.SpawnEffect(this.spawnEffectPrefab, new EffectData() { origin = new Vector3(0, -10, 0), scale = 4, rotation = Quaternion.identity }, false);
+            if (!this.doLegs || !NetworkServer.active)
+                return;
+            ChildLocator modelChildLocator = this.GetModelChildLocator();
+            this.modelLocator.modelTransform.Find("VoidRaidCrabArmature/ROOT/HeadBase/eyeballRoot").gameObject.SetActive(false);
+            if (!(bool)this.jointSpawnCard || !(bool)modelChildLocator)
+                return;
+            DirectorPlacementRule placementRule = new DirectorPlacementRule()
+            {
+                placementMode = DirectorPlacementRule.PlacementMode.Direct,
+                spawnOnTarget = this.GetModelTransform()
+            };
+            this.SpawnJointBodyForLegServer(this.leg1Name, modelChildLocator, placementRule);
+            this.SpawnJointBodyForLegServer(this.leg2Name, modelChildLocator, placementRule);
+            this.SpawnJointBodyForLegServer(this.leg3Name, modelChildLocator, placementRule);
+            this.SpawnJointBodyForLegServer(this.leg4Name, modelChildLocator, placementRule);
+            this.SpawnJointBodyForLegServer(this.leg5Name, modelChildLocator, placementRule);
+            this.SpawnJointBodyForLegServer(this.leg6Name, modelChildLocator, placementRule);
         }
 
         private void SpawnJointBodyForLegServer(
@@ -65,28 +84,15 @@ namespace FathomlessVoidling
             if ((double)this.fixedAge >= (double)this.delay && !playedAnim)
             {
                 // FathomlessVoidling.CreateTube();
-                TeleportHelper.TeleportGameObject(this.gameObject, new Vector3(0, -10, 0));
-                // TeleportHelper.TeleportBody(this.characterBody, new Vector3(0, -10, 0));
                 this.PlayAnimation(this.animationLayerName, this.animationStateName, this.animationPlaybackRateParam, this.duration);
                 this.playedAnim = true;
                 if ((bool)this.characterModel)
                     --this.characterModel.invisibilityCount;
-                if (!this.doLegs || !NetworkServer.active)
-                    return;
-                ChildLocator modelChildLocator = this.GetModelChildLocator();
-                if (!(bool)this.jointSpawnCard || !(bool)modelChildLocator)
-                    return;
-                DirectorPlacementRule placementRule = new DirectorPlacementRule()
-                {
-                    placementMode = DirectorPlacementRule.PlacementMode.Direct,
-                    spawnOnTarget = this.GetModelTransform()
-                };
-                this.SpawnJointBodyForLegServer(this.leg1Name, modelChildLocator, placementRule);
-                this.SpawnJointBodyForLegServer(this.leg2Name, modelChildLocator, placementRule);
-                this.SpawnJointBodyForLegServer(this.leg3Name, modelChildLocator, placementRule);
-                this.SpawnJointBodyForLegServer(this.leg4Name, modelChildLocator, placementRule);
-                this.SpawnJointBodyForLegServer(this.leg5Name, modelChildLocator, placementRule);
-                this.SpawnJointBodyForLegServer(this.leg6Name, modelChildLocator, placementRule);
+            }
+            if (this.fixedAge >= 6f && !this.activatedEye)
+            {
+                this.modelLocator.modelTransform.Find("VoidRaidCrabArmature/ROOT/HeadBase/eyeballRoot").gameObject.SetActive(true);
+                this.activatedEye = true;
             }
             if ((double)this.fixedAge < (double)this.duration || !this.isAuthority)
                 return;
