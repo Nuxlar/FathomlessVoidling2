@@ -41,6 +41,12 @@
     <PackageReference Include="R2API.Core" Version="5.3.0" />
     <PackageReference Include="R2API.ContentManagement" Version="1.0.10" />
   </ItemGroup>
+  
+ <ItemGroup>
+    <Reference Include="Unity.Timeline">
+      <HintPath>libs\Unity.Timeline.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 
  <Target Name="BuildTSPackage" AfterTargets="Build">
     <MakeDir Directories="$(TSPackageDir);$(TSPackagePluginDir)" />
@@ -57,6 +63,7 @@
       <NetWeaverHasOutput Condition="Exists('$(TSPackagePluginDir)/$(AssemblyName).dll')">true</NetWeaverHasOutput>
     </PropertyGroup>
 
+    <Copy SourceFiles="$(BuildDir)fathomlessvoidling.bundle" DestinationFolder="$(TSPackagePluginDir)" Condition="!$(NetWeaverHasOutput)"/>
     <Copy SourceFiles="$(OutDir)$(AssemblyName).dll" DestinationFolder="$(TSPackagePluginDir)" Condition="!$(NetWeaverHasOutput)" />
     <Copy SourceFiles="$(OutDir)$(AssemblyName).pdb" DestinationFolder="$(TSPackagePluginDir)" Condition="'$(Configuration)'=='Debug'" ContinueOnError="true" />
 

@@ -5,7 +5,7 @@ namespace FathomlessVoidling
 {
     public class JointSpawnState : BaseState
     {
-        public float duration = 4f;
+        public float duration = 5f;
 
         private bool visible = false;
         private CharacterModel characterModel;

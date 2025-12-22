@@ -4,12 +4,14 @@ using R2API;
 using RoR2;
 using RoR2.ContentManagement;
 using RoR2.Mecanim;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
+using UnityEngine.Timeline;
+using System.Reflection;
 
 namespace FathomlessVoidling
 {
@@ -27,12 +29,23 @@ namespace FathomlessVoidling
     public static GameObject spawnEffect;
     public static CharacterSpawnCard jointCard;
     public static SpawnCard bigVoidlingCard;
+    public static TimelineAsset introTimeline;
+    /*
+    public static AnimationClip newClip;
+    public static AssetBundle assetBundle;
+    public const string bundleName = "fathomlessvoidling.bundle";
+    */
 
     public void Awake()
     {
       Instance = this;
 
       Log.Init(Logger);
+
+      /*
+      Main.assetBundle = AssetBundle.LoadFromFile(Assembly.GetExecutingAssembly().Location.Replace("FathomlessVoidling.dll", "fathomlessvoidling.bundle"));
+      newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
+      */
 
       ContentAddition.AddEntityState<BetterSpawnState>(out _);
       ContentAddition.AddEntityState<JointSpawnState>(out _);
@@ -64,9 +77,14 @@ namespace FathomlessVoidling
           phase1Obj.GetComponent<ScriptedCombatEncounter>().spawns = [spawnInfo];
 
           Transform cam = GameObject.Find("RaidVoid").transform.GetChild(5);
+          Transform forcedCam = cam.GetChild(1);
+          // BrotherBossIntroTimeline
+          forcedCam.GetComponent<PlayableDirector>().playableAsset = introTimeline;
+          // .SetPlayableAsset(introTimeline);
           Transform curve = cam.GetChild(2);
-          curve.GetChild(0).position = new Vector3(-0.2f, 217.13f, -442.84f);
-          curve.GetChild(1).position = new Vector3(-12.5f, 29.7f, -181.4f);
+          // y -6.812038f
+          curve.position = new Vector3(-110.27766f, 25f, -300f);
+          curve.GetChild(0).position = new Vector3(-50f, 28.9719f, -396.993f); // orig -6.215 28.9719 -396.993
         }
       }
       orig(self);
@@ -99,7 +117,7 @@ namespace FathomlessVoidling
             // Fix invisible model
             GameObject model = modelLocator.modelTransform.gameObject;
             PrintController printController = model.AddComponent<PrintController>();
-            printController.printTime = 10f; // 6f orig
+            printController.printTime = 8.5f; // 6f orig
             printController.disableWhenFinished = true;
             printController.startingPrintHeight = -20f;
             printController.maxPrintHeight = 200f; //500f
@@ -118,6 +136,11 @@ namespace FathomlessVoidling
 
     private static void LoadAssets()
     {
+      AssetReferenceT<TimelineAsset> timelineRef = new AssetReferenceT<TimelineAsset>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabIntroTimeiline_playable);
+      AssetAsyncReferenceManager<TimelineAsset>.LoadAsset(timelineRef).Completed += (x) =>
+      {
+        introTimeline = x.Result;
+      };
       AssetReferenceT<GameObject> spawnRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpawnEffect_prefab);
       AssetAsyncReferenceManager<GameObject>.LoadAsset(spawnRef).Completed += (x) =>
       {
@@ -143,8 +166,6 @@ namespace FathomlessVoidling
 
         ModelLocator modelLocator = body.GetComponent<ModelLocator>();
         GameObject model = modelLocator.modelTransform.gameObject;
-
-        modelLocator.modelTransform.Find("VoidRaidCrabArmature/ROOT/HeadBase/eyeballRoot").gameObject.SetActive(false);
       };
 
 

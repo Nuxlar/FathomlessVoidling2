@@ -10,7 +10,8 @@ namespace FathomlessVoidling
     public class BetterSpawnState : BaseState
     {
         public float duration = 10f;
-        public float delay = 2f;
+        public float delay = 1f;
+        public float camDuration = 9f;
         public string spawnSoundString = "Play_voidRaid_spawn";
         public GameObject spawnEffectPrefab = Main.spawnEffect;
         public string animationLayerName = "Body";
@@ -18,6 +19,7 @@ namespace FathomlessVoidling
         public string animationPlaybackRateParam = "Spawn.playbackRate";
         public bool doLegs = true;
         public bool activatedEye = false;
+        public bool disabledCam = false;
         public bool playedAnim = false;
         public CharacterSpawnCard jointSpawnCard = Main.jointCard;
         public string leg1Name = "FrontLegL";
@@ -33,15 +35,13 @@ namespace FathomlessVoidling
             base.OnEnter();
             Util.PlaySound(this.spawnSoundString, GameObject.Find("SpawnCamera"));
             this.characterModel = this.GetModelTransform().GetComponent<CharacterModel>();
-
-            if ((bool)this.characterModel)
-                ++this.characterModel.invisibilityCount;
             if ((bool)this.spawnEffectPrefab)
                 EffectManager.SpawnEffect(this.spawnEffectPrefab, new EffectData() { origin = new Vector3(0, -10, 0), scale = 4, rotation = Quaternion.identity }, false);
-            if (!this.doLegs || !NetworkServer.active)
-                return;
+            this.PlayAnimation(this.animationLayerName, this.animationStateName, this.animationPlaybackRateParam, this.duration);
             ChildLocator modelChildLocator = this.GetModelChildLocator();
             this.modelLocator.modelTransform.Find("VoidRaidCrabArmature/ROOT/HeadBase/eyeballRoot").gameObject.SetActive(false);
+            if (!this.doLegs || !NetworkServer.active)
+                return;
             if (!(bool)this.jointSpawnCard || !(bool)modelChildLocator)
                 return;
             DirectorPlacementRule placementRule = new DirectorPlacementRule()
@@ -84,15 +84,16 @@ namespace FathomlessVoidling
             if ((double)this.fixedAge >= (double)this.delay && !playedAnim)
             {
                 // FathomlessVoidling.CreateTube();
-                this.PlayAnimation(this.animationLayerName, this.animationStateName, this.animationPlaybackRateParam, this.duration);
-                this.playedAnim = true;
-                if ((bool)this.characterModel)
-                    --this.characterModel.invisibilityCount;
             }
             if (this.fixedAge >= 6f && !this.activatedEye)
             {
                 this.modelLocator.modelTransform.Find("VoidRaidCrabArmature/ROOT/HeadBase/eyeballRoot").gameObject.SetActive(true);
                 this.activatedEye = true;
+            }
+            if (this.fixedAge >= this.camDuration && !this.disabledCam)
+            {
+                GameObject.Find("Forced Camera").SetActive(false);
+                this.disabledCam = true;
             }
             if ((double)this.fixedAge < (double)this.duration || !this.isAuthority)
                 return;
