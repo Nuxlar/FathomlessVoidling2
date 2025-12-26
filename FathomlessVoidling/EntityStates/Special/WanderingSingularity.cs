@@ -10,7 +10,7 @@ namespace FathomlessVoidling
     public class WanderingSingularity : BaseState
     {
         private float duration;
-        private float baseDuration = 4f;
+        private float baseDuration = 6f;
         private float windDuration = 2f;
         private string animLayerName = "Body";
         private string animEnterStateName = "SuckEnter";
@@ -19,6 +19,7 @@ namespace FathomlessVoidling
         private string animPlaybackRateParamName = "Suck.playbackRate";
         private Transform vacuumOrigin;
         private bool hasFired = false;
+        private bool hasPlayedExit = false;
         private CentralLegController centralLegController;
         private CentralLegController.SuppressBreaksRequest suppressBreaksRequest;
 
@@ -63,6 +64,11 @@ namespace FathomlessVoidling
                     });
                 }
             }
+            if (this.fixedAge >= this.duration - this.windDuration && !this.hasPlayedExit)
+            {
+                this.PlayAnimation(this.animLayerName, this.animExitStateName, this.animPlaybackRateParamName, this.windDuration);
+                this.hasPlayedExit = true;
+            }
             if (!this.isAuthority || (double)this.fixedAge < (double)this.duration)
                 return;
             this.outer.SetNextStateToMain();
@@ -70,8 +76,6 @@ namespace FathomlessVoidling
 
         public override void OnExit()
         {
-            if (!string.IsNullOrEmpty(this.animLayerName) && !string.IsNullOrEmpty(this.animExitStateName))
-                this.PlayAnimation(this.animLayerName, this.animExitStateName, this.animPlaybackRateParamName, this.windDuration);
             base.OnExit();
             this.suppressBreaksRequest?.Dispose();
         }

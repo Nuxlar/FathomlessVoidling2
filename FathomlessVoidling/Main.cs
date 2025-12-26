@@ -95,7 +95,7 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
           forcedCam.GetComponent<PlayableDirector>().playableAsset = introTimeline;
           Transform curve = cam.GetChild(2);
           // y -6.812038f
-          curve.position = new Vector3(-110.27766f, 20f, -300f);
+          curve.position = new Vector3(-110.27766f, 15f, -300f);
           curve.GetChild(0).position = new Vector3(-50f, 28.9719f, -396.993f); // orig -6.215 28.9719 -396.993
         }
       }
@@ -104,14 +104,6 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
 
     private static void CreateSingularityProjectile()
     {
-      /*
-          public static GameObject sphereEffect = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidRaidCrab/KillSphereVfxPlaceholder.prefab").WaitForCompletion(), "WSingularitySphere");
-    public static GameObject centerEffect = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidRaidCrab/VoidRaidCrabSuckLoopFX.prefab").WaitForCompletion(), "WSingularityCenter");
-    public static GameObject projectile = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/DLC1/VoidRaidCrab/VoidRaidCrabMissileProjectile.prefab").WaitForCompletion(), "projectile");
-    public static GameObject wSingularityGhost = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>("RoR2/Base/LunarWisp/LunarWispTrackingBombGhost.prefab").WaitForCompletion(), "WSingularityGhost");
-    public static LoopSoundDef singularityLSD = Addressables.LoadAssetAsync<LoopSoundDef>("RoR2/DLC1/VoidRaidCrab/lsdVoidRaidCrabVacuumAttack.asset").WaitForCompletion();
-    */
-      ;
       AssetReferenceT<GameObject> suckSphereRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.KillSphereVfxPlaceholder_prefab);
       GameObject sphereEffect = AssetAsyncReferenceManager<GameObject>.LoadAsset(suckSphereRef).WaitForCompletion();
       sphereEffect = PrefabAPI.InstantiateClone(sphereEffect, "WSingularitySphere", true);
@@ -148,7 +140,7 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
       }
       Destroy(projectile.GetComponent<BoxCollider>());
       Destroy(projectile.GetComponent<ProjectileSingleTargetImpact>());
-      projectile.AddComponent<SingularityKillComponent>();
+      projectile.AddComponent<SingularityComponent>();
       SphereCollider sphereCollider = projectile.AddComponent<SphereCollider>();
       sphereCollider.radius = 19f;
       sphereCollider.isTrigger = true;
@@ -164,8 +156,8 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
       projectileController.flightSoundLoop = singularityLSD;
       projectileController.myColliders = new Collider[1] { sphereCollider };
       ProjectileSimple projectileSimple = projectile.GetComponent<ProjectileSimple>();
-      projectileSimple.desiredForwardSpeed = 15f;
-      projectileSimple.lifetime = 30f;
+      projectileSimple.desiredForwardSpeed = 10f;
+      projectileSimple.lifetime = 15f;
       projectile.transform.localScale = Vector3.one;
 
       ContentAddition.AddProjectile(projectile);

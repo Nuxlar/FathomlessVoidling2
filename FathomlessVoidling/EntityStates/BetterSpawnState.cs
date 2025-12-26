@@ -9,9 +9,9 @@ namespace FathomlessVoidling
 {
     public class BetterSpawnState : BaseState
     {
-        public float duration = 10f;
+        public float duration = 9f;
         public float delay = 1f;
-        public float camDuration = 9f;
+        public float camDuration = 8.5f;
         public string spawnSoundString = "Play_voidRaid_spawn";
         public GameObject spawnEffectPrefab = Main.spawnEffect;
         public string animationLayerName = "Body";
@@ -85,7 +85,7 @@ namespace FathomlessVoidling
             {
                 // FathomlessVoidling.CreateTube();
             }
-            if (this.fixedAge >= 6f && !this.activatedEye)
+            if (this.fixedAge >= 5f && !this.activatedEye)
             {
                 this.modelLocator.modelTransform.Find("VoidRaidCrabArmature/ROOT/HeadBase/eyeballRoot").gameObject.SetActive(true);
                 this.activatedEye = true;
