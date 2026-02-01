@@ -3,7 +3,7 @@ using EntityStates.VoidRaidCrab.Weapon;
 using RoR2;
 using UnityEngine;
 
-namespace FathomlessVoidling
+namespace FathomlessVoidling.EntityStates.Secondary
 {
     public class ChargeVoidRain : BaseState
     {

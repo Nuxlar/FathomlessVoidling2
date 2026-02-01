@@ -1,7 +1,7 @@
 using RoR2;
 using UnityEngine;
 
-namespace FathomlessVoidling
+namespace FathomlessVoidling.Components
 {
     public class VoidRainComponent : MonoBehaviour
     {

@@ -5,7 +5,7 @@ using UnityEngine;
 using RoR2.Projectile;
 using RoR2.VoidRaidCrab;
 
-namespace FathomlessVoidling
+namespace FathomlessVoidling.EntityStates.Special
 {
     public class WanderingSingularity : BaseState
     {

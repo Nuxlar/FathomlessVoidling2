@@ -5,13 +5,13 @@ using UnityEngine.Networking;
 using EntityStates;
 using System;
 
-namespace FathomlessVoidling
+namespace FathomlessVoidling.EntityStates
 {
     public class BetterSpawnState : BaseState
     {
-        public float duration = 9f;
+        public float duration = 7.5f;
         public float delay = 1f;
-        public float camDuration = 8.5f;
+        public float camDuration = 7f;
         public string spawnSoundString = "Play_voidRaid_spawn";
         public GameObject spawnEffectPrefab = Main.spawnEffect;
         public string animationLayerName = "Body";
@@ -28,13 +28,11 @@ namespace FathomlessVoidling
         public string leg4Name = "MidLegR";
         public string leg5Name = "BackLegL";
         public string leg6Name = "BackLegR";
-        private CharacterModel characterModel;
 
         public override void OnEnter()
         {
             base.OnEnter();
             Util.PlaySound(this.spawnSoundString, GameObject.Find("SpawnCamera"));
-            this.characterModel = this.GetModelTransform().GetComponent<CharacterModel>();
             if ((bool)this.spawnEffectPrefab)
                 EffectManager.SpawnEffect(this.spawnEffectPrefab, new EffectData() { origin = new Vector3(0, -10, 0), scale = 4, rotation = Quaternion.identity }, false);
             this.PlayAnimation(this.animationLayerName, this.animationStateName, this.animationPlaybackRateParam, this.duration);
@@ -85,7 +83,7 @@ namespace FathomlessVoidling
             {
                 // FathomlessVoidling.CreateTube();
             }
-            if (this.fixedAge >= 5f && !this.activatedEye)
+            if (this.fixedAge >= 4.5f && !this.activatedEye)
             {
                 this.modelLocator.modelTransform.Find("VoidRaidCrabArmature/ROOT/HeadBase/eyeballRoot").gameObject.SetActive(true);
                 this.activatedEye = true;

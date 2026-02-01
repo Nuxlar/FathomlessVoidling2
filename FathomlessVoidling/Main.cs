@@ -14,6 +14,12 @@ using UnityEngine.Timeline;
 using System.Reflection;
 using RoR2.Audio;
 using RoR2.Projectile;
+using EntityStates;
+using FathomlessVoidling.EntityStates;
+using FathomlessVoidling.EntityStates.Primary;
+using FathomlessVoidling.EntityStates.Secondary;
+using FathomlessVoidling.EntityStates.Special;
+using FathomlessVoidling.Components;
 
 namespace FathomlessVoidling
 {
@@ -38,6 +44,9 @@ namespace FathomlessVoidling
     public static GameObject voidRainWarning;
     public static GameObject voidRainPortalEffect;
     public static GameObject wSingularityProjectile;
+    public static GameObject eyeMissileProjectile;
+    public static GameObject eyeBlastChargeEffect;
+    public static GameObject eyeBlastMuzzleFlash;
     /*
     public static AnimationClip newClip;
     public static AssetBundle assetBundle;
@@ -56,6 +65,7 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
       AddContent();
       LoadAssets();
       CreateSingularityProjectile();
+      CreateNewEyeMissiles();
       TweakBigVoidling();
 
       On.RoR2.SceneDirector.Start += TweakBossDirector;
@@ -68,6 +78,8 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
       ContentAddition.AddEntityState<ChargeVoidRain>(out _);
       ContentAddition.AddEntityState<FireVoidRain>(out _);
       ContentAddition.AddEntityState<WanderingSingularity>(out _);
+      ContentAddition.AddEntityState<ChargeEyeBlast>(out _);
+      ContentAddition.AddEntityState<FireEyeBlast>(out _);
     }
 
     private void TweakBossDirector(On.RoR2.SceneDirector.orig_Start orig, RoR2.SceneDirector self)
@@ -164,6 +176,63 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
       wSingularityProjectile = projectile;
     }
 
+    private static void CreateNewEyeMissiles()
+    {
+      AssetReferenceT<GameObject> impactRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabImpact1_prefab);
+      GameObject missileImpact = AssetAsyncReferenceManager<GameObject>.LoadAsset(impactRef).WaitForCompletion();
+      AssetReferenceT<GameObject> ghostRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMissileGhost_prefab);
+      GameObject missileProjectileGhost = AssetAsyncReferenceManager<GameObject>.LoadAsset(ghostRef).WaitForCompletion();
+      AssetReferenceT<GameObject> projectileRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMissileProjectile_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(projectileRef).Completed += (x) =>
+      {
+        GameObject missileProjectile = PrefabAPI.InstantiateClone(x.Result, "FathomlessEyeProjectile", false);
+        missileProjectileGhost = PrefabAPI.InstantiateClone(missileProjectileGhost, "FathomlessEyeProjectileGhost", false);
+        missileImpact = PrefabAPI.InstantiateClone(missileImpact, "FathomlessEyeProjectileImpact", false);
+
+        missileProjectile.GetComponent<ProjectileController>().ghostPrefab = missileProjectileGhost;
+
+        missileProjectile.AddComponent<StasisMissileComponent>();
+        ProjectileSimple ps = missileProjectile.GetComponent<ProjectileSimple>();
+        /*
+         ps.oscillate = true;
+         ps.oscillateSpeed = 5f;
+         ps.oscillateMagnitude = 30f; // 20f orig
+         */
+        //ps.lifetime = 
+        ps.desiredForwardSpeed = 125f; // 70f orig
+
+        ProjectileImpactExplosion pie = missileProjectile.AddComponent<ProjectileImpactExplosion>();
+        pie.blastRadius = 6f;
+        pie.impactEffect = missileImpact;
+        pie.destroyOnWorld = true;
+        pie.lifetime = 5f;
+        pie.blastDamageCoefficient = 1f;
+        pie.falloffModel = BlastAttack.FalloffModel.SweetSpot;
+
+        GameObject.Destroy(missileProjectile.GetComponent<ProjectileTargetComponent>());
+        GameObject.Destroy(missileProjectile.GetComponent<ProjectileSingleTargetImpact>());
+        GameObject.Destroy(missileProjectile.GetComponent<ProjectileDirectionalTargetFinder>());
+        GameObject.Destroy(missileProjectile.GetComponent<ProjectileSteerTowardTarget>());
+
+        missileProjectile.transform.localScale *= 4;
+        foreach (Transform child in missileProjectileGhost.transform)
+        {
+          child.localScale *= 4;
+        }
+
+        foreach (Transform child in missileImpact.transform)
+        {
+          child.localScale *= 4;
+        }
+
+        ContentAddition.AddEffect(missileImpact);
+        ContentAddition.AddProjectile(missileProjectile);
+
+        eyeMissileProjectile = missileProjectile;
+      };
+
+    }
+
     private static void TweakBigVoidling()
     {
       AssetReferenceT<GameObject> voidlingRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabBody_prefab);
@@ -172,7 +241,8 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
             GameObject body = x.Result;
             ModelLocator modelLocator = body.GetComponent<ModelLocator>();
 
-            body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new EntityStates.SerializableEntityStateType(typeof(WanderingSingularity));
+            body.GetComponent<SkillLocator>().primary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeEyeBlast));
+            body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
             body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.baseMaxStock = 1;
 
             // Add new spawn state
@@ -182,7 +252,7 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
               EntityStateMachine esm = list[i];
               if (esm.customName == "Body")
               {
-                esm.initialStateType = new EntityStates.SerializableEntityStateType(typeof(BetterSpawnState));
+                esm.initialStateType = new SerializableEntityStateType(typeof(BetterSpawnState));
               }
             }
 
@@ -213,7 +283,13 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
 
     private static void LoadAssets()
     {
-      AssetReferenceT<GameObject> portalRainRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidMegaCrab.VoidMegaCrabSpawnEffect_prefab);
+      AssetReferenceT<GameObject> muzzleFlashRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMuzzleflashEyeMissiles_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(muzzleFlashRef).Completed += (x) => eyeBlastMuzzleFlash = x.Result;
+
+      AssetReferenceT<GameObject> eyeBlastChargeRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabChargeEyeMissiles_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(eyeBlastChargeRef).Completed += (x) => eyeBlastChargeEffect = x.Result;
+
+      AssetReferenceT<GameObject> portalRainRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierSpawnEffect_prefab);
       AssetAsyncReferenceManager<GameObject>.LoadAsset(portalRainRef).Completed += (x) =>
       {
         voidRainPortalEffect = PrefabAPI.InstantiateClone(x.Result, "VoidRainPortalEffect", true);
@@ -241,14 +317,14 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
       AssetAsyncReferenceManager<GameObject>.LoadAsset(spawnRef).Completed += (x) =>
       {
         GameObject result = x.Result;
-        spawnEffect = PrefabAPI.InstantiateClone(result, "FathomlessVoidlingSpawnEffect", true);
+        spawnEffect = PrefabAPI.InstantiateClone(result, "FathomlessVoidlingSpawnEffect", false);
         spawnEffect.transform.localScale = new Vector3(15, 15, 15);
         spawnEffect.GetComponent<DestroyOnTimer>().duration = 12f; // 6f orig
         foreach (ParticleSystem item in spawnEffect.transform.GetChild(0).GetChild(1).GetComponentsInChildren<ParticleSystem>())
         {
           ParticleSystem.MainModule main = item.main;
-          main.duration *= 2f;
-          main.startLifetimeMultiplier *= 2f;
+          main.duration *= 1.85f;
+          main.startLifetimeMultiplier *= 1.85f;
         }
         ContentAddition.AddEffect(spawnEffect);
       };
@@ -260,7 +336,7 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
       AssetAsyncReferenceManager<GameObject>.LoadAsset(jointBodyRef).Completed += (x) =>
       {
         GameObject body = x.Result;
-        body.GetComponent<EntityStateMachine>().initialStateType = new EntityStates.SerializableEntityStateType(typeof(JointSpawnState));
+        body.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(JointSpawnState));
 
         ModelLocator modelLocator = body.GetComponent<ModelLocator>();
         GameObject model = modelLocator.modelTransform.gameObject;

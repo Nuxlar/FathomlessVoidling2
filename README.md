@@ -1,27 +1,28 @@
 # Fathomless Voidling
 
-I think the idea should be more chaotic, so moves last after activation or maybe activate with each other. Unless you want to add mobs. Could also remove the center shield and add a ton of armor to the main body like wing. Would have to make attacks not originate from the eye because of the leg rotation and obviously survivors just sitting on his head.
-Maybe external components that randomize attack intervals, like a big laser that zaps 1 area of the donut
-Killing a joint spawns "mines"?
+How to make a raid boss less monotonous:
+    - Environment hazards in the arena
+    - Additional "skills" or attacks that aren't tied to the main body
 
-Or do I just scrap big voidling and use these ideas for solus wing since that boss is just a better big voidling.
+Exploring hazards:
+    - Void fog, though might just have this integrated with the main attacks
+    - "mines" that dont do damage but maybe a version of the gravity bump from the original kit
+    - convert the phase transition safe pillars into a damaging "projectile"
 
-"Auto" attacks
-    - Unsafe zones: random pillars that cause damage if you're in them
-    - 
+Voidling attacks should be large scale, cinematic, typical raid boss stuff. The joints should be mixing things up.
 
-## Moveset
+Voidling Skills
+    - Primary: Eye Blast (removes tracking from normal projectiles, increases size, blast radius, and adds oscillation)
+    - Secondary: Portal Beams (really liked this from the initial draft)
+    - Utility: Missile Barrage
+    - Special: One of the singularities ig
 
-### Phase 1
+Skill ideas to mess around with
+    - Missile Barrage: "missiles" visually that are actually more like mortars behaviorally
+    - Abyssal Vision: Spawns a disembodied "eye" that fires a shotgun blast
+    - Singularity: Can just be an enlarged version of the vanilla one, since there's more stuff going on, could be fun.
+    - Wandering Singularity: Fathomless first draft, a black hole that slowly wanders and instantly kills, personally not a fan of the visuals just clipping through things.
+    - Targeted Singularity: The vanilla black hole, but spawns based on player position, so warning bubble, then starts the black hole at different locations.
+    - Asteroid Barrage: Spawns "orbiting" asteroids that are launched (one by one or simultaneously) or fall from the sky
 
-Primary: Void Missiles
-    - 
-
-Secondary: Portal Beams
-    - Summons portals that fire predictive lasers at the closest enemy to the portal
-
-Utility:
-    - 
-
-Special: Into the Depths
-    - Activates void fog
+Add skilldrivers to the joints and have them do some attacks, the "auto" or "hazard" ones. So while voidling is doing the big, grandiose attacks, the joints are adding to the chaos. 

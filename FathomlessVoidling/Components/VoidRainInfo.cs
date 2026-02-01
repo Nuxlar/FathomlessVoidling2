@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace FathomlessVoidling
+namespace FathomlessVoidling.Components
 {
     public class VoidRainInfo : MonoBehaviour
     {

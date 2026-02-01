@@ -1,11 +1,11 @@
 using RoR2;
 using EntityStates;
 
-namespace FathomlessVoidling
+namespace FathomlessVoidling.EntityStates
 {
     public class JointSpawnState : BaseState
     {
-        public float duration = 5f;
+        public float duration = 4.5f;
 
         private bool visible = false;
         private CharacterModel characterModel;

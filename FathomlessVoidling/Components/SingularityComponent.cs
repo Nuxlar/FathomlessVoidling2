@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 using RoR2;
 using UnityEngine;
 
-namespace FathomlessVoidling
+namespace FathomlessVoidling.Components
 {
     public class SingularityComponent : MonoBehaviour
     {
