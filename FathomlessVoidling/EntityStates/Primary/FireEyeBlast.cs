@@ -3,6 +3,7 @@ using RoR2;
 using RoR2.Skills;
 using RoR2.Projectile;
 using UnityEngine;
+using System;
 
 namespace FathomlessVoidling.EntityStates.Primary
 {
@@ -10,7 +11,7 @@ namespace FathomlessVoidling.EntityStates.Primary
     {
         public float baseInitialDelay = 0f;
         public float baseDelayBetweenWaves = 0.5f;
-        public float baseEndDelay = 3f;
+        public float baseEndDelay = 0f;
         public int numWaves = 5;
         public int numMissilesPerWave = 8; // 6 orig
         public string muzzleName = "EyeProjectileCenter";
@@ -32,6 +33,7 @@ namespace FathomlessVoidling.EntityStates.Primary
         private int numWavesFired;
         private float timeUntilNextWave;
         private Transform muzzleTransform;
+        public AimAnimator.DirectionOverrideRequest animatorDirectionOverrideRequest;
 
         public override void OnEnter()
         {
@@ -61,23 +63,24 @@ namespace FathomlessVoidling.EntityStates.Primary
                 // EffectManager.SimpleMuzzleFlash(this.muzzleFlashPrefab, this.gameObject, this.muzzleName, false);
                 EffectManager.SpawnEffect(this.muzzleFlashPrefab, new EffectData()
                 {
-                    origin = this.muzzleTransform.position + new Vector3(0f, 50f, 0f),
+                    origin = this.muzzleTransform.position,
                     rotation = this.muzzleTransform.rotation
                 }, false);
                 if (this.isAuthority)
                 {
-                    Quaternion quaternion = Util.QuaternionSafeLookRotation(this.GetAimRay().direction);
+                    Vector3 direction = Quaternion.AngleAxis(-80, Vector3.left) * this.GetAimRay().direction;
+                    Quaternion quaternion = Util.QuaternionSafeLookRotation(direction);
                     FireProjectileInfo fireProjectileInfo = new FireProjectileInfo()
                     {
                         projectilePrefab = this.projectilePrefab,
-                        position = this.muzzleTransform.position + new Vector3(0f, 50f, 0f),
+                        position = this.muzzleTransform.position,
                         owner = this.gameObject,
                         damage = this.damageStat * this.damageCoefficient,
                         force = this.force
                     };
                     for (int index = 0; index < this.numMissilesPerWave; ++index)
                     {
-                        fireProjectileInfo.rotation = quaternion * this.GetRandomRollPitch();
+                        fireProjectileInfo.rotation = quaternion;
                         fireProjectileInfo.crit = Util.CheckRoll(this.critStat, this.characterBody.master);
                         ProjectileManager.instance.FireProjectile(fireProjectileInfo);
                     }
@@ -88,14 +91,15 @@ namespace FathomlessVoidling.EntityStates.Primary
             this.outer.SetNextStateToMain();
         }
 
+        public override void OnExit()
+        {
+            this.animatorDirectionOverrideRequest?.Dispose();
+            base.OnExit();
+        }
+
         public override InterruptPriority GetMinimumInterruptPriority()
         {
             return InterruptPriority.PrioritySkill;
-        }
-
-        protected Quaternion GetRandomRollPitch()
-        {
-            return Quaternion.AngleAxis(Random.Range(0, 360), Vector3.forward) * Quaternion.AngleAxis(this.minSpreadDegrees + Random.Range(0.0f, this.rangeSpreadDegrees), Vector3.left);
         }
     }
 }

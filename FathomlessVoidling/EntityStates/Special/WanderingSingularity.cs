@@ -4,7 +4,7 @@ using EntityStates.VoidRaidCrab;
 using UnityEngine;
 using RoR2.Projectile;
 using RoR2.VoidRaidCrab;
-
+/*
 namespace FathomlessVoidling.EntityStates.Special
 {
     public class WanderingSingularity : BaseState
@@ -83,3 +83,4 @@ namespace FathomlessVoidling.EntityStates.Special
         public override InterruptPriority GetMinimumInterruptPriority() => InterruptPriority.Frozen;
     }
 }
+*/

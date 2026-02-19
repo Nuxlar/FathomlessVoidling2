@@ -18,8 +18,9 @@ using EntityStates;
 using FathomlessVoidling.EntityStates;
 using FathomlessVoidling.EntityStates.Primary;
 using FathomlessVoidling.EntityStates.Secondary;
-using FathomlessVoidling.EntityStates.Special;
+//using FathomlessVoidling.EntityStates.Special;
 using FathomlessVoidling.Components;
+using RoR2.CharacterAI;
 
 namespace FathomlessVoidling
 {
@@ -43,7 +44,6 @@ namespace FathomlessVoidling
     public static GameObject voidRainExplosion;
     public static GameObject voidRainWarning;
     public static GameObject voidRainPortalEffect;
-    public static GameObject wSingularityProjectile;
     public static GameObject eyeMissileProjectile;
     public static GameObject eyeBlastChargeEffect;
     public static GameObject eyeBlastMuzzleFlash;
@@ -59,14 +59,14 @@ namespace FathomlessVoidling
 
       Log.Init(Logger);
       /*
-Main.assetBundle = AssetBundle.LoadFromFile(Assembly.GetExecutingAssembly().Location.Replace("FathomlessVoidling.dll", "fathomlessvoidling.bundle"));
-newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
-*/
+        Main.assetBundle = AssetBundle.LoadFromFile(Assembly.GetExecutingAssembly().Location.Replace("FathomlessVoidling.dll", "fathomlessvoidling.bundle"));
+        newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
+      */
       AddContent();
       LoadAssets();
-      CreateSingularityProjectile();
       CreateNewEyeMissiles();
       TweakBigVoidling();
+      TweakBigVoidlingMaster();
 
       On.RoR2.SceneDirector.Start += TweakBossDirector;
     }
@@ -77,7 +77,6 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
       ContentAddition.AddEntityState<JointSpawnState>(out _);
       ContentAddition.AddEntityState<ChargeVoidRain>(out _);
       ContentAddition.AddEntityState<FireVoidRain>(out _);
-      ContentAddition.AddEntityState<WanderingSingularity>(out _);
       ContentAddition.AddEntityState<ChargeEyeBlast>(out _);
       ContentAddition.AddEntityState<FireEyeBlast>(out _);
     }
@@ -112,68 +111,6 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
         }
       }
       orig(self);
-    }
-
-    private static void CreateSingularityProjectile()
-    {
-      AssetReferenceT<GameObject> suckSphereRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.KillSphereVfxPlaceholder_prefab);
-      GameObject sphereEffect = AssetAsyncReferenceManager<GameObject>.LoadAsset(suckSphereRef).WaitForCompletion();
-      sphereEffect = PrefabAPI.InstantiateClone(sphereEffect, "WSingularitySphere", true);
-      AssetReferenceT<GameObject> suckCenterRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSuckLoopFX_prefab);
-      GameObject centerEffect = AssetAsyncReferenceManager<GameObject>.LoadAsset(suckCenterRef).WaitForCompletion();
-      centerEffect = PrefabAPI.InstantiateClone(centerEffect, "WSingularityCenter", true);
-      AssetReferenceT<GameObject> projectileRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMissileProjectile_prefab);
-      GameObject projectile = AssetAsyncReferenceManager<GameObject>.LoadAsset(projectileRef).WaitForCompletion();
-      projectile = PrefabAPI.InstantiateClone(projectile, "WSingularityProjectile", true);
-      AssetReferenceT<GameObject> ghostRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_LunarWisp.LunarWispTrackingBombGhost_prefab);
-      GameObject ghost = AssetAsyncReferenceManager<GameObject>.LoadAsset(ghostRef).WaitForCompletion();
-      ghost = PrefabAPI.InstantiateClone(ghost, "WSingularityGhost", true);
-      AssetReferenceT<LoopSoundDef> lsdRef = new AssetReferenceT<LoopSoundDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.lsdVoidRaidCrabVacuumAttack_asset);
-      LoopSoundDef singularityLSD = AssetAsyncReferenceManager<LoopSoundDef>.LoadAsset(lsdRef).WaitForCompletion();
-
-      Destroy(sphereEffect.GetComponent<VFXHelper.VFXTransformController>());
-      Destroy(centerEffect.GetComponent<VFXHelper.VFXTransformController>());
-      sphereEffect.transform.localScale = new Vector3(20f, 20f, 20f);
-
-      foreach (Transform child in ghost.transform)
-      {
-        Destroy(child.gameObject);
-      }
-
-      centerEffect.transform.parent = ghost.transform;
-      sphereEffect.transform.parent = ghost.transform;
-      sphereEffect.transform.GetChild(1).GetChild(1).gameObject.SetActive(false);
-      centerEffect.GetComponent<VFXAttributes>().vfxIntensity = VFXAttributes.VFXIntensity.Low;
-      sphereEffect.GetComponent<VFXAttributes>().vfxIntensity = VFXAttributes.VFXIntensity.Low;
-
-      foreach (Transform child in projectile.transform)
-      {
-        Destroy(child.gameObject);
-      }
-      Destroy(projectile.GetComponent<BoxCollider>());
-      Destroy(projectile.GetComponent<ProjectileSingleTargetImpact>());
-      projectile.AddComponent<SingularityComponent>();
-      SphereCollider sphereCollider = projectile.AddComponent<SphereCollider>();
-      sphereCollider.radius = 19f;
-      sphereCollider.isTrigger = true;
-      projectile.GetComponent<Rigidbody>().useGravity = false;
-      // projectile.GetComponent<ProjectileSingleTargetImpact>().destroyOnWorld = false;
-      ProjectileDirectionalTargetFinder targetFinder = projectile.GetComponent<ProjectileDirectionalTargetFinder>();
-      targetFinder.allowTargetLoss = false;
-      targetFinder.lookCone = 360f;
-      targetFinder.lookRange = 1000f;
-      ProjectileController projectileController = projectile.GetComponent<ProjectileController>();
-      projectileController.ghostPrefab = ghost;
-      projectileController.cannotBeDeleted = true;
-      projectileController.flightSoundLoop = singularityLSD;
-      projectileController.myColliders = new Collider[1] { sphereCollider };
-      ProjectileSimple projectileSimple = projectile.GetComponent<ProjectileSimple>();
-      projectileSimple.desiredForwardSpeed = 10f;
-      projectileSimple.lifetime = 15f;
-      projectile.transform.localScale = Vector3.one;
-
-      ContentAddition.AddProjectile(projectile);
-      wSingularityProjectile = projectile;
     }
 
     private static void CreateNewEyeMissiles()
@@ -211,8 +148,8 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
 
         GameObject.Destroy(missileProjectile.GetComponent<ProjectileTargetComponent>());
         GameObject.Destroy(missileProjectile.GetComponent<ProjectileSingleTargetImpact>());
-        GameObject.Destroy(missileProjectile.GetComponent<ProjectileDirectionalTargetFinder>());
         GameObject.Destroy(missileProjectile.GetComponent<ProjectileSteerTowardTarget>());
+        GameObject.Destroy(missileProjectile.GetComponent<ProjectileDirectionalTargetFinder>());
 
         missileProjectile.transform.localScale *= 4;
         foreach (Transform child in missileProjectileGhost.transform)
@@ -231,6 +168,55 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
         eyeMissileProjectile = missileProjectile;
       };
 
+    }
+
+    private static void TweakBigVoidlingMaster()
+    {
+      AssetReferenceT<GameObject> voidlingMasterRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMaster_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(voidlingMasterRef).Completed += (x) =>
+      {
+        GameObject masterPrefab = x.Result;
+        Debug.LogWarning("AISKILLDRIVERNAMES");
+        List<AISkillDriver> driverList = masterPrefab.GetComponents<AISkillDriver>().ToList();
+        foreach (AISkillDriver driver in driverList)
+        {
+          Debug.LogWarning(driver.customName);
+          switch (driver.customName)
+          {
+            case "Channel Gauntlet 1":
+              //driver.maxUserHealthFraction = 0.66f;
+              driver.requiredSkill = null;
+              break;
+            case "Channel Gauntlet 2":
+              // driver.maxUserHealthFraction = 0.33f;
+              driver.requiredSkill = null;
+              break;
+            case "FireMissiles":
+              driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
+              driver.activationRequiresAimConfirmation = false;
+              break;
+            case "FireMultiBeam":
+              driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
+              break;
+            case "SpinBeam":
+              driver.maxUserHealthFraction = 1f;
+              driver.requiredSkill = null;
+              break;
+            case "GravityBump":
+              driver.maxUserHealthFraction = 1f;
+              driver.requiredSkill = null;
+              driver.skillSlot = SkillSlot.Utility;
+              break;
+            case "Vacuum Attack":
+              driver.maxUserHealthFraction = 0.9f;
+              driver.requiredSkill = null;
+              break;
+            case "LookAtTarget":
+              driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
+              break;
+          }
+        }
+      };
     }
 
     private static void TweakBigVoidling()
@@ -341,7 +327,6 @@ newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
         ModelLocator modelLocator = body.GetComponent<ModelLocator>();
         GameObject model = modelLocator.modelTransform.gameObject;
       };
-
 
       AssetReferenceT<CharacterSpawnCard> voidlingCardRef = new AssetReferenceT<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrab_asset);
       AssetAsyncReferenceManager<CharacterSpawnCard>.LoadAsset(voidlingCardRef).Completed += (x) => bigVoidlingCard = x.Result;

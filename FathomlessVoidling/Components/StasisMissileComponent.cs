@@ -7,11 +7,14 @@ namespace FathomlessVoidling.Components
 {
     public class StasisMissileComponent : MonoBehaviour
     {
+        public Quaternion postPauseRotation;
         private ProjectileSimple projectileSimple;
         private float stopwatch = 0f;
-        private float delayBeforePause = 0.5f;
+        private float delayBeforePause = 1f;
         private float pauseDuration = 1f;
         private bool hasPaused = false;
+        private float minSpreadDegrees = 0f;
+        private float rangeSpreadDegrees = 10f;
 
         public void Start()
         {
@@ -51,9 +54,17 @@ namespace FathomlessVoidling.Components
                 return;
 
             Vector3 direction = foundBullseye.transform.position - aimRay.origin;
-            this.transform.forward = direction.normalized;
+            Quaternion quaternion = Util.QuaternionSafeLookRotation(direction);
+            Quaternion newRotation = quaternion * this.GetRandomRollPitch();
+            this.transform.rotation = newRotation;
+            //  this.transform.forward = direction.normalized;
             projectileSimple.desiredForwardSpeed = 125f;
             Destroy(this);
+        }
+
+        protected Quaternion GetRandomRollPitch()
+        {
+            return Quaternion.AngleAxis(Random.Range(0, 360), Vector3.forward) * Quaternion.AngleAxis(this.minSpreadDegrees + Random.Range(0.0f, this.rangeSpreadDegrees), Vector3.left);
         }
     }
 }
