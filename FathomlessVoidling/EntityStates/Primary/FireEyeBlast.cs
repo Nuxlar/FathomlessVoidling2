@@ -28,6 +28,7 @@ namespace FathomlessVoidling.EntityStates.Primary
         public string animationPlaybackRateParam = "Eyeblast.playbackRate";
         public SkillDef skillDefToReplaceAtStocksEmpty;
         public SkillDef nextSkillDef;
+        private Ray aimRay;
         private float delayBetweenWaves;
         private float duration;
         private int numWavesFired;
@@ -49,6 +50,7 @@ namespace FathomlessVoidling.EntityStates.Primary
             this.timeUntilNextWave = this.baseInitialDelay / this.attackSpeedStat;
             this.delayBetweenWaves = this.baseDelayBetweenWaves / this.attackSpeedStat;
             this.muzzleTransform = this.FindModelChild(this.muzzleName);
+            this.aimRay = this.GetAimRay();
         }
 
         public override void FixedUpdate()
@@ -68,8 +70,12 @@ namespace FathomlessVoidling.EntityStates.Primary
                 }, false);
                 if (this.isAuthority)
                 {
-                    Vector3 direction = Quaternion.AngleAxis(-80, Vector3.left) * this.GetAimRay().direction;
-                    Quaternion quaternion = Util.QuaternionSafeLookRotation(direction);
+                    Ray aimRay = this.GetAimRay();
+                    float degrees = 60f;
+                    float angleFromForward = Vector3.SignedAngle(Vector3.forward, new Vector3(aimRay.direction.x, 0, aimRay.direction.z), Vector3.up); // we find how far are we from forward ignoring y axis, so it doesn't affect the angle from forward
+                    Vector3 newRight = Quaternion.AngleAxis(angleFromForward, Vector3.up) * Vector3.right; // using the angle we find our new right to our aim direction
+                    Vector3 newDirection = (Quaternion.AngleAxis(-degrees, newRight) * aimRay.direction).normalized; // here we angle aim direction 30 degrees towards the sky
+                    Quaternion quaternion = Util.QuaternionSafeLookRotation(newDirection);
                     FireProjectileInfo fireProjectileInfo = new FireProjectileInfo()
                     {
                         projectilePrefab = this.projectilePrefab,

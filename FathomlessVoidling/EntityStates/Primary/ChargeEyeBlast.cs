@@ -57,8 +57,11 @@ namespace FathomlessVoidling.EntityStates.Primary
         private Vector3 GetAimDirection()
         {
             Ray aimRay = this.GetAimRay();
-            Vector3 direction = Quaternion.AngleAxis(-80, Vector3.left) * aimRay.direction;
-            return direction;
+            float degrees = 60f;
+            float angleFromForward = Vector3.SignedAngle(Vector3.forward, new Vector3(aimRay.direction.x, 0, aimRay.direction.z), Vector3.up); // we find how far are we from forward ignoring y axis, so it doesn't affect the angle from forward
+            Vector3 newRight = Quaternion.AngleAxis(angleFromForward, Vector3.up) * Vector3.right; // using the angle we find our new right to our aim direction
+            Vector3 newDirection = (Quaternion.AngleAxis(-degrees, newRight) * aimRay.direction).normalized; // here we angle aim direction 80 degrees towards the sky
+            return newDirection;
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()

@@ -146,11 +146,16 @@ namespace FathomlessVoidling
         pie.blastDamageCoefficient = 1f;
         pie.falloffModel = BlastAttack.FalloffModel.SweetSpot;
 
-        GameObject.Destroy(missileProjectile.GetComponent<ProjectileTargetComponent>());
         GameObject.Destroy(missileProjectile.GetComponent<ProjectileSingleTargetImpact>());
-        GameObject.Destroy(missileProjectile.GetComponent<ProjectileSteerTowardTarget>());
-        GameObject.Destroy(missileProjectile.GetComponent<ProjectileDirectionalTargetFinder>());
 
+        ProjectileSteerTowardTarget steer = missileProjectile.GetComponent<ProjectileSteerTowardTarget>();
+        steer.rotationSpeed = 20f;
+        steer.enabled = false;
+        ProjectileDirectionalTargetFinder targetFinder = missileProjectile.GetComponent<ProjectileDirectionalTargetFinder>();
+        targetFinder.lookCone = 360f;
+        targetFinder.lookRange = 100f;
+        // allowTargetLoss is true
+        // sortMode is distance and angle
         missileProjectile.transform.localScale *= 4;
         foreach (Transform child in missileProjectileGhost.transform)
         {
@@ -193,10 +198,11 @@ namespace FathomlessVoidling
               break;
             case "FireMissiles":
               driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
-              driver.activationRequiresAimConfirmation = false;
+              // driver.activationRequiresAimConfirmation = true;
               break;
             case "FireMultiBeam":
               driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
+              driver.aimType = AISkillDriver.AimType.AtMoveTarget;
               break;
             case "SpinBeam":
               driver.maxUserHealthFraction = 1f;
@@ -270,10 +276,25 @@ namespace FathomlessVoidling
     private static void LoadAssets()
     {
       AssetReferenceT<GameObject> muzzleFlashRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMuzzleflashEyeMissiles_prefab);
-      AssetAsyncReferenceManager<GameObject>.LoadAsset(muzzleFlashRef).Completed += (x) => eyeBlastMuzzleFlash = x.Result;
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(muzzleFlashRef).Completed += (x) =>
+      {
+        GameObject prefab = x.Result;
+        eyeBlastMuzzleFlash = PrefabAPI.InstantiateClone(prefab, "EyeBlastMuzzleFlashNux");
+        ContentAddition.AddEffect(eyeBlastMuzzleFlash);
+      };
 
       AssetReferenceT<GameObject> eyeBlastChargeRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabChargeEyeMissiles_prefab);
-      AssetAsyncReferenceManager<GameObject>.LoadAsset(eyeBlastChargeRef).Completed += (x) => eyeBlastChargeEffect = x.Result;
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(eyeBlastChargeRef).Completed += (x) =>
+      {
+        GameObject prefab = x.Result;
+        eyeBlastChargeEffect = PrefabAPI.InstantiateClone(prefab, "EyeBlastChargeEffectNux");
+        foreach (ParticleSystem item in eyeBlastChargeEffect.transform.GetComponentsInChildren<ParticleSystem>())
+        {
+          ParticleSystem.MainModule main = item.main;
+          main.startSizeMultiplier *= 2f;
+        }
+        ContentAddition.AddEffect(eyeBlastChargeEffect);
+      };
 
       AssetReferenceT<GameObject> portalRainRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierSpawnEffect_prefab);
       AssetAsyncReferenceManager<GameObject>.LoadAsset(portalRainRef).Completed += (x) =>
@@ -286,7 +307,19 @@ namespace FathomlessVoidling
       AssetAsyncReferenceManager<GameObject>.LoadAsset(warningRainRef).Completed += (x) => voidRainWarning = x.Result;
 
       AssetReferenceT<GameObject> chargeRainRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabTripleBeamChargeUp_prefab);
-      AssetAsyncReferenceManager<GameObject>.LoadAsset(chargeRainRef).Completed += (x) => chargeVoidRain = x.Result;
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(chargeRainRef).Completed += (x) =>
+      {
+        GameObject prefab = x.Result;
+        chargeVoidRain = PrefabAPI.InstantiateClone(prefab, "ChargeVoidRainNuxEffect");
+        foreach (ParticleSystem item in chargeVoidRain.transform.GetComponentsInChildren<ParticleSystem>())
+        {
+          ParticleSystem.MainModule main = item.main;
+          main.startSizeMultiplier *= 1.5f;
+          main.duration *= 7f;
+          main.startLifetimeMultiplier *= 7f;
+        }
+        ContentAddition.AddEffect(chargeVoidRain);
+      };
 
       AssetReferenceT<GameObject> tracerRainRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.TracerVoidRaidCrabTripleBeamSmall_prefab);
       AssetAsyncReferenceManager<GameObject>.LoadAsset(tracerRainRef).Completed += (x) => voidRainTracer = x.Result;
@@ -309,8 +342,8 @@ namespace FathomlessVoidling
         foreach (ParticleSystem item in spawnEffect.transform.GetChild(0).GetChild(1).GetComponentsInChildren<ParticleSystem>())
         {
           ParticleSystem.MainModule main = item.main;
-          main.duration *= 1.85f;
-          main.startLifetimeMultiplier *= 1.85f;
+          main.duration *= 1.75f;
+          main.startLifetimeMultiplier *= 1.75f;
         }
         ContentAddition.AddEffect(spawnEffect);
       };

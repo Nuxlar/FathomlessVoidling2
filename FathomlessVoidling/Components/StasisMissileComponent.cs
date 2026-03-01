@@ -8,6 +8,7 @@ namespace FathomlessVoidling.Components
     public class StasisMissileComponent : MonoBehaviour
     {
         public Quaternion postPauseRotation;
+        private ProjectileSteerTowardTarget steer;
         private ProjectileSimple projectileSimple;
         private float stopwatch = 0f;
         private float delayBeforePause = 1f;
@@ -19,6 +20,7 @@ namespace FathomlessVoidling.Components
         public void Start()
         {
             this.projectileSimple = this.GetComponent<ProjectileSimple>();
+            this.steer = this.GetComponent<ProjectileSteerTowardTarget>();
         }
 
         private void FixedUpdate()
@@ -46,7 +48,7 @@ namespace FathomlessVoidling.Components
             enemyFinder.searchOrigin = aimRay.origin;
             enemyFinder.searchDirection = aimRay.direction;
             enemyFinder.filterByLoS = false;
-            enemyFinder.sortMode = BullseyeSearch.SortMode.Distance;
+            enemyFinder.sortMode = BullseyeSearch.SortMode.DistanceAndAngle;
             enemyFinder.teamMaskFilter = TeamMask.GetEnemyTeams(TeamIndex.Void);
             enemyFinder.RefreshCandidates();
             HurtBox foundBullseye = enemyFinder.GetResults().LastOrDefault<HurtBox>();
@@ -58,7 +60,8 @@ namespace FathomlessVoidling.Components
             Quaternion newRotation = quaternion * this.GetRandomRollPitch();
             this.transform.rotation = newRotation;
             //  this.transform.forward = direction.normalized;
-            projectileSimple.desiredForwardSpeed = 125f;
+            this.projectileSimple.desiredForwardSpeed = 125f;
+            this.steer.enabled = true;
             Destroy(this);
         }
 

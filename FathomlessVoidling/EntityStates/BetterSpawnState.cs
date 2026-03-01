@@ -9,7 +9,7 @@ namespace FathomlessVoidling.EntityStates
 {
     public class BetterSpawnState : BaseState
     {
-        public float duration = 7.5f;
+        public float duration = 8f;
         public float delay = 1f;
         public float camDuration = 7f;
         public string spawnSoundString = "Play_voidRaid_spawn";

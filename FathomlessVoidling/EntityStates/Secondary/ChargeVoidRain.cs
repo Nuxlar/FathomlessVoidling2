@@ -22,7 +22,7 @@ namespace FathomlessVoidling.EntityStates.Secondary
         {
             base.OnEnter();
             this.duration = this.baseDuration / this.attackSpeedStat;
-            this.PlayAnimation(this.animationLayerName, this.animationStateName, this.animationPlaybackRateParam, this.duration);
+            this.PlayAnimation(this.animationLayerName, this.animationStateName, this.animationPlaybackRateParam, 6f);
             ChildLocator modelChildLocator = this.GetModelChildLocator();
             if ((bool)modelChildLocator && (bool)this.chargeEffectPrefab)
             {
