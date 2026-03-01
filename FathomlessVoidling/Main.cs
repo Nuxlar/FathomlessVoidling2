@@ -157,6 +157,16 @@ namespace FathomlessVoidling
         // allowTargetLoss is true
         // sortMode is distance and angle
         missileProjectile.transform.localScale *= 4;
+
+        Transform ring = missileProjectileGhost.transform.Find("FlashRing");
+        if (ring)
+        {
+          ParticleSystem ghostPs = ring.GetComponent<ParticleSystem>();
+          ParticleSystem.MainModule main = ghostPs.main;
+          main.duration *= 3f;
+          main.startLifetimeMultiplier *= 3f;
+        }
+
         foreach (Transform child in missileProjectileGhost.transform)
         {
           child.localScale *= 4;
@@ -275,6 +285,9 @@ namespace FathomlessVoidling
 
     private static void LoadAssets()
     {
+      AssetReferenceT<Material> voidRainPortalMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_PortalVoid.matPortalVoidCenter_mat);
+      Material voidRainPortalMat = AssetAsyncReferenceManager<Material>.LoadAsset(voidRainPortalMatRef).WaitForCompletion();
+
       AssetReferenceT<GameObject> muzzleFlashRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMuzzleflashEyeMissiles_prefab);
       AssetAsyncReferenceManager<GameObject>.LoadAsset(muzzleFlashRef).Completed += (x) =>
       {
@@ -300,6 +313,9 @@ namespace FathomlessVoidling
       AssetAsyncReferenceManager<GameObject>.LoadAsset(portalRainRef).Completed += (x) =>
       {
         voidRainPortalEffect = PrefabAPI.InstantiateClone(x.Result, "VoidRainPortalEffect", true);
+        Transform ring = voidRainPortalEffect.transform.Find("Ring");
+        ParticleSystemRenderer psr = ring.GetChild(0).GetComponent<ParticleSystemRenderer>();
+        psr.sharedMaterial = voidRainPortalMat;
         ContentAddition.AddEffect(voidRainPortalEffect);
       };
 

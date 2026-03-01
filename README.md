@@ -35,7 +35,3 @@ Add skilldrivers to the joints and have them do some attacks, the "auto" or "haz
 
 Known Issues:
 - Joint respawn not networked
-
-TODOs:
-- Tweak missile vfx to maintain outer orb for longer
-- Tweak portal beam vfx to be more visible (brighter colors)
