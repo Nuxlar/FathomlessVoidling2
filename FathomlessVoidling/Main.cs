@@ -21,6 +21,9 @@ using FathomlessVoidling.EntityStates.Secondary;
 //using FathomlessVoidling.EntityStates.Special;
 using FathomlessVoidling.Components;
 using RoR2.CharacterAI;
+using EntityStates.VoidRaidCrab;
+using RoR2.Skills;
+using FathomlessVoidling.EntityStates.Haunt;
 
 namespace FathomlessVoidling
 {
@@ -47,6 +50,9 @@ namespace FathomlessVoidling
     public static GameObject eyeMissileProjectile;
     public static GameObject eyeBlastChargeEffect;
     public static GameObject eyeBlastMuzzleFlash;
+
+    public static GameObject gravityBombProjectile;
+    public static SpawnCard voidlingHauntCard = ScriptableObject.CreateInstance<CharacterSpawnCard>();
     /*
     public static AnimationClip newClip;
     public static AssetBundle assetBundle;
@@ -64,6 +70,8 @@ namespace FathomlessVoidling
       */
       AddContent();
       LoadAssets();
+      CreateVoidlingHaunt();
+      CreateVoidlingHauntProjectile();
       CreateNewEyeMissiles();
       TweakBigVoidling();
       TweakBigVoidlingMaster();
@@ -79,6 +87,8 @@ namespace FathomlessVoidling
       ContentAddition.AddEntityState<FireVoidRain>(out _);
       ContentAddition.AddEntityState<ChargeEyeBlast>(out _);
       ContentAddition.AddEntityState<FireEyeBlast>(out _);
+
+      ContentAddition.AddEntityState<FireGravityBombs>(out _);
     }
 
     private void TweakBossDirector(On.RoR2.SceneDirector.orig_Start orig, RoR2.SceneDirector self)
@@ -235,6 +245,120 @@ namespace FathomlessVoidling
       };
     }
 
+    private static void CreateVoidlingHauntProjectile()
+    {
+      AssetReferenceT<Material> matGravitySphereRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabGravityBumpSphere_mat);
+      Material matGravitySphere = AssetAsyncReferenceManager<Material>.LoadAsset(matGravitySphereRef).WaitForCompletion();
+      AssetReferenceT<Material> matGravitySphere2Ref = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabGravityBumpGem_mat);
+      Material matGravitySphere2 = AssetAsyncReferenceManager<Material>.LoadAsset(matGravitySphere2Ref).WaitForCompletion();
+
+      AssetReferenceT<Material> matGravityStarRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabParticleBlue_mat);
+      Material matGravityStar = AssetAsyncReferenceManager<Material>.LoadAsset(matGravityStarRef).WaitForCompletion();
+      AssetReferenceT<Material> matGravityIndicatorRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabGravityBumpWarning_mat);
+      Material matGravityIndicator = AssetAsyncReferenceManager<Material>.LoadAsset(matGravityIndicatorRef).WaitForCompletion();
+
+      AssetReferenceT<GameObject> preBombGhostRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierPreBombGhost_prefab);
+      GameObject preBombGhost = AssetAsyncReferenceManager<GameObject>.LoadAsset(preBombGhostRef).WaitForCompletion();
+
+      AssetReferenceT<GameObject> bombRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierBombProjectile_prefab);
+      GameObject bombProjectile = AssetAsyncReferenceManager<GameObject>.LoadAsset(bombRef).WaitForCompletion();
+
+      AssetReferenceT<GameObject> preBombRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierPreBombProjectile_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(preBombRef).Completed += (x) =>
+      {
+        GameObject prefab = x.Result;
+        GameObject newPrebombProjectile = PrefabAPI.InstantiateClone(prefab, "GravityPreBombProjectileNux", true);
+        GameObject newPrebombGhost = PrefabAPI.InstantiateClone(preBombGhost, "GravityPreBombGhostNux", false);
+        Transform ghostSphere = newPrebombGhost.transform.Find("Sphere");
+        Transform ghostStars = newPrebombGhost.transform.Find("Vacuum Stars");
+        ghostSphere.GetComponent<MeshRenderer>().sharedMaterials = new Material[] { matGravitySphere, matGravitySphere2 };
+        ghostStars.GetComponent<ParticleSystemRenderer>().sharedMaterial = matGravityStar;
+        newPrebombGhost.transform.GetChild(4).GetComponent<ParticleSystemRenderer>().sharedMaterial = matGravityIndicator;
+
+        newPrebombProjectile.GetComponent<ProjectileController>().ghostPrefab = newPrebombGhost;
+
+        gravityBombProjectile = newPrebombProjectile;
+        // TODO increase bomb size
+        // TODO tweak VFX for explosion
+        // TODO add functionality for getting hit
+
+        //   ContentAddition.AddEffect(newPrebombGhost);
+        ContentAddition.AddProjectile(gravityBombProjectile);
+      };
+    }
+    private static void CreateVoidlingHaunt()
+    {
+      AssetReferenceT<GameObject> hauntMasterRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_BrotherHaunt.BrotherHauntMaster_prefab);
+      GameObject hauntMaster = AssetAsyncReferenceManager<GameObject>.LoadAsset(hauntMasterRef).WaitForCompletion();
+
+      AssetReferenceT<GameObject> hauntRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_BrotherHaunt.BrotherHauntBody_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(hauntRef).Completed += (x) =>
+      {
+        GameObject prefab = x.Result;
+        GameObject voidlingHaunt = PrefabAPI.InstantiateClone(prefab, "VoidlingHauntNux", true);
+        GameObject voidlingHauntMaster = PrefabAPI.InstantiateClone(hauntMaster, "VoidlingHauntNuxMaster", true);
+
+        CharacterBody body = voidlingHaunt.GetComponent<CharacterBody>();
+        body.baseNameToken = "Voidling Haunt";
+
+        voidlingHauntMaster.GetComponent<CharacterMaster>().bodyPrefab = voidlingHaunt;
+
+        SkillDef skillDef = ScriptableObject.CreateInstance<SkillDef>();
+
+        skillDef.skillName = "Gravity Well Nux";
+        (skillDef as ScriptableObject).name = "Gravity Well Nux";
+        skillDef.skillNameToken = "Gravity Well Nux";
+
+        skillDef.activationState = new SerializableEntityStateType(typeof(FireGravityBombs));
+        skillDef.activationStateMachineName = "Weapon";
+        skillDef.interruptPriority = InterruptPriority.Death;
+
+        skillDef.baseMaxStock = 1;
+        skillDef.baseRechargeInterval = 60f;
+
+        skillDef.rechargeStock = 1;
+        skillDef.requiredStock = 1;
+        skillDef.stockToConsume = 1;
+
+        skillDef.dontAllowPastMaxStocks = true;
+        skillDef.beginSkillCooldownOnSkillEnd = true;
+        skillDef.canceledFromSprinting = false;
+        skillDef.forceSprintDuringState = false;
+        skillDef.fullRestockOnAssign = false;
+        skillDef.resetCooldownTimerOnUse = false;
+        skillDef.isCombatSkill = true;
+        skillDef.mustKeyPress = false;
+        skillDef.cancelSprintingOnActivation = false;
+
+        ContentAddition.AddSkillDef(skillDef);
+
+        GameObject.Destroy(voidlingHaunt.GetComponent<GenericSkill>());
+        EntityStateMachine esm = voidlingHaunt.GetComponent<EntityStateMachine>();
+        esm.initialStateType = new SerializableEntityStateType(typeof(FireGravityBombs));
+        esm.mainStateType = new SerializableEntityStateType(typeof(FireGravityBombs));
+
+        SkillLocator skillLocator = voidlingHaunt.GetComponent<SkillLocator>();
+
+        GenericSkill primarySkill = voidlingHaunt.AddComponent<GenericSkill>();
+        primarySkill.skillName = "VHauntNuxPrimary";
+
+        SkillFamily newFamily = ScriptableObject.CreateInstance<SkillFamily>();
+        (newFamily as ScriptableObject).name = "VHauntNuxPrimaryFamily";
+        newFamily.variants = new SkillFamily.Variant[] { new SkillFamily.Variant() { skillDef = skillDef } };
+
+        primarySkill._skillFamily = newFamily;
+        ContentAddition.AddSkillFamily(newFamily);
+        skillLocator.primary = primarySkill;
+
+        ContentAddition.AddBody(voidlingHaunt);
+        ContentAddition.AddMaster(voidlingHauntMaster);
+
+        voidlingHauntCard.prefab = voidlingHauntMaster;
+        voidlingHauntCard.sendOverNetwork = true;
+        voidlingHauntCard.nodeGraphType = RoR2.Navigation.MapNodeGroup.GraphType.Air;
+      };
+    }
+
     private static void TweakBigVoidling()
     {
       AssetReferenceT<GameObject> voidlingRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabBody_prefab);
@@ -292,7 +416,7 @@ namespace FathomlessVoidling
       AssetAsyncReferenceManager<GameObject>.LoadAsset(muzzleFlashRef).Completed += (x) =>
       {
         GameObject prefab = x.Result;
-        eyeBlastMuzzleFlash = PrefabAPI.InstantiateClone(prefab, "EyeBlastMuzzleFlashNux");
+        eyeBlastMuzzleFlash = PrefabAPI.InstantiateClone(prefab, "EyeBlastMuzzleFlashNux", false);
         ContentAddition.AddEffect(eyeBlastMuzzleFlash);
       };
 
@@ -300,19 +424,19 @@ namespace FathomlessVoidling
       AssetAsyncReferenceManager<GameObject>.LoadAsset(eyeBlastChargeRef).Completed += (x) =>
       {
         GameObject prefab = x.Result;
-        eyeBlastChargeEffect = PrefabAPI.InstantiateClone(prefab, "EyeBlastChargeEffectNux");
+        eyeBlastChargeEffect = PrefabAPI.InstantiateClone(prefab, "EyeBlastChargeEffectNux", false);
         foreach (ParticleSystem item in eyeBlastChargeEffect.transform.GetComponentsInChildren<ParticleSystem>())
         {
           ParticleSystem.MainModule main = item.main;
           main.startSizeMultiplier *= 2f;
         }
-        ContentAddition.AddEffect(eyeBlastChargeEffect);
+        // ContentAddition.AddEffect(eyeBlastChargeEffect);
       };
 
       AssetReferenceT<GameObject> portalRainRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierSpawnEffect_prefab);
       AssetAsyncReferenceManager<GameObject>.LoadAsset(portalRainRef).Completed += (x) =>
       {
-        voidRainPortalEffect = PrefabAPI.InstantiateClone(x.Result, "VoidRainPortalEffect", true);
+        voidRainPortalEffect = PrefabAPI.InstantiateClone(x.Result, "VoidRainPortalEffect", false);
         Transform ring = voidRainPortalEffect.transform.Find("Ring");
         ParticleSystemRenderer psr = ring.GetChild(0).GetComponent<ParticleSystemRenderer>();
         psr.sharedMaterial = voidRainPortalMat;
@@ -326,7 +450,7 @@ namespace FathomlessVoidling
       AssetAsyncReferenceManager<GameObject>.LoadAsset(chargeRainRef).Completed += (x) =>
       {
         GameObject prefab = x.Result;
-        chargeVoidRain = PrefabAPI.InstantiateClone(prefab, "ChargeVoidRainNuxEffect");
+        chargeVoidRain = PrefabAPI.InstantiateClone(prefab, "ChargeVoidRainNuxEffect", false);
         foreach (ParticleSystem item in chargeVoidRain.transform.GetComponentsInChildren<ParticleSystem>())
         {
           ParticleSystem.MainModule main = item.main;
@@ -334,7 +458,7 @@ namespace FathomlessVoidling
           main.duration *= 7f;
           main.startLifetimeMultiplier *= 7f;
         }
-        ContentAddition.AddEffect(chargeVoidRain);
+        // ContentAddition.AddEffect(chargeVoidRain);
       };
 
       AssetReferenceT<GameObject> tracerRainRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.TracerVoidRaidCrabTripleBeamSmall_prefab);

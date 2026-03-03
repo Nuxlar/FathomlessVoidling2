@@ -38,6 +38,21 @@ namespace FathomlessVoidling.EntityStates
             this.PlayAnimation(this.animationLayerName, this.animationStateName, this.animationPlaybackRateParam, this.duration);
             ChildLocator modelChildLocator = this.GetModelChildLocator();
             this.modelLocator.modelTransform.Find("VoidRaidCrabArmature/ROOT/HeadBase/eyeballRoot").gameObject.SetActive(false);
+
+            DirectorSpawnRequest spawnRequest = new DirectorSpawnRequest(
+                Main.voidlingHauntCard,
+                new DirectorPlacementRule
+                {
+                    placementMode = DirectorPlacementRule.PlacementMode.Direct,
+                    position = Vector3.zero
+                },
+                RoR2Application.rng
+            );
+            spawnRequest.teamIndexOverride = this.GetTeam();
+            spawnRequest.ignoreTeamMemberLimit = true;
+
+            Main.voidlingHauntCard.DoSpawn(Vector3.zero, Quaternion.identity, spawnRequest);
+
             if (!this.doLegs || !NetworkServer.active)
                 return;
             if (!(bool)this.jointSpawnCard || !(bool)modelChildLocator)
