@@ -20,7 +20,7 @@ public class FireGravityBombs : BaseState
     public override void OnEnter()
     {
         base.OnEnter();
-        this.chargeTimer = duration;
+        this.chargeTimer = 0f;
         this.cooldownTimer = cooldown;
     }
 
