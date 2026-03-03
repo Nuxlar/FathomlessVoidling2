@@ -51,15 +51,13 @@ Joint Attacks (random intervals? or make actual skilldrivers?):
 Attack1: Stomp (stomps down if enemy is within range)
 Attack2: Portal bombs
 
-Probably just an attack controller like the P4 controller from umbral or an invisible "voidling haunt"
-Psychic Attacks:
-Either A: random portal bombs that if hit, do the gravity bump
-Or B: random portal bombs that spawn gravity mines after attacking
-why not both?
-So we got voidling haunt spawning gravity portal bombs, I'd say random on/off intervals so it's not constant
-Maybe also random spawns of void squids (these tether down enemies within an area)
-the stomps from the legs
+Voidling Haunt is going to be an invisible body that adds some chaos to the fight so Voidling doesn't have the same issues as Solus Wing
+Thinking of adding some kind of mechanics as well, like another way to mix things up so Haunt/Voidling aren't just cycling the same things
+I think for Haunt specifically, maybe a counter for how many hits it lands, land X hits and goes into an "enrage"
 
+Voidling Haunt Attacks:
+- Gravity Bombs: spawns bombs across the arena, if hit, you'll get launched into a random direction
+- Void Squid: spawns void squids that trap you if you land in their sphere
 
 Joints:
 HP thresholds: 75% 50% 25% go immune and spawn barnacles on the leg, immunity dissipated once barnacles are killed

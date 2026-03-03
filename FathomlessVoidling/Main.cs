@@ -38,6 +38,7 @@ namespace FathomlessVoidling
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
 
+    public static DamageAPI.ModdedDamageType gravityDamageType = DamageAPI.ReserveDamageType();
     public static GameObject spawnEffect;
     public static CharacterSpawnCard jointCard;
     public static SpawnCard bigVoidlingCard;
@@ -53,6 +54,9 @@ namespace FathomlessVoidling
 
     public static GameObject gravityBombProjectile;
     public static SpawnCard voidlingHauntCard = ScriptableObject.CreateInstance<CharacterSpawnCard>();
+
+    private static GameObject groundedGravityEffect;
+    private static GameObject airborneGravityEffect;
     /*
     public static AnimationClip newClip;
     public static AssetBundle assetBundle;
@@ -77,6 +81,7 @@ namespace FathomlessVoidling
       TweakBigVoidlingMaster();
 
       On.RoR2.SceneDirector.Start += TweakBossDirector;
+      GlobalEventManager.onServerDamageDealt += ApplyGravityDamageType;
     }
 
     private void AddContent()
@@ -89,6 +94,51 @@ namespace FathomlessVoidling
       ContentAddition.AddEntityState<FireEyeBlast>(out _);
 
       ContentAddition.AddEntityState<FireGravityBombs>(out _);
+    }
+
+    private void ApplyGravityDamageType(DamageReport obj)
+    {
+      if (obj.damageInfo.HasModdedDamageType(gravityDamageType) && obj.victimBody)
+      {
+        CharacterDirection direction = obj.victimBody.GetComponent<CharacterDirection>();
+        CharacterMotor motor = obj.victimBody.GetComponent<CharacterMotor>();
+        if (direction && motor)
+        {
+          float airborneForce = 3000f;
+          float groundedForce = 3000f; // 7000 orig
+          Vector3 airborneForceVector;
+          Vector3 groundedForceVector;
+          bool preventAirControl = false;
+          bool isLeft = (double)Random.value > 0.5;
+          Vector3 vector3 = Vector3.Cross(direction.forward, Vector3.up);
+
+          if (!isLeft)
+            vector3 *= -1f;
+
+          airborneForceVector = Vector3.up * -1f * airborneForce + vector3 * airborneForce;
+          groundedForceVector = Vector3.up * groundedForce + vector3 * groundedForce;
+
+          EffectData effectData = new EffectData()
+          {
+            origin = obj.victimBody.transform.position
+          };
+          GameObject effectPrefab;
+          if (motor.isGrounded)
+          {
+            // this.disableAirControlUntilCollision
+            motor.ApplyForce(groundedForceVector, true, preventAirControl);
+            effectPrefab = groundedGravityEffect;
+            effectData.rotation = Util.QuaternionSafeLookRotation(groundedForceVector);
+          }
+          else
+          {
+            motor.ApplyForce(airborneForceVector, true, preventAirControl);
+            effectPrefab = airborneGravityEffect;
+            effectData.rotation = Util.QuaternionSafeLookRotation(airborneForceVector);
+          }
+          EffectManager.SpawnEffect(effectPrefab, effectData, true);
+        }
+      }
     }
 
     private void TweakBossDirector(On.RoR2.SceneDirector.orig_Start orig, RoR2.SceneDirector self)
@@ -260,6 +310,9 @@ namespace FathomlessVoidling
       AssetReferenceT<GameObject> preBombGhostRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierPreBombGhost_prefab);
       GameObject preBombGhost = AssetAsyncReferenceManager<GameObject>.LoadAsset(preBombGhostRef).WaitForCompletion();
 
+      AssetReferenceT<GameObject> explosionRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierExplosion_prefab);
+      GameObject explosionEffect = AssetAsyncReferenceManager<GameObject>.LoadAsset(explosionRef).WaitForCompletion();
+
       AssetReferenceT<GameObject> bombRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierBombProjectile_prefab);
       GameObject bombProjectile = AssetAsyncReferenceManager<GameObject>.LoadAsset(bombRef).WaitForCompletion();
 
@@ -269,20 +322,52 @@ namespace FathomlessVoidling
         GameObject prefab = x.Result;
         GameObject newPrebombProjectile = PrefabAPI.InstantiateClone(prefab, "GravityPreBombProjectileNux", true);
         GameObject newPrebombGhost = PrefabAPI.InstantiateClone(preBombGhost, "GravityPreBombGhostNux", false);
-        Transform ghostSphere = newPrebombGhost.transform.Find("Sphere");
-        Transform ghostStars = newPrebombGhost.transform.Find("Vacuum Stars");
-        ghostSphere.GetComponent<MeshRenderer>().sharedMaterials = new Material[] { matGravitySphere, matGravitySphere2 };
-        ghostStars.GetComponent<ParticleSystemRenderer>().sharedMaterial = matGravityStar;
-        newPrebombGhost.transform.GetChild(4).GetComponent<ParticleSystemRenderer>().sharedMaterial = matGravityIndicator;
+        GameObject newExplosionEffect = PrefabAPI.InstantiateClone(explosionEffect, "GravityBombExplosionEffectNux", false);
 
-        newPrebombProjectile.GetComponent<ProjectileController>().ghostPrefab = newPrebombGhost;
+        ProjectileController controller = newPrebombProjectile.GetComponent<ProjectileController>();
+        controller.ghostPrefab = newPrebombGhost;
+        controller.cannotBeDeleted = true;
+
+        ProjectileImpactExplosion pie = newPrebombProjectile.GetComponent<ProjectileImpactExplosion>();
+        pie.blastRadius = 10f;
+        pie.impactEffect = newExplosionEffect;
+        pie.lifetime = 2f;
+        pie.childrenProjectilePrefab = null;
 
         gravityBombProjectile = newPrebombProjectile;
-        // TODO increase bomb size
-        // TODO tweak VFX for explosion
+        gravityBombProjectile.transform.localScale *= 2f;
+
+        newPrebombGhost.transform.localScale *= 2f;
+        newPrebombGhost.transform.Find("Vacuum Radial").GetComponent<ParticleSystemRenderer>().sharedMaterial = matGravityIndicator;
+        Transform sphere = newPrebombGhost.transform.Find("Sphere");
+        sphere.localScale *= 2f;
+        ObjectScaleCurve curve = sphere.GetComponent<ObjectScaleCurve>();
+        curve.timeMax = 2f;
+        curve.baseScale = new Vector3(4f, 4f, 4f);
+        sphere.GetComponent<MeshRenderer>().sharedMaterials = new Material[] { matGravitySphere, matGravitySphere2 };
+        newPrebombGhost.transform.Find("Vacuum Stars").GetComponent<ParticleSystemRenderer>().sharedMaterial = matGravityStar;
+        foreach (ParticleSystem item in newPrebombGhost.transform.GetComponentsInChildren<ParticleSystem>())
+        {
+          ParticleSystem.MainModule main = item.main;
+          main.startSizeMultiplier *= 1.5f;
+          main.duration *= 2f;
+          main.startLifetimeMultiplier *= 2f;
+        }
+
+        newExplosionEffect.transform.Find("Vacuum Stars").GetComponent<ParticleSystemRenderer>().sharedMaterial = matGravityStar;
+        newExplosionEffect.transform.Find("Vacuum Radial").GetComponent<ParticleSystemRenderer>().sharedMaterial = matGravityIndicator;
+        Transform sphere2 = newExplosionEffect.transform.Find("Sphere");
+        sphere2.GetComponent<MeshRenderer>().sharedMaterials = new Material[] { matGravitySphere, matGravitySphere2 };
+        sphere2.transform.localScale *= 2f;
+        foreach (ParticleSystem item in newExplosionEffect.transform.GetComponentsInChildren<ParticleSystem>())
+        {
+          ParticleSystem.MainModule main = item.main;
+          main.startSizeMultiplier *= 1.2f;
+        }
+
         // TODO add functionality for getting hit
 
-        //   ContentAddition.AddEffect(newPrebombGhost);
+        ContentAddition.AddEffect(newExplosionEffect);
         ContentAddition.AddProjectile(gravityBombProjectile);
       };
     }
@@ -411,6 +496,11 @@ namespace FathomlessVoidling
     {
       AssetReferenceT<Material> voidRainPortalMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_PortalVoid.matPortalVoidCenter_mat);
       Material voidRainPortalMat = AssetAsyncReferenceManager<Material>.LoadAsset(voidRainPortalMatRef).WaitForCompletion();
+
+      AssetReferenceT<GameObject> gravityEffectARef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabGravityBumpExplosionAir_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(gravityEffectARef).Completed += (x) => airborneGravityEffect = x.Result;
+      AssetReferenceT<GameObject> gravityEffectGRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabGravityBumpExplosionGround_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(gravityEffectGRef).Completed += (x) => groundedGravityEffect = x.Result;
 
       AssetReferenceT<GameObject> muzzleFlashRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMuzzleflashEyeMissiles_prefab);
       AssetAsyncReferenceManager<GameObject>.LoadAsset(muzzleFlashRef).Completed += (x) =>

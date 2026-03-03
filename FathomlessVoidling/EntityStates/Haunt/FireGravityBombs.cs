@@ -4,16 +4,17 @@ using RoR2.Projectile;
 using EntityStates;
 using System.Collections.Generic;
 using UnityEngine;
+using R2API;
 
 namespace FathomlessVoidling.EntityStates.Haunt;
 
 public class FireGravityBombs : BaseState
 {
     public static GameObject projectilePrefab = Main.gravityBombProjectile;
-    public static float damageCoefficient = 6f;
-    public static float duration = 20f;
-    public static float cooldown = 40f;
-    public static float chanceToFirePerSecond = 0.1f;
+    public static float damageCoefficient = 1f;
+    public static float duration = 40f;
+    public static float cooldown = 10f;
+    public static float chanceToFirePerSecond = 0.15f;
     private float chargeTimer;
     private float cooldownTimer;
 
@@ -57,13 +58,15 @@ public class FireGravityBombs : BaseState
         NodeGraph.NodeIndex nodeIndex = nodesInRange[Random.Range(0, nodesInRange.Count)];
         Vector3 position;
         groundNodes.GetNodePosition(nodeIndex, out position);
-        ProjectileManager.instance.FireProjectile(new FireProjectileInfo()
-        {
-            projectilePrefab = FireGravityBombs.projectilePrefab,
-            owner = this.gameObject,
-            damage = this.damageStat * FireGravityBombs.damageCoefficient,
-            position = position
-        });
+        FireProjectileInfo fireProjectileInfo = default(FireProjectileInfo);
+        fireProjectileInfo.projectilePrefab = FireGravityBombs.projectilePrefab;
+        fireProjectileInfo.owner = this.gameObject;
+        fireProjectileInfo.damage = this.damageStat * FireGravityBombs.damageCoefficient;
+        fireProjectileInfo.position = position;
+        DamageTypeCombo damageType = DamageType.Generic | DamageType.BypassBlock;
+        damageType.AddModdedDamageType(Main.gravityDamageType);
+        fireProjectileInfo.damageTypeOverride = damageType;
+        ProjectileManager.instance.FireProjectile(fireProjectileInfo);
     }
 
     public override InterruptPriority GetMinimumInterruptPriority() => InterruptPriority.Death;
