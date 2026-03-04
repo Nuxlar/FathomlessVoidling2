@@ -1,16 +1,5 @@
 # Fathomless Voidling
 
-How to make a raid boss less monotonous:
-    - Environment hazards in the arena
-    - Additional "skills" or attacks that aren't tied to the main body
-
-Exploring hazards:
-    - Void fog, though might just have this integrated with the main attacks
-    - "mines" that dont do damage but maybe a version of the gravity bump from the original kit
-    - convert the phase transition safe pillars into a damaging "projectile"
-
-Voidling attacks should be large scale, cinematic, typical raid boss stuff. The joints should be mixing things up.
-
 Voidling Skills
     - Primary: Eye Blast (removes tracking from normal projectiles, increases size, blast radius, and adds oscillation)
     - Secondary: Portal Beams (really liked this from the initial draft)
@@ -31,7 +20,17 @@ Skill ideas to mess around with
     - Singularity: Can just be an enlarged version of the vanilla one, since there's more stuff going on, could be fun.
     - Asteroid Barrage: Spawns "orbiting" asteroids that are launched (one by one or simultaneously) or fall from the sky
 
-Add skilldrivers to the joints and have them do some attacks, the "auto" or "hazard" ones. So while voidling is doing the big, grandiose attacks, the joints are adding to the chaos. 
+Voidling Haunt is going to be an invisible body that adds some chaos to the fight so Voidling doesn't have the same issues as Solus Wing
+Thinking of adding some kind of mechanics as well, like another way to mix things up so Haunt/Voidling aren't just cycling the same things
+I think for Haunt specifically, maybe a counter for how many hits it lands, land X hits and goes into an "enrage"
+
+Voidling Haunt Attacks:
+- Gravity Bombs: spawns bombs across the arena, if hit, you'll get launched into a random direction
+- Gravity Barnacles: has a combat director for spawning special barnacles, they shoot gravity bullets that have the same effect as the bombs
+
+Joints:
+Do I wanna add stomping to the legs?
+HP thresholds: 75% 50% 25% go immune and spawn barnacles on the leg, immunity dissipated once barnacles are killed?
 
 ## Phase Flow
 
@@ -39,28 +38,14 @@ Add skilldrivers to the joints and have them do some attacks, the "auto" or "haz
 
 Voidling spawns in at the center, shield up for the main body
 
-Main Body Attacks
+Voidling attacks:
 Primary: Mortar Blast (fires a volley of "mortars" that rain down)
 Secondary: Portal Beams (fires beams from portals)
 Utility: Laser Sweep (fires big laser and sweeps a part of the arena)
 Special: Singularity (creates a giant black hole at the center of the arena)
 
-Joint Attacks (random intervals? or make actual skilldrivers?):
-- Random intervals would be easiest but I think actual skilldrivers would be good here, maybe a collider where if a player enters a certain area they can attack?
-- No skilldrivers, but maybe just trigger one of the random attacks if a player enters an area around the leg
-Attack1: Stomp (stomps down if enemy is within range)
-Attack2: Portal bombs
+Voidling Haunt attacks:
 
-Voidling Haunt is going to be an invisible body that adds some chaos to the fight so Voidling doesn't have the same issues as Solus Wing
-Thinking of adding some kind of mechanics as well, like another way to mix things up so Haunt/Voidling aren't just cycling the same things
-I think for Haunt specifically, maybe a counter for how many hits it lands, land X hits and goes into an "enrage"
-
-Voidling Haunt Attacks:
-- Gravity Bombs: spawns bombs across the arena, if hit, you'll get launched into a random direction
-- Void Squid: spawns void squids that trap you if you land in their sphere
-
-Joints:
-HP thresholds: 75% 50% 25% go immune and spawn barnacles on the leg, immunity dissipated once barnacles are killed
 
 ### Phase 2
 
@@ -92,7 +77,6 @@ Portal Beams firing automatically
 
 Known Issues:
 - Joint respawn not networked
-
 
 What would 1.0 entail?
 - The complete move/attack set

@@ -12,15 +12,20 @@ public class FireGravityBombs : BaseState
 {
     public static GameObject projectilePrefab = Main.gravityBombProjectile;
     public static float damageCoefficient = 1f;
-    public static float duration = 40f;
-    public static float cooldown = 10f;
+    public static float duration = 20f;
+    public static float cooldown = 40f;
     public static float chanceToFirePerSecond = 0.15f;
     private float chargeTimer;
     private float cooldownTimer;
+    private GameObject barnacleDirector;
 
     public override void OnEnter()
     {
         base.OnEnter();
+        // TODO add some logic for the director to prevent immediate spawns
+        Transform directorTransform = this.characterBody.transform.Find("Barnacle Director");
+        if (directorTransform)
+            barnacleDirector = directorTransform.gameObject;
         this.chargeTimer = 0f;
         this.cooldownTimer = cooldown;
     }
@@ -35,8 +40,12 @@ public class FireGravityBombs : BaseState
         if (this.chargeTimer <= 0f)
         {
             this.cooldownTimer -= this.GetDeltaTime();
+            if (!barnacleDirector.activeSelf)
+                barnacleDirector.SetActive(true);
             if (this.cooldownTimer <= 0f)
             {
+                if (barnacleDirector.activeSelf)
+                    barnacleDirector.SetActive(false);
                 this.chargeTimer = duration;
                 this.cooldownTimer = cooldown;
             }
