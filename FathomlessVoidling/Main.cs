@@ -134,7 +134,7 @@ namespace FathomlessVoidling
         if (hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
         {
           body.AddBuff(RoR2Content.Buffs.Immune);
-          body.GetComponent<JointThresholdController>().combatDirector.enabled = true;
+          body.GetComponent<JointThresholdController>().TriggerThresholdEvent();
           hc.health = hc.fullHealth * 0.75f;
           damageReport.damageDealt = 1f;
         }
@@ -475,7 +475,7 @@ namespace FathomlessVoidling
       AssetReferenceT<GameObject> barnacleMasterRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleMaster_prefab);
       barnacleMaster = AssetAsyncReferenceManager<GameObject>.LoadAsset(barnacleMasterRef).WaitForCompletion();
 
-      AssetReferenceT<SpawnCard> barnacleCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.cscVoidBarnacle_asset);
+      AssetReferenceT<SpawnCard> barnacleCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.cscVoidBarnacleNoCast_asset);
       barnacleSpawnCard = AssetAsyncReferenceManager<SpawnCard>.LoadAsset(barnacleCardRef).WaitForCompletion();
       DirectorCard barnacleDirectorCard = new DirectorCard
       {
@@ -718,24 +718,48 @@ namespace FathomlessVoidling
       AssetReferenceT<CharacterSpawnCard> jointCardRef = new AssetReferenceT<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrabJoint_asset);
       AssetAsyncReferenceManager<CharacterSpawnCard>.LoadAsset(jointCardRef).Completed += (x) => jointCard = x.Result;
 
+      AssetReferenceT<SpawnCard> barnacleCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.cscVoidBarnacleNoCast_asset);
+      barnacleSpawnCard = AssetAsyncReferenceManager<SpawnCard>.LoadAsset(barnacleCardRef).WaitForCompletion();
+
       AssetReferenceT<GameObject> jointBodyRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabJointBody_prefab);
       AssetAsyncReferenceManager<GameObject>.LoadAsset(jointBodyRef).Completed += (x) =>
       {
         GameObject body = x.Result;
         JointThresholdController thresholdController = body.AddComponent<JointThresholdController>();
         CombatDirector combatDirector = body.AddComponent<CombatDirector>();
-
-        combatDirector.enabled = false;
-        combatDirector.combatSquad = body.AddComponent<CombatSquad>();
-        combatDirector.monsterCredit = 300f;
-        combatDirector.ignoreTeamSizeLimit = true;
-        combatDirector.combatSquad.grantBonusHealthInMultiplayer = true;
-        combatDirector.maxSquadCount = 6;
+        /*
+        Using the Xi Construct's implementation, there needs to be a NetworkedBodySpawnSlot for each spawn
+Needs: spawncard, owner body, owner child locator, owner attach child name, spawn effect prefab (can be null), and kill effect prefab
+BodyPrefab -> Model Base -> mockModel -> Toe -> ToeJoint
+0 -> 0 -> 2 -> 0
+z -0.44 0.44
+x -0.44 0.44
+        */
+        body.AddComponent<MasterSpawnSlotController>();
+        Transform toeJoint = body.transform.GetChild(0).GetChild(0).GetChild(2).GetChild(0);
+        for (int i = 0; i < 4; i++)
+        {
+          string attachName = "AttachPoint" + i;
+          NetworkedBodySpawnSlot spawnSlot = body.AddComponent<NetworkedBodySpawnSlot>();
+          GameObject newAttachment = new GameObject(attachName);
+          newAttachment.transform.parent = toeJoint;
+          if (i < 2)
+          {
+            float zVector = i == 0 ? 0.44f : -0.44f;
+            newAttachment.transform.localPosition = new Vector3(0f, 0f, zVector);
+          }
+          else
+          {
+            float xVector = i == 2 ? 0.44f : -0.44f;
+            newAttachment.transform.localPosition = new Vector3(xVector, 0f, 0f);
+          }
+          spawnSlot.spawnCard = barnacleSpawnCard;
+          spawnSlot.ownerBody = body.GetComponent<CharacterBody>();
+          spawnSlot.ownerChildLocator = body.GetComponent<ModelLocator>().modelChildLocator;
+          spawnSlot.ownerAttachChildName = attachName;
+        }
 
         body.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(JointSpawnState));
-
-        ModelLocator modelLocator = body.GetComponent<ModelLocator>();
-        GameObject model = modelLocator.modelTransform.gameObject;
       };
 
       AssetReferenceT<CharacterSpawnCard> voidlingCardRef = new AssetReferenceT<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrab_asset);
