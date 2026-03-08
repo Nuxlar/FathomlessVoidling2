@@ -4,16 +4,17 @@ using RoR2.Skills;
 using RoR2.Projectile;
 using UnityEngine;
 using System;
+using UnityEngine.Networking;
 
 namespace FathomlessVoidling.EntityStates.Primary
 {
     public class FireEyeBlast : BaseState
     {
         public float baseInitialDelay = 0f;
-        public float baseDelayBetweenWaves = 0.5f;
+        public static float baseDelayBetweenWaves = 0.5f;
         public float baseEndDelay = 0f;
         public int numWaves = 5;
-        public int numMissilesPerWave = 8; // 6 orig
+        public static int numMissilesPerWave = 6; // 6 orig
         public string muzzleName = "EyeProjectileCenter";
         public GameObject muzzleFlashPrefab = Main.eyeBlastMuzzleFlash;
         public GameObject projectilePrefab = Main.eyeMissileProjectile;
@@ -45,10 +46,26 @@ namespace FathomlessVoidling.EntityStates.Primary
                 if ((bool)skillByDef && skillByDef.stock == 0)
                     skillByDef.SetBaseSkill(this.nextSkillDef);
             }
-            this.duration = (this.baseInitialDelay + Mathf.Max(0.0f, this.baseDelayBetweenWaves * (this.numWaves - 1)) + this.baseEndDelay) / this.attackSpeedStat;
+            PhasedInventorySetter inventorySetter = this.GetComponent<PhasedInventorySetter>();
+            if ((bool)inventorySetter && NetworkServer.active)
+            {
+                switch (inventorySetter.phaseIndex)
+                {
+                    case 0:
+                        FireEyeBlast.numMissilesPerWave = 6;
+                        break;
+                    case 1:
+                        FireEyeBlast.numMissilesPerWave = 8;
+                        break;
+                    case 2:
+                        FireEyeBlast.baseDelayBetweenWaves = 0.25f;
+                        break;
+                }
+            }
+            this.duration = (this.baseInitialDelay + Mathf.Max(0.0f, FireEyeBlast.baseDelayBetweenWaves * (this.numWaves - 1)) + this.baseEndDelay) / this.attackSpeedStat;
             this.characterBody.SetAimTimer(this.duration + 3f);
             this.timeUntilNextWave = this.baseInitialDelay / this.attackSpeedStat;
-            this.delayBetweenWaves = this.baseDelayBetweenWaves / this.attackSpeedStat;
+            this.delayBetweenWaves = FireEyeBlast.baseDelayBetweenWaves / this.attackSpeedStat;
             this.muzzleTransform = this.FindModelChild(this.muzzleName);
             this.aimRay = this.GetAimRay();
         }
@@ -84,7 +101,7 @@ namespace FathomlessVoidling.EntityStates.Primary
                         damage = this.damageStat * this.damageCoefficient,
                         force = this.force
                     };
-                    for (int index = 0; index < this.numMissilesPerWave; ++index)
+                    for (int index = 0; index < FireEyeBlast.numMissilesPerWave; ++index)
                     {
                         fireProjectileInfo.rotation = quaternion;
                         fireProjectileInfo.crit = Util.CheckRoll(this.critStat, this.characterBody.master);

@@ -26,6 +26,7 @@ using EntityStates.VoidRaidCrab;
 using RoR2.Skills;
 using FathomlessVoidling.EntityStates.Haunt;
 using EntityStates.VoidBarnacle.Weapon;
+using FathomlessVoidling.Controllers;
 
 namespace FathomlessVoidling
 {
@@ -41,6 +42,8 @@ namespace FathomlessVoidling
     public static string PluginDirectory { get; private set; }
 
     public static DamageAPI.ModdedDamageType gravityDamageType = DamageAPI.ReserveDamageType();
+    public static SpawnCard barnacleSpawnCard;
+    public static GameObject barnacleMaster;
     public static GameObject spawnEffect;
     public static CharacterSpawnCard jointCard;
     public static SpawnCard bigVoidlingCard;
@@ -62,7 +65,7 @@ namespace FathomlessVoidling
 
     private static GameObject groundedGravityEffect;
     private static GameObject airborneGravityEffect;
-    private static DirectorCardCategorySelection barnacleDccs = ScriptableObject.CreateInstance<DirectorCardCategorySelection>();
+    public static DirectorCardCategorySelection barnacleDccs = ScriptableObject.CreateInstance<DirectorCardCategorySelection>();
     /*
     public static AnimationClip newClip;
     public static AssetBundle assetBundle;
@@ -86,11 +89,13 @@ namespace FathomlessVoidling
       TweakBigVoidling();
       TweakBigVoidlingMaster();
 
-      On.RoR2.SceneDirector.Start += TweakBossDirector;
       GlobalEventManager.onServerDamageDealt += ApplyGravityDamageType;
+      // Regular Hooks
+      On.RoR2.SceneDirector.Start += TweakBossDirector;
+      On.RoR2.HealthComponent.SendDamageDealt += ThresholdCheck;
+      // EntityState Hooks
       On.EntityStates.VoidBarnacle.Weapon.ChargeFire.OnEnter += LazyMf;
       On.EntityStates.VoidRaidCrab.VacuumAttack.OnEnter += IncreaseSingularitySize;
-
     }
 
     private void IncreaseSingularitySize(On.EntityStates.VoidRaidCrab.VacuumAttack.orig_OnEnter orig, VacuumAttack self)
@@ -116,6 +121,25 @@ namespace FathomlessVoidling
         self.outer.SetState(new ChargeGravityBullet());
       else
         orig(self);
+    }
+
+    private void ThresholdCheck(On.RoR2.HealthComponent.orig_SendDamageDealt orig, DamageReport damageReport)
+    {
+      HealthComponent hc = damageReport.victim.gameObject.GetComponent<HealthComponent>();
+      CharacterBody body = hc.body;
+
+      if (body && hc && body.name == "VoidRaidCrabJointBody(Clone)")
+      {
+
+        if (hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
+        {
+          body.AddBuff(RoR2Content.Buffs.Immune);
+          body.GetComponent<JointThresholdController>().combatDirector.enabled = true;
+          hc.health = hc.fullHealth * 0.75f;
+          damageReport.damageDealt = 1f;
+        }
+      }
+      orig(damageReport);
     }
 
     private void AddContent()
@@ -448,12 +472,15 @@ namespace FathomlessVoidling
     }
     private static void CreateVoidlingHaunt()
     {
+      AssetReferenceT<GameObject> barnacleMasterRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleMaster_prefab);
+      barnacleMaster = AssetAsyncReferenceManager<GameObject>.LoadAsset(barnacleMasterRef).WaitForCompletion();
+
       AssetReferenceT<SpawnCard> barnacleCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.cscVoidBarnacle_asset);
-      SpawnCard barnacleCard = AssetAsyncReferenceManager<SpawnCard>.LoadAsset(barnacleCardRef).WaitForCompletion();
+      barnacleSpawnCard = AssetAsyncReferenceManager<SpawnCard>.LoadAsset(barnacleCardRef).WaitForCompletion();
       DirectorCard barnacleDirectorCard = new DirectorCard
       {
         selectionWeight = 1,
-        spawnCard = barnacleCard,
+        spawnCard = barnacleSpawnCard,
       };
 
       AssetReferenceT<GameObject> hauntMasterRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_BrotherHaunt.BrotherHauntMaster_prefab);
@@ -695,6 +722,16 @@ namespace FathomlessVoidling
       AssetAsyncReferenceManager<GameObject>.LoadAsset(jointBodyRef).Completed += (x) =>
       {
         GameObject body = x.Result;
+        JointThresholdController thresholdController = body.AddComponent<JointThresholdController>();
+        CombatDirector combatDirector = body.AddComponent<CombatDirector>();
+
+        combatDirector.enabled = false;
+        combatDirector.combatSquad = body.AddComponent<CombatSquad>();
+        combatDirector.monsterCredit = 300f;
+        combatDirector.ignoreTeamSizeLimit = true;
+        combatDirector.combatSquad.grantBonusHealthInMultiplayer = true;
+        combatDirector.maxSquadCount = 6;
+
         body.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(JointSpawnState));
 
         ModelLocator modelLocator = body.GetComponent<ModelLocator>();

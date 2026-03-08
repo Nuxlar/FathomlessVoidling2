@@ -43,8 +43,8 @@ public class VoidlingHauntManager : BaseState
         if (this.chargeTimer <= 0f)
         {
             this.cooldownTimer -= this.GetDeltaTime();
-            if (!barnacleDirector.activeSelf)
-                barnacleDirector.SetActive(true);
+            //  if (!barnacleDirector.activeSelf)
+            // barnacleDirector.SetActive(true);
             if (this.cooldownTimer <= 0f)
             {
                 if (barnacleDirector.activeSelf)

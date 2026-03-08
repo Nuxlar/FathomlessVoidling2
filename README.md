@@ -41,21 +41,40 @@ HP thresholds: 75% 50% 25% go immune and spawn barnacles on the leg, immunity di
 Voidling spawns in at the center, shield up for the main body
 
 Voidling attacks:
-Primary: Mortar Blast (fires a volley of "mortars" that rain down)
-Secondary: Portal Beams (fires beams from portals)
-Utility: Laser Sweep (fires big laser and sweeps a part of the arena)
-Special: Singularity (creates a giant black hole at the center of the arena)
+    - Primary: Mortar Blast I (fires a volley of "mortars" that rain down)
+    - Secondary: Portal Beams I (fires beams from portals)
+    - Utility: Maze I (fires 1 large lasers into the arena)
+    - Special: UNDEFINED
 
 Voidling Haunt attacks:
+    - Gravity Bombs
 
 
 ### Phase 2
 
 Joint break, 1 leg retracted, other joints heal
 
+Voidling attacks:
+    - Primary: Mortar Blast II (increase missile count 6 -> 8)
+    - Secondary: Portal Beams II (increase beam spawn frequency)
+    - Utility: Maze II (2 lasers)
+    - Special: Singularity (creates a giant black hole at the center of the arena)
+
+Voidling Haunt:
+    - Gravity Bombs
+    - Activate Barnacle Director
+
+
 ### Phase 3
 
 Joint break, 2 legs retracted, other joints heal
+
+Voidling attacks:
+    - Primary: Mortar Blast III (increase attack speed)
+    - Secondary: Portal Beams III (increase beam spawn frequency)
+    - Utility: Maze III (more waves)
+    - Special: UNDEFINED
+
 
 ### Phase 4
 
@@ -73,10 +92,6 @@ OR
 
 Do something to prevent yourself from being taken with Voidling when it dies
 
-It's charging up the final stand to wipe out everyone, 
-Portal Beams firing automatically
-
-
 Known Issues:
 - Joint respawn not networked
 
@@ -85,3 +100,12 @@ What would 1.0 entail?
 - Some arena tweaks to hit the joints better
 - MP compat
 - Testing with drones or many allies
+
+ISSUES:
+- Joint barnacle threshold kinda working, spawns an elite barnacle sometimes and doesn't stick to the joint if it does spawn
+- Test threshold in multiplayer
+
+TODOs:
+- Maze I, II, III
+- Singularity (force haunt bombs during state)
+- Joint threshold event
