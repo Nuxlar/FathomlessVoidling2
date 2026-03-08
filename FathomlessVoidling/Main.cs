@@ -89,6 +89,24 @@ namespace FathomlessVoidling
       On.RoR2.SceneDirector.Start += TweakBossDirector;
       GlobalEventManager.onServerDamageDealt += ApplyGravityDamageType;
       On.EntityStates.VoidBarnacle.Weapon.ChargeFire.OnEnter += LazyMf;
+      On.EntityStates.VoidRaidCrab.VacuumAttack.OnEnter += IncreaseSingularitySize;
+
+    }
+
+    private void IncreaseSingularitySize(On.EntityStates.VoidRaidCrab.VacuumAttack.orig_OnEnter orig, VacuumAttack self)
+    {
+      AnimationCurve newRadiusCurve = new AnimationCurve();
+      newRadiusCurve.preWrapMode = WrapMode.ClampForever;
+      newRadiusCurve.postWrapMode = WrapMode.ClampForever;
+      newRadiusCurve.AddKey(new Keyframe() { time = 0f, value = 0f, inTangent = 125f, outTangent = 125f, inWeight = 0f, outWeight = 0.3333333432674408f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
+      newRadiusCurve.AddKey(new Keyframe() { time = 1f, value = 125f, inTangent = 125f, outTangent = 125f, inWeight = 0.3333333432674408f, outWeight = 0f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
+      // original curve
+      // {"preWrapMode":8,"postWrapMode":8,"keys":[{"time":0.0,"value":0.0,"inTangent":50.0,"outTangent":50.0,"inWeight":0.0,"outWeight":0.3333333432674408,"weightedMode":0,"tangentMode":34},{"time":1.0,"value":50.0,"inTangent":50.0,"outTangent":50.0,"inWeight":0.3333333432674408,"outWeight":0.0,"weightedMode":0,"tangentMode":34}]}
+      VacuumAttack.killRadiusCurve = newRadiusCurve;
+      //   VacuumAttack.killRadiusCurve = AnimationCurve.Linear(0, 0, 1, 150); // 50
+      // VacuumAttack.pullMagnitudeCurve = AnimationCurve.Linear(0, 0, 1, 45);
+      // TODO tweak pull magnitude if it's too much in testing
+      orig(self);
     }
 
     private void LazyMf(On.EntityStates.VoidBarnacle.Weapon.ChargeFire.orig_OnEnter orig, ChargeFire self)
@@ -109,7 +127,7 @@ namespace FathomlessVoidling
       ContentAddition.AddEntityState<ChargeEyeBlast>(out _);
       ContentAddition.AddEntityState<FireEyeBlast>(out _);
 
-      ContentAddition.AddEntityState<FireGravityBombs>(out _);
+      ContentAddition.AddEntityState<VoidlingHauntManager>(out _);
       ContentAddition.AddEntityState<ChargeGravityBullet>(out _);
       ContentAddition.AddEntityState<FireGravityBullet>(out _);
     }
@@ -483,7 +501,7 @@ namespace FathomlessVoidling
         (skillDef as ScriptableObject).name = "Gravity Well Nux";
         skillDef.skillNameToken = "Gravity Well Nux";
 
-        skillDef.activationState = new SerializableEntityStateType(typeof(FireGravityBombs));
+        skillDef.activationState = new SerializableEntityStateType(typeof(VoidlingHauntManager));
         skillDef.activationStateMachineName = "Weapon";
         skillDef.interruptPriority = InterruptPriority.Death;
 
@@ -508,8 +526,8 @@ namespace FathomlessVoidling
 
         GameObject.Destroy(voidlingHaunt.GetComponent<GenericSkill>());
         EntityStateMachine esm = voidlingHaunt.GetComponent<EntityStateMachine>();
-        esm.initialStateType = new SerializableEntityStateType(typeof(FireGravityBombs));
-        esm.mainStateType = new SerializableEntityStateType(typeof(FireGravityBombs));
+        esm.initialStateType = new SerializableEntityStateType(typeof(VoidlingHauntManager));
+        esm.mainStateType = new SerializableEntityStateType(typeof(VoidlingHauntManager));
 
         SkillLocator skillLocator = voidlingHaunt.GetComponent<SkillLocator>();
 

@@ -8,8 +8,11 @@ using R2API;
 
 namespace FathomlessVoidling.EntityStates.Haunt;
 
-public class FireGravityBombs : BaseState
+public class VoidlingHauntManager : BaseState
 {
+    // TODO: add "override" functionality, forcing gravity bombs to spawn
+    // TODO: add "director start" functionality, activating the barnacle director
+    // TODO: add "director boost" functionality, giving X credits to the barnacle director
     public static GameObject projectilePrefab = Main.gravityBombProjectile;
     public static float damageCoefficient = 1f;
     public static float duration = 20f;
@@ -52,7 +55,7 @@ public class FireGravityBombs : BaseState
         }
         else
         {
-            if ((double)Random.value < FireGravityBombs.chanceToFirePerSecond)
+            if ((double)Random.value < VoidlingHauntManager.chanceToFirePerSecond)
                 this.FireProjectile();
         }
     }
@@ -60,7 +63,6 @@ public class FireGravityBombs : BaseState
     private void FireProjectile()
     {
         NodeGraph groundNodes = SceneInfo.instance.groundNodes;
-        //  NodeGraph airNodes = SceneInfo.instance.airNodes;
         if (!(bool)groundNodes)
             return;
         List<NodeGraph.NodeIndex> nodesInRange = groundNodes.FindNodesInRange(Vector3.zero, 25f, 200f, HullMask.Human);
@@ -68,9 +70,9 @@ public class FireGravityBombs : BaseState
         Vector3 position;
         groundNodes.GetNodePosition(nodeIndex, out position);
         FireProjectileInfo fireProjectileInfo = default(FireProjectileInfo);
-        fireProjectileInfo.projectilePrefab = FireGravityBombs.projectilePrefab;
+        fireProjectileInfo.projectilePrefab = VoidlingHauntManager.projectilePrefab;
         fireProjectileInfo.owner = this.gameObject;
-        fireProjectileInfo.damage = this.damageStat * FireGravityBombs.damageCoefficient;
+        fireProjectileInfo.damage = this.damageStat * VoidlingHauntManager.damageCoefficient;
         fireProjectileInfo.position = position;
         DamageTypeCombo damageType = DamageType.Generic | DamageType.BypassBlock;
         damageType.AddModdedDamageType(Main.gravityDamageType);

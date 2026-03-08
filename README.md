@@ -1,7 +1,9 @@
 # Fathomless Voidling
 
+Also need to think for haunt, how to mix up the attacks, maybe changing intensity or intervals as the fight goes on, for now though, I think it's fine, need to work on the actual attacks
+
 Voidling Skills
-    - Primary: Eye Blast (removes tracking from normal projectiles, increases size, blast radius, and adds oscillation)
+    - Primary: Eye Blast (larger missiles, much weaker tracking, fired upwards in a volley then rain down after pausing for a second)
     - Secondary: Portal Beams (really liked this from the initial draft)
     - Utility: Void Laser
     - Special: One of the singularities ig
