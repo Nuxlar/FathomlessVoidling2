@@ -10,12 +10,10 @@ namespace FathomlessVoidling.Controllers
 {
     public class JointThresholdController : NetworkBehaviour
     {
-        [SyncVar]
-        public int barnaclesKilled = 0;
         private CharacterBody jointBody;
         private List<CharacterMaster> membersList = new List<CharacterMaster>();
         private List<OnDestroyCallback> onDestroyCallbacksServer;
-        private bool defeatedServer;
+        public bool defeatedServer;
 
         private void OnDestroy()
         {

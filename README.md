@@ -101,12 +101,6 @@ What would 1.0 entail?
 - MP compat
 - Testing with drones or many allies
 
-ISSUES:
-- Joint barnacle threshold kinda working, spawns an elite barnacle sometimes and doesn't stick to the joint if it does spawn
-- Test threshold in multiplayer
-- New problem, spawns are working but the joint body is still technically at the bottom of the fucking arena, so gotta figure out how to get the spawns to stick to the actual mf, kms
-
 TODOs:
 - Maze I, II, III
 - Singularity (force haunt bombs during state)
-- Joint threshold event

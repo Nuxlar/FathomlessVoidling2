@@ -62,7 +62,7 @@ namespace FathomlessVoidling
     public static GameObject gravityBulletProjectile;
     public static GameObject gravityBombProjectile;
     public static SpawnCard voidlingHauntCard = ScriptableObject.CreateInstance<CharacterSpawnCard>();
-
+    public static SpawnCard attachableBarnacleCard = ScriptableObject.CreateInstance<CharacterSpawnCard>();
     private static GameObject groundedGravityEffect;
     private static GameObject airborneGravityEffect;
     public static DirectorCardCategorySelection barnacleDccs = ScriptableObject.CreateInstance<DirectorCardCategorySelection>();
@@ -88,6 +88,7 @@ namespace FathomlessVoidling
       CreateNewEyeMissiles();
       TweakBigVoidling();
       TweakBigVoidlingMaster();
+      //CreateAttachableBarnacle();
 
       GlobalEventManager.onServerDamageDealt += ApplyGravityDamageType;
       // Regular Hooks
@@ -133,10 +134,14 @@ namespace FathomlessVoidling
 
         if (hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
         {
-          body.AddBuff(RoR2Content.Buffs.Immune);
-          body.GetComponent<JointThresholdController>().TriggerThresholdEvent();
-          hc.health = hc.fullHealth * 0.75f;
-          damageReport.damageDealt = 1f;
+          JointThresholdController jointThresholdController = body.GetComponent<JointThresholdController>();
+          if (!jointThresholdController.defeatedServer)
+          {
+            body.AddBuff(RoR2Content.Buffs.Immune);
+            body.GetComponent<JointThresholdController>().TriggerThresholdEvent();
+            hc.health = hc.fullHealth * 0.75f;
+            damageReport.damageDealt = 1f;
+          }
         }
       }
       orig(damageReport);
@@ -154,6 +159,7 @@ namespace FathomlessVoidling
       ContentAddition.AddEntityState<VoidlingHauntManager>(out _);
       ContentAddition.AddEntityState<ChargeGravityBullet>(out _);
       ContentAddition.AddEntityState<FireGravityBullet>(out _);
+      ContentAddition.AddEntityState<FindSurfaceAccurate>(out _);
     }
 
     private void ApplyGravityDamageType(DamageReport obj)
@@ -169,7 +175,7 @@ namespace FathomlessVoidling
           Vector3 airborneForceVector;
           Vector3 groundedForceVector;
           bool preventAirControl = false;
-          bool isLeft = (double)Random.value > 0.5;
+          bool isLeft = (double)UnityEngine.Random.value > 0.5;
           Vector3 vector3 = Vector3.Cross(direction.forward, Vector3.up);
 
           if (!isLeft)
@@ -470,12 +476,50 @@ namespace FathomlessVoidling
         ContentAddition.AddProjectile(gravityBombProjectile);
       };
     }
+
+    private static void CreateAttachableBarnacle()
+    {
+      AssetReferenceT<GameObject> barnacleMasterRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleMaster_prefab);
+      GameObject barnacleMaster = AssetAsyncReferenceManager<GameObject>.LoadAsset(barnacleMasterRef).WaitForCompletion();
+
+      AssetReferenceT<GameObject> barnacleBodyRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleBody_prefab);
+      GameObject barnacleBody = AssetAsyncReferenceManager<GameObject>.LoadAsset(barnacleBodyRef).WaitForCompletion();
+
+      GameObject newBarnacleMaster = PrefabAPI.InstantiateClone(barnacleMaster, "VoidBarnacleAttachableMasterNux");
+      GameObject newBarnacleBody = PrefabAPI.InstantiateClone(barnacleBody, "VoidBarnacleAttachableBodyNux");
+
+      CharacterBody body = newBarnacleBody.GetComponent<CharacterBody>();
+      body.baseMaxHealth = 275f; // 225 vanilla
+      body.levelMaxHealth = 85f; // 68 vanilla
+      newBarnacleBody.transform.localScale *= 1.15f;
+      newBarnacleBody.GetComponent<ModelLocator>().modelTransform.localScale *= 1.15f;
+      newBarnacleBody.AddComponent<NetworkedBodyAttachment>().shouldParentToAttachedBody = true;
+      EntityStateMachine esm = newBarnacleBody.GetComponent<EntityStateMachine>();
+      esm.initialStateType = new SerializableEntityStateType(typeof(FindSurfaceAccurate));
+
+      newBarnacleMaster.GetComponent<CharacterMaster>().bodyPrefab = newBarnacleBody;
+
+      ContentAddition.AddBody(newBarnacleBody);
+      ContentAddition.AddMaster(newBarnacleMaster);
+
+      attachableBarnacleCard.prefab = newBarnacleMaster;
+      attachableBarnacleCard.sendOverNetwork = true;
+      attachableBarnacleCard.hullSize = HullClassification.Human;
+      attachableBarnacleCard.nodeGraphType = RoR2.Navigation.MapNodeGroup.GraphType.Ground;
+      attachableBarnacleCard.requiredFlags = RoR2.Navigation.NodeFlags.None;
+      attachableBarnacleCard.forbiddenFlags = RoR2.Navigation.NodeFlags.NoCharacterSpawn | RoR2.Navigation.NodeFlags.NoChestSpawn | RoR2.Navigation.NodeFlags.NoShrineSpawn;
+      attachableBarnacleCard.directorCreditCost = 50;
+    }
+
     private static void CreateVoidlingHaunt()
     {
       AssetReferenceT<GameObject> barnacleMasterRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleMaster_prefab);
       barnacleMaster = AssetAsyncReferenceManager<GameObject>.LoadAsset(barnacleMasterRef).WaitForCompletion();
 
-      AssetReferenceT<SpawnCard> barnacleCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.cscVoidBarnacleNoCast_asset);
+      AssetReferenceT<GameObject> barnacleBodyRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleBody_prefab);
+      GameObject barnacleBody = AssetAsyncReferenceManager<GameObject>.LoadAsset(barnacleBodyRef).WaitForCompletion();
+
+      AssetReferenceT<SpawnCard> barnacleCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.cscVoidBarnacle_asset);
       barnacleSpawnCard = AssetAsyncReferenceManager<SpawnCard>.LoadAsset(barnacleCardRef).WaitForCompletion();
       DirectorCard barnacleDirectorCard = new DirectorCard
       {
@@ -718,8 +762,7 @@ namespace FathomlessVoidling
       AssetReferenceT<CharacterSpawnCard> jointCardRef = new AssetReferenceT<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrabJoint_asset);
       AssetAsyncReferenceManager<CharacterSpawnCard>.LoadAsset(jointCardRef).Completed += (x) => jointCard = x.Result;
 
-      AssetReferenceT<SpawnCard> barnacleCardRef = new AssetReferenceT<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.cscVoidBarnacleNoCast_asset);
-      barnacleSpawnCard = AssetAsyncReferenceManager<SpawnCard>.LoadAsset(barnacleCardRef).WaitForCompletion();
+      CreateAttachableBarnacle();
 
       AssetReferenceT<GameObject> jointBodyRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabJointBody_prefab);
       AssetAsyncReferenceManager<GameObject>.LoadAsset(jointBodyRef).Completed += (x) =>
@@ -736,6 +779,8 @@ z -0.44 0.44
 x -0.44 0.44
         */
         body.AddComponent<MasterSpawnSlotController>();
+        ChildLocator childLocator = body.GetComponent<ModelLocator>().modelChildLocator;
+
         Transform toeJoint = body.transform.GetChild(0).GetChild(0).GetChild(2).GetChild(0);
         for (int i = 0; i < 4; i++)
         {
@@ -745,17 +790,18 @@ x -0.44 0.44
           newAttachment.transform.parent = toeJoint;
           if (i < 2)
           {
-            float zVector = i == 0 ? 0.44f : -0.44f;
+            float zVector = i == 0 ? 0.44f : -0.66f;
             newAttachment.transform.localPosition = new Vector3(0f, 0f, zVector);
           }
           else
           {
-            float xVector = i == 2 ? 0.44f : -0.44f;
+            float xVector = i == 2 ? 0.44f : -0.66f;
             newAttachment.transform.localPosition = new Vector3(xVector, 0f, 0f);
           }
-          spawnSlot.spawnCard = barnacleSpawnCard;
+          childLocator.AddChild(attachName, newAttachment.transform);
+          spawnSlot.spawnCard = attachableBarnacleCard;
           spawnSlot.ownerBody = body.GetComponent<CharacterBody>();
-          spawnSlot.ownerChildLocator = body.GetComponent<ModelLocator>().modelChildLocator;
+          spawnSlot.ownerChildLocator = childLocator;
           spawnSlot.ownerAttachChildName = attachName;
         }
 
