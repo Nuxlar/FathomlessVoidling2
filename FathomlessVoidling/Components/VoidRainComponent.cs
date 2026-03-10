@@ -1,9 +1,10 @@
 using RoR2;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace FathomlessVoidling.Components
 {
-    public class VoidRainComponent : MonoBehaviour
+    public class VoidRainComponent : NetworkBehaviour
     {
         public Ray aimRay;
         public float damageStat;

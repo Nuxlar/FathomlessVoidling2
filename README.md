@@ -34,11 +34,7 @@ Voidling attacks:
     - Primary: Mortar Blast I (fires a volley of "mortars" that rain down)
     - Secondary: Portal Beams I (fires beams from portals)
     - Utility: Maze I (fires 1 large laser into the arena)
-    - Special: UNDEFINED
-
-Voidling Haunt attacks:
-    - Gravity Bombs
-
+    - Special: UNDEFINED (maybe wandering singularity?)
 
 ### Phase 2
 
@@ -50,11 +46,6 @@ Voidling attacks:
     - Utility: Maze II (2 lasers)
     - Special: Singularity (creates a giant black hole at the center of the arena)
 
-Voidling Haunt:
-    - Gravity Bombs
-    - Activate Barnacle Director
-
-
 ### Phase 3
 
 Joint break, 2 legs retracted, other joints heal
@@ -64,7 +55,6 @@ Voidling attacks:
     - Secondary: Portal Beams III (increase beam spawn frequency)
     - Utility: Maze III (more waves)
     - Special: UNDEFINED
-
 
 ### Phase 4
 
@@ -82,15 +72,19 @@ OR
 
 Do something to prevent yourself from being taken with Voidling when it dies
 
-Known Issues:
-- Joint respawn not networked
-
 What would 1.0 entail?
-- The complete move/attack set
-- Some arena tweaks to hit the joints better
+- The complete move/attack set for voidling and voidling haunt
+- Properly ending the fight instead of manually ending the run
+- (MAYBE) Phase transition to alternate donuts
 - MP compat
-- Testing with drones or many allies
+
+Notes:
+- Need to reduce the insta-death attacks or at least make them not target drones for some, like ward wipe
+- Bring back Wandering Singularity instead of the big center one
+- Or make the spawn point of the center one lower
 
 TODOs:
-- Maze I, II, III
-- Singularity (force haunt bombs during state)
+- Complete Maze attack, ensure the phase differences work
+- Force Gravity bombs and barnacle spawn during Singularity
+- Tweak Gravity Bump VFX for Maze
+- Change targeting on VoidRain, EyeBlast, and 

@@ -17,13 +17,13 @@ namespace FathomlessVoidling.EntityStates.Utility
     {
         public static string headTransformNameInChildLocator = "Head";
         public static string muzzleTransformNameInChildLocator = "EyeMuzzle";
-        public static int waves = 3;
-        public static float beamDuration = 2f;
-        public static bool dualBeams = false;
-        public static bool alternatingBeams = false;
+        public int waves = 3;
+        public float beamDuration = 2f;
+        public bool dualBeams = false;
+        public bool alternatingBeams = false;
 
-        private Transform headTransform;
-        private Transform muzzleTransform;
+        public Transform headTransform;
+        public Transform muzzleTransform;
         private int phaseIndex;
         protected Animator modelAnimator { get; private set; }
         protected List<GameObject> beamVfxInstances { get; private set; }
@@ -46,16 +46,16 @@ namespace FathomlessVoidling.EntityStates.Utility
                 switch (this.phaseIndex)
                 {
                     case 0:
-                        BaseMazeAttackState.alternatingBeams = false;
-                        BaseMazeAttackState.dualBeams = false;
+                        this.alternatingBeams = false;
+                        this.dualBeams = false;
                         break;
                     case 1:
-                        BaseMazeAttackState.dualBeams = false;
-                        BaseMazeAttackState.alternatingBeams = false;
+                        this.dualBeams = false;
+                        this.alternatingBeams = false;
                         break;
                     case 2:
-                        BaseMazeAttackState.alternatingBeams = true;
-                        BaseMazeAttackState.dualBeams = true;
+                        this.alternatingBeams = true;
+                        this.dualBeams = true;
                         break;
                 }
             }
@@ -67,11 +67,12 @@ namespace FathomlessVoidling.EntityStates.Utility
             base.OnExit();
         }
 
-        protected void CreateBeamVFXInstance(GameObject beamVfxPrefab, Transform parent)
+        protected GameObject CreateBeamVFXInstance(GameObject beamVfxPrefab, Transform parent)
         {
             GameObject beamVfxInstance = UnityEngine.Object.Instantiate<GameObject>(beamVfxPrefab);
             beamVfxInstance.transform.SetParent(parent, true);
             beamVfxInstance.transform.SetPositionAndRotation(parent.position, Quaternion.LookRotation(parent.forward));
+            return beamVfxInstance;
         }
 
         protected void DestroyBeamVFXInstance()

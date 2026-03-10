@@ -29,6 +29,7 @@ using EntityStates.VoidBarnacle.Weapon;
 using FathomlessVoidling.Controllers;
 using UnityEngine.Networking;
 using FathomlessVoidling.EntityStates.Utility;
+using UnityEngine.Rendering.PostProcessing;
 
 namespace FathomlessVoidling
 {
@@ -68,6 +69,12 @@ namespace FathomlessVoidling
     private static GameObject groundedGravityEffect;
     private static GameObject airborneGravityEffect;
     public static DirectorCardCategorySelection barnacleDccs = ScriptableObject.CreateInstance<DirectorCardCategorySelection>();
+
+    public static GameObject mazePortalEffect;
+    public static GameObject mazeMuzzleEffect;
+    public static GameObject mazeLaserPrefab;
+    public static GameObject mazeChargeUpPrefab;
+    public static GameObject mazeImpactEffect;
     /*
     public static AnimationClip newClip;
     public static AssetBundle assetBundle;
@@ -430,7 +437,6 @@ namespace FathomlessVoidling
 
         gravityBulletProjectile.GetComponent<ProjectileImpactExplosion>().impactEffect = newExplosion;
 
-        ContentAddition.AddEffect(gravityBulletChargeEffect);
         ContentAddition.AddEffect(newExplosion);
         ContentAddition.AddProjectile(gravityBulletProjectile);
       };
@@ -686,8 +692,95 @@ namespace FathomlessVoidling
 
     private static void LoadAssets()
     {
+      AssetReferenceT<Material> spinBeamMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabSpinBeamSphere1_mat);
+      Material spinBeamSphereMat = AssetAsyncReferenceManager<Material>.LoadAsset(spinBeamMatRef).WaitForCompletion();
+
       AssetReferenceT<Material> voidRainPortalMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_PortalVoid.matPortalVoidCenter_mat);
       Material voidRainPortalMat = AssetAsyncReferenceManager<Material>.LoadAsset(voidRainPortalMatRef).WaitForCompletion();
+
+      AssetReferenceT<GameObject> mazeChargeUpRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamChargeUp_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(mazeChargeUpRef).Completed += (x) =>
+      {
+        GameObject prefab = x.Result;
+        mazeChargeUpPrefab = PrefabAPI.InstantiateClone(prefab, "MazeChargeUpEffectNux", false);
+        foreach (ParticleSystem item in mazeChargeUpPrefab.transform.GetComponentsInChildren<ParticleSystem>())
+        {
+          ParticleSystem.MainModule main = item.main;
+          main.startSizeMultiplier *= 1.5f;
+        }
+      };
+
+      AssetReferenceT<GameObject> mazeImpactRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.LaserImpactEffect_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(mazeImpactRef).Completed += (x) =>
+      {
+        GameObject prefab = x.Result;
+        mazeImpactEffect = PrefabAPI.InstantiateClone(prefab, "MazeImpactEffectNux", false);
+        foreach (ParticleSystem item in mazeImpactEffect.transform.GetComponentsInChildren<ParticleSystem>())
+        {
+          ParticleSystem.MainModule main = item.main;
+          main.startSizeMultiplier /= 2f;
+        }
+        ContentAddition.AddEffect(mazeImpactEffect);
+      };
+
+      AssetReferenceT<PostProcessProfile> ppRef = new AssetReferenceT<PostProcessProfile>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_title_PostProcessing.ppLocalNullifier_asset);
+      PostProcessProfile ppProfile = AssetAsyncReferenceManager<PostProcessProfile>.LoadAsset(ppRef).WaitForCompletion();
+
+      AssetReferenceT<GameObject> mazeLaserRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamVFX_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(mazeLaserRef).Completed += (x) =>
+      {
+        GameObject prefab = x.Result;
+        mazeLaserPrefab = PrefabAPI.InstantiateClone(prefab, "MazeLaserVFXNux");
+        mazeLaserPrefab.AddComponent<NetworkIdentity>();
+        Transform meshTransform = mazeLaserPrefab.transform.Find("Mesh, Additive");
+        meshTransform.localScale *= 2f;
+        meshTransform.localPosition = new Vector3(0f, 0f, 33.5f);
+        // 0 0 33.5
+        Transform ppTransform = mazeLaserPrefab.transform.Find("Point Light, End").GetChild(0);
+        ppTransform.gameObject.SetActive(true);
+        ppTransform.GetComponent<PostProcessVolume>().sharedProfile = ppProfile; //ppLocalNullifier_asset or ppLocalDoppelganger_asset
+        foreach (ParticleSystem item in mazeLaserPrefab.transform.GetComponentsInChildren<ParticleSystem>())
+        {
+          if (item.gameObject.name != "MuzzleRayParticles")
+          {
+            ParticleSystem.MainModule main = item.main;
+            main.startSizeMultiplier *= 2f;
+          }
+        }
+      };
+      AssetReferenceT<GameObject> mazeMuzzleRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamChargeUp_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(mazeMuzzleRef).Completed += (x) =>
+      {
+        GameObject gravityPrefab = x.Result;
+        GameObject newMuzzlePrefab = PrefabAPI.InstantiateClone(gravityPrefab, "MazeMuzzleEffectNux", false);
+        foreach (ParticleSystem item in newMuzzlePrefab.transform.GetComponentsInChildren<ParticleSystem>())
+        {
+          ParticleSystem.MainModule main = item.main;
+          main.duration *= 2f;
+          main.startLifetimeMultiplier *= 2f;
+          main.startSizeMultiplier *= 1.5f;
+        }
+        mazeMuzzleEffect = newMuzzlePrefab;
+      };
+      AssetReferenceT<GameObject> mazePortalRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidMegaCrab.VoidMegaCrabSpawnEffect_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(mazePortalRef).Completed += (x) =>
+      {
+        GameObject portalPrefab = x.Result;
+        GameObject newPortalPrefab = PrefabAPI.InstantiateClone(portalPrefab, "MazePortalEffectNux", false);
+        newPortalPrefab.GetComponent<DestroyOnTimer>().duration = 5f;
+        foreach (ParticleSystem ps in newPortalPrefab.GetComponentsInChildren<ParticleSystem>())
+        {
+          var mainModule = ps.main;
+          mainModule.startSizeMultiplier *= 1.5f;
+          mainModule.startLifetimeMultiplier *= 4f;
+        }
+        Transform ring = newPortalPrefab.transform.Find("Ring");
+        ParticleSystemRenderer psr = ring.GetChild(0).GetComponent<ParticleSystemRenderer>();
+        psr.sharedMaterial = voidRainPortalMat;
+
+        mazePortalEffect = newPortalPrefab;
+        ContentAddition.AddEffect(mazePortalEffect);
+      };
 
       AssetReferenceT<GameObject> barnacleFlashRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleMuzzleflash_prefab);
       AssetAsyncReferenceManager<GameObject>.LoadAsset(barnacleFlashRef).Completed += (x) => barnacleMuzzleFlash = x.Result;
@@ -768,7 +861,7 @@ namespace FathomlessVoidling
         {
           ParticleSystem.MainModule main = item.main;
           main.duration *= 1.75f;
-          main.startLifetimeMultiplier *= 1.75f;
+          // main.startLifetimeMultiplier *= 1.75f;
         }
         ContentAddition.AddEffect(spawnEffect);
       };
@@ -805,12 +898,12 @@ x -0.44 0.44
           if (i < 2)
           {
             float zVector = i == 0 ? 0.44f : -0.66f;
-            newAttachment.transform.localPosition = new Vector3(0f, 0f, zVector);
+            newAttachment.transform.localPosition = new Vector3(0f, -0.1f, zVector);
           }
           else
           {
             float xVector = i == 2 ? 0.44f : -0.66f;
-            newAttachment.transform.localPosition = new Vector3(xVector, 0f, 0f);
+            newAttachment.transform.localPosition = new Vector3(xVector, -0.1f, 0f);
           }
           childLocator.AddChild(attachName, newAttachment.transform);
           spawnSlot.spawnCard = attachableBarnacleCard;

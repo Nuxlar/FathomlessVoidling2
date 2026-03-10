@@ -14,8 +14,8 @@ namespace FathomlessVoidling.EntityStates.Utility
     public class ExitMaze : BaseMazeAttackState
     {
         public string animLayerName = "Body";
-        public string animStateName = "SpinBeamExit";
-        public string animPlaybackRateParamName = "SpinBeam.playbackRate";
+        public string animStateName = "FireGravityBumpRight";
+        public string animPlaybackRateParamName = "GravityBump.playbackRate";
         public float baseDuration = 2f; // 3f orig
         private float duration;
 

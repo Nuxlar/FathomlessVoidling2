@@ -1,5 +1,6 @@
 using EntityStates;
 using EntityStates.GrandParentBoss;
+using EntityStates.VoidRaidCrab;
 using EntityStates.VoidRaidCrab.Weapon;
 using FathomlessVoidling.Components;
 using FathomlessVoidling.Controllers;
@@ -21,25 +22,31 @@ namespace FathomlessVoidling.EntityStates.Utility
         // beamradius 8
         // beammaxdistance 400
         // beamdpscoeff 40
-        public static GameObject beamVfxPrefab;
+        public static GameObject beamVfxPrefab = Main.mazeLaserPrefab;
         public static float beamRadius = 16f;
         public static float beamMaxDistance = 400f;
         public static float beamDpsCoefficient = 40f;
         public static float beamTickFrequency = 30f;
-        public static GameObject beamImpactEffectPrefab;
-        public static LoopSoundDef loopSound;
-        public static string enterSoundString = "Play_voidRaid_superLaser_start";
-
-        public string animLayerName = "Body";
-        public string animStateName = "SpinBeamLoop";
-        public string animPlaybackRateParamName = "SpinBeam.playbackRate";
-        public float baseDuration = 9f; // 8f orig
+        public static GameObject beamImpactEffectPrefab = Main.mazeImpactEffect;
+        public static GameObject portalEffectPrefab = Main.mazePortalEffect;
+        public static GameObject chargeEffectPrefab = Main.mazeChargeUpPrefab;
+        public static GameObject muzzleEffectPrefab = Main.mazeMuzzleEffect;
+        public static LoopSoundDef loopSound = SpinBeamAttack.loopSound;
+        // Play_voidRaid_superLaser_chargeUp
+        public static string chargeSoundString = "Play_voidRaid_superLaser_chargeUp";
+        public static string fireSoundString = "Play_voidRaid_superLaser_start";
+        public float laserDelayDuration = 2f;
+        public float laserFireDuration = 3f;
+        public float baseDuration = 10f; // 8f orig
         private float duration;
-        private float beamStopwatch = 0f;
-        private float beamTickTimer;
+        private float fireStopwatch = 0f;
+        private float delayStopwatch = 0f;
+        private float beamTickTimer = 0f;
         private bool beamsFiring = false;
-        private LoopSoundManager.SoundLoopPtr loopPtr;
-
+        private int previousAnchorIndex = -1;
+        private List<LoopSoundManager.SoundLoopPtr> loopPtrs = new List<LoopSoundManager.SoundLoopPtr>();
+        private List<GameObject> chargeEffectInstances = new List<GameObject>();
+        private GameObject eyeEffectInstance;
         private List<List<int>> positionMatrix = new List<List<int>>()
         {
             // Top Left, Top Right
@@ -52,51 +59,80 @@ namespace FathomlessVoidling.EntityStates.Utility
             new List<int>() { 1, 1 },
         };
 
+        // TODO prevent same selection on single
         public override void OnEnter()
         {
             base.OnEnter();
-            this.duration = this.baseDuration;
-            if (!string.IsNullOrEmpty(this.animLayerName) && !string.IsNullOrEmpty(this.animStateName))
+            this.duration = this.waves * (this.laserDelayDuration + this.laserFireDuration);
+            ChildLocator modelChildLocator = this.GetModelChildLocator();
+            if (modelChildLocator && MazeAttack.muzzleEffectPrefab)
             {
-                if (!string.IsNullOrEmpty(this.animPlaybackRateParamName))
-                    this.PlayAnimation(this.animLayerName, this.animStateName, this.animPlaybackRateParamName, this.duration);
-                else
-                    this.PlayAnimation(this.animLayerName, this.animStateName);
-            }
-            if (!MazeSpawnPointController.instance)
-                return;
-            List<int> spawnPositions = SelectBeamPositions(BaseMazeAttackState.dualBeams, BaseMazeAttackState.alternatingBeams);
-            foreach (int position in spawnPositions)
-            {
-                Debug.LogWarning("SPAWN POSITION: " + position);
-                Transform child = MazeSpawnPointController.instance.transform.Find("MazeAnchor" + position);
-                if (child)
+                Transform transform = this.muzzleTransform ?? this.characterBody.coreTransform;
+                if (transform)
                 {
-                    Ray randomRay = new Ray();
-                    randomRay.origin = child.position;
-                    randomRay.direction = child.forward;
-                    EffectManager.SpawnEffect(Main.voidRainPortalEffect, new EffectData()
-                    {
-                        origin = child.position,
-                        rotation = Util.QuaternionSafeLookRotation(child.forward)
-                    }, false);
-                    GameObject warningLaserVfxInstance = Object.Instantiate<GameObject>(Main.voidRainWarning);
-                    RayAttackIndicator warningLaserVfxInstanceRayAttackIndicator = warningLaserVfxInstance.GetComponent<RayAttackIndicator>();
-                    warningLaserVfxInstanceRayAttackIndicator.attackRange = 1000f;
-                    warningLaserVfxInstanceRayAttackIndicator.attackRay = randomRay;
+                    this.eyeEffectInstance = Object.Instantiate<GameObject>(MazeAttack.muzzleEffectPrefab, transform.position, transform.rotation);
+                    this.eyeEffectInstance.transform.parent = transform;
+                    ScaleParticleSystemDuration component = this.eyeEffectInstance.GetComponent<ScaleParticleSystemDuration>();
+                    if (component)
+                        component.newDuration = this.duration;
                 }
             }
-            // this.CreateBeamVFXInstance(MazeAttack.beamVfxPrefab);
-            //this.loopPtr = LoopSoundManager.PlaySoundLoopLocal(this.gameObject, MazeAttack.loopSound);
-            Util.PlaySound(MazeAttack.enterSoundString, this.gameObject);
+
+            if (!MazeSpawnPointController.instance)
+                return;
+            BeginMaze();
         }
 
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            if ((double)this.fixedAge < this.duration || !this.isAuthority)
+
+            if (!this.beamsFiring)
+                this.delayStopwatch += Time.fixedDeltaTime;
+            else
+                this.fireStopwatch += Time.fixedDeltaTime;
+
+
+            if (this.beamsFiring && this.isAuthority)
+            {
+                if (this.beamTickTimer <= 0.0)
+                {
+                    this.beamTickTimer += 1f / MazeAttack.beamTickFrequency;
+                    this.FireBeamBulletAuthority();
+                }
+                this.beamTickTimer -= this.GetDeltaTime();
+            }
+
+            if (this.delayStopwatch >= this.laserDelayDuration)
+            {
+                this.delayStopwatch = 0f;
+                foreach (GameObject instance in this.chargeEffectInstances)
+                {
+                    Debug.LogWarning(instance.transform.parent);
+                    Util.PlaySound(MazeAttack.fireSoundString, instance.transform.parent.gameObject);
+                    GameObject beamVfxInstance = this.CreateBeamVFXInstance(MazeAttack.beamVfxPrefab, instance.transform.parent);
+                    this.loopPtrs.Add(LoopSoundManager.PlaySoundLoopLocal(beamVfxInstance, MazeAttack.loopSound));
+                    this.beamVfxInstances.Add(beamVfxInstance);
+                }
+                this.beamsFiring = true;
+            }
+
+            if (this.fireStopwatch >= this.laserFireDuration)
+            {
+                this.beamsFiring = false;
+                this.fireStopwatch = 0f;
+                this.beamTickTimer = 0f;
+                ResetMaze();
+            }
+
+            if (this.fixedAge < this.duration || !this.isAuthority)
                 return;
             this.outer.SetNextState(new ExitMaze());
+        }
+
+        public override void OnExit()
+        {
+            base.OnExit();
         }
 
         // Row 0 & 1 = Horizontal (LR) lasers
@@ -133,6 +169,108 @@ namespace FathomlessVoidling.EntityStates.Utility
             }
 
             return selected;
+        }
+
+        private void ResetMaze()
+        {
+            foreach (GameObject instance in this.chargeEffectInstances)
+            {
+                EntityState.Destroy(instance);
+            }
+            this.chargeEffectInstances.Clear();
+
+            foreach (GameObject beamInstance in this.beamVfxInstances)
+            {
+                VfxKillBehavior.KillVfxObject(beamInstance);
+            }
+            this.beamVfxInstances.Clear();
+            foreach (LoopSoundManager.SoundLoopPtr loopPtr in this.loopPtrs)
+            {
+                LoopSoundManager.StopSoundLoopLocal(loopPtr);
+            }
+
+            BeginMaze();
+        }
+
+        private void BeginMaze()
+        {
+            List<int> spawnPositions = SelectBeamPositions(this.dualBeams, this.alternatingBeams);
+            if (!this.dualBeams)
+            {
+                if (this.previousAnchorIndex != -1)
+                {
+                    int newIdx = spawnPositions[0];
+                    if (newIdx == this.previousAnchorIndex)
+                    {
+                        while (newIdx == this.previousAnchorIndex)
+                        {
+                            spawnPositions = SelectBeamPositions(this.dualBeams, this.alternatingBeams);
+                            newIdx = spawnPositions[0];
+                        }
+                    }
+                }
+                else
+                    this.previousAnchorIndex = spawnPositions[0];
+            }
+            foreach (int position in spawnPositions)
+            {
+                Debug.LogWarning("SPAWN POSITION: " + position);
+                Transform child = MazeSpawnPointController.instance.transform.Find("MazeAnchor" + position);
+                if (child)
+                {
+                    EffectManager.SpawnEffect(MazeAttack.portalEffectPrefab, new EffectData()
+                    {
+                        origin = child.position,
+                        rotation = Util.QuaternionSafeLookRotation(child.forward)
+                    }, false);
+
+                    GameObject chargeUpEffect = this.CreateBeamVFXInstance(MazeAttack.chargeEffectPrefab, child);
+                    Util.PlaySound(MazeAttack.chargeSoundString, chargeUpEffect);
+                    this.chargeEffectInstances.Add(chargeUpEffect);
+                }
+            }
+        }
+
+        private void FireBeamBulletAuthority()
+        {
+            if (this.beamVfxInstances.Count == 0)
+                return;
+
+            foreach (GameObject beamInstance in this.beamVfxInstances)
+            {
+                Ray beamRay = new Ray();
+                beamRay.origin = beamInstance.transform.position;
+                beamRay.direction = beamInstance.transform.forward;
+
+                new BulletAttack()
+                {
+                    muzzleName = BaseMazeAttackState.muzzleTransformNameInChildLocator,
+                    origin = beamRay.origin,
+                    aimVector = beamRay.direction,
+                    minSpread = 0.0f,
+                    maxSpread = 0.0f,
+                    maxDistance = 400f,
+                    hitMask = LayerIndex.CommonMasks.bullet,
+                    stopperMask = (LayerMask)0,
+                    bulletCount = 1U,
+                    radius = MazeAttack.beamRadius,
+                    smartCollision = false,
+                    queryTriggerInteraction = QueryTriggerInteraction.Ignore,
+                    procCoefficient = 1f,
+                    procChainMask = new ProcChainMask(),
+                    owner = this.gameObject,
+                    weapon = this.gameObject,
+                    damage = MazeAttack.beamDpsCoefficient * this.damageStat / MazeAttack.beamTickFrequency,
+                    damageColorIndex = DamageColorIndex.Default,
+                    damageType = ((DamageTypeCombo)DamageType.Generic),
+                    falloffModel = BulletAttack.FalloffModel.None,
+                    force = 0.0f,
+                    hitEffectPrefab = MazeAttack.beamImpactEffectPrefab,
+                    tracerEffectPrefab = null,
+                    isCrit = false,
+                    HitEffectNormal = false
+                }.Fire();
+            }
         }
     }
 }

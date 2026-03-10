@@ -48,6 +48,9 @@
     <Reference Include="Unity.Timeline">
       <HintPath>libs\Unity.Timeline.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Postprocessing.Runtime">
+      <HintPath>libs\Unity.Postprocessing.Runtime.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
  <Target Name="BuildTSPackage" AfterTargets="Build">

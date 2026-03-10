@@ -21,6 +21,10 @@ namespace FathomlessVoidling.Controllers
             new Vector3(204.3f, 21.7f, -130.1f), new Vector3(73f, 24.3f, 217.3f)
           };
 
+        // which ones work
+        // 0, 3, 5
+        // Not working
+        // 2, 4, 7
         private void Start()
         {
             if (!NetworkServer.active)
@@ -31,18 +35,28 @@ namespace FathomlessVoidling.Controllers
                 switch (i)
                 {
                     case 0:
-                        angle = 60f;
-                        break;
-                    case 2:
                         angle = 70f;
                         break;
+                    case 2:
+                        angle = 60f;
+                        break;
                     case 1:
+                        angle = 240f;
+                        break;
                     case 3:
-                        angle = 30f; // maybe 240? idk shits weird
+                        angle = 260f; // maybe 240? idk shits weird
+                        break;
+                    case 4:
+                        angle = 70f;
                         break;
                     case 5:
+                        angle = 90f;
+                        break;
+                    case 6:
+                        angle = -30f;
+                        break;
                     case 7:
-                        angle = 180f;
+                        angle = 120f;
                         break;
                 }
                 string anchorName = "MazeAnchor" + i;
