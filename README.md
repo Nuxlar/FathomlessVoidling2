@@ -12,16 +12,6 @@ Voidling Skills
         - PortalBeam is pretty simple, increase the quantity and frequency values per phase
         - EyeBlast could either add more missiles or more "waves"
 
-Skill ideas to mess around with
-    - Void Laser: Multiple possibilties here
-        - Predictively point in a certain direction
-        - The normal spinny one to sweep the donut arena (force players to get up on the parkour bits)
-        - Spawns a portal and blasts a part of the arena (kinda like this one, block off a bit of the arena)
-        - Laser sweeps a part of the arena, sees where player is for general direction, then sweeps that area with the laser
-    - Abyssal Vision: Spawns a disembodied "eye" that fires a shotgun blast
-    - Singularity: Can just be an enlarged version of the vanilla one, since there's more stuff going on, could be fun.
-    - Asteroid Barrage: Spawns "orbiting" asteroids that are launched (one by one or simultaneously) or fall from the sky
-
 Voidling Haunt is going to be an invisible body that adds some chaos to the fight so Voidling doesn't have the same issues as Solus Wing
 Thinking of adding some kind of mechanics as well, like another way to mix things up so Haunt/Voidling aren't just cycling the same things
 I think for Haunt specifically, maybe a counter for how many hits it lands, land X hits and goes into an "enrage"
@@ -43,7 +33,7 @@ Voidling spawns in at the center, shield up for the main body
 Voidling attacks:
     - Primary: Mortar Blast I (fires a volley of "mortars" that rain down)
     - Secondary: Portal Beams I (fires beams from portals)
-    - Utility: Maze I (fires 1 large lasers into the arena)
+    - Utility: Maze I (fires 1 large laser into the arena)
     - Special: UNDEFINED
 
 Voidling Haunt attacks:

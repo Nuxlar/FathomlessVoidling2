@@ -116,7 +116,7 @@ namespace FathomlessVoidling.EntityStates
         public override void OnExit()
         {
             base.OnExit();
-            this.characterBody.skillLocator.secondary.RemoveAllStocks();
+            //  this.characterBody.skillLocator.secondary.RemoveAllStocks();
             this.characterBody.skillLocator.utility.RemoveAllStocks();
         }
 

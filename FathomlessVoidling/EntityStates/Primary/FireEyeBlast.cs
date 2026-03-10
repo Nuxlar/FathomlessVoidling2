@@ -122,7 +122,7 @@ namespace FathomlessVoidling.EntityStates.Primary
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.PrioritySkill;
+            return InterruptPriority.Skill; // TODO testing if the interrupt would be fun
         }
     }
 }

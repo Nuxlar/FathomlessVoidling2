@@ -27,6 +27,8 @@ using RoR2.Skills;
 using FathomlessVoidling.EntityStates.Haunt;
 using EntityStates.VoidBarnacle.Weapon;
 using FathomlessVoidling.Controllers;
+using UnityEngine.Networking;
+using FathomlessVoidling.EntityStates.Utility;
 
 namespace FathomlessVoidling
 {
@@ -155,6 +157,10 @@ namespace FathomlessVoidling
       ContentAddition.AddEntityState<FireVoidRain>(out _);
       ContentAddition.AddEntityState<ChargeEyeBlast>(out _);
       ContentAddition.AddEntityState<FireEyeBlast>(out _);
+      ContentAddition.AddEntityState<BaseMazeAttackState>(out _);
+      ContentAddition.AddEntityState<EnterMaze>(out _);
+      ContentAddition.AddEntityState<ExitMaze>(out _);
+      ContentAddition.AddEntityState<MazeAttack>(out _);
 
       ContentAddition.AddEntityState<VoidlingHauntManager>(out _);
       ContentAddition.AddEntityState<ChargeGravityBullet>(out _);
@@ -219,7 +225,7 @@ namespace FathomlessVoidling
           missionObj.transform.GetChild(2).gameObject.SetActive(false);
 
           Transform transform = new GameObject().transform;
-          transform.position = new Vector3(0, -20, 0);
+          transform.position = new Vector3(0, -15, 0);
 
           ScriptedCombatEncounter.SpawnInfo spawnInfo = new ScriptedCombatEncounter.SpawnInfo();
           spawnInfo.explicitSpawnPosition = transform;
@@ -234,6 +240,13 @@ namespace FathomlessVoidling
           // y -6.812038f
           curve.position = new Vector3(-110.27766f, 15f, -300f);
           curve.GetChild(0).position = new Vector3(-50f, 28.9719f, -396.993f); // orig -6.215 28.9719 -396.993
+
+          if (NetworkServer.active)
+          {
+            GameObject mazeController = new GameObject("MazeSpawnPointController");
+            mazeController.transform.localPosition = Vector3.zero;
+            mazeController.AddComponent<MazeSpawnPointController>();
+          }
         }
       }
       orig(self);
@@ -631,7 +644,8 @@ namespace FathomlessVoidling
             ModelLocator modelLocator = body.GetComponent<ModelLocator>();
 
             body.GetComponent<SkillLocator>().primary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeEyeBlast));
-            body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
+            body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(EnterMaze));
+            //   body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
             body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.baseMaxStock = 1;
 
             // Add new spawn state
