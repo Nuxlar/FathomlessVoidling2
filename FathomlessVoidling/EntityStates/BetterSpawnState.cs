@@ -34,7 +34,7 @@ namespace FathomlessVoidling.EntityStates
             base.OnEnter();
             Util.PlaySound(this.spawnSoundString, GameObject.Find("SpawnCamera"));
             if ((bool)this.spawnEffectPrefab)
-                EffectManager.SpawnEffect(this.spawnEffectPrefab, new EffectData() { origin = new Vector3(0, -15, 0), scale = 4, rotation = Quaternion.identity }, false);
+                EffectManager.SpawnEffect(this.spawnEffectPrefab, new EffectData() { origin = new Vector3(0, 0, 0), scale = 4, rotation = Quaternion.identity }, false);
             this.PlayAnimation(this.animationLayerName, this.animationStateName, this.animationPlaybackRateParam, this.duration);
             ChildLocator modelChildLocator = this.GetModelChildLocator();
             this.modelLocator.modelTransform.Find("VoidRaidCrabArmature/ROOT/HeadBase/eyeballRoot").gameObject.SetActive(false);

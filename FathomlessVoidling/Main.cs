@@ -756,8 +756,7 @@ namespace FathomlessVoidling
         foreach (ParticleSystem item in newMuzzlePrefab.transform.GetComponentsInChildren<ParticleSystem>())
         {
           ParticleSystem.MainModule main = item.main;
-          main.duration *= 2f;
-          main.startLifetimeMultiplier *= 2f;
+          main.duration *= 1.25f;
           main.startSizeMultiplier *= 1.5f;
         }
         mazeMuzzleEffect = newMuzzlePrefab;

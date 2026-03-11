@@ -47,15 +47,12 @@ namespace FathomlessVoidling.EntityStates.Utility
                 {
                     case 0:
                         this.alternatingBeams = false;
-                        this.dualBeams = false;
                         break;
                     case 1:
-                        this.dualBeams = false;
                         this.alternatingBeams = false;
                         break;
                     case 2:
                         this.alternatingBeams = true;
-                        this.dualBeams = true;
                         break;
                 }
             }

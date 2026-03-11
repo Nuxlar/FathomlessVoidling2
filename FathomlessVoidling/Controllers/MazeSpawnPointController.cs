@@ -14,17 +14,13 @@ namespace FathomlessVoidling.Controllers
              // Top Left, Top Right
             new Vector3(-258.2f, 19f, 25.5f), new Vector3(83.8f, 19f, 223f), // new Vector3(83.8f, 21.1f, 223f)
             // Bottom Left, Bottom Right
-            new Vector3(-201f, 21.3f, -195f), new Vector3(205f, 19.35f, -101f),
+            new Vector3(-201f, 20f, -195f), new Vector3(205f, 20f, -101f),
             // Bottom Up Left, Top Down Left
-            new Vector3(-141.3f, 26.6f, -261.7f), new Vector3(-232.2f, 26.3f, 93.4f),
+            new Vector3(-141.3f, 21.6f, -261.7f), new Vector3(-232.2f, 21.3f, 93.4f),
             // Bottom Up Right, Top Down Right
-            new Vector3(204.3f, 21.7f, -130.1f), new Vector3(73f, 24.3f, 217.3f)
+            new Vector3(204.3f, 21.3f, -130.1f), new Vector3(73f, 21.3f, 217.3f)
           };
 
-        // which ones work
-        // 0, 3, 5
-        // Not working
-        // 2, 4, 7
         private void Start()
         {
             if (!NetworkServer.active)
@@ -37,26 +33,26 @@ namespace FathomlessVoidling.Controllers
                     case 0:
                         angle = 70f;
                         break;
-                    case 2:
-                        angle = 60f;
-                        break;
                     case 1:
-                        angle = 240f;
+                        angle = 230f;
                         break;
-                    case 3:
-                        angle = 260f; // maybe 240? idk shits weird
-                        break;
-                    case 4:
+                    case 2:
                         angle = 70f;
                         break;
+                    case 3:
+                        angle = 260f;
+                        break;
+                    case 4:
+                        angle = 5f;
+                        break;
                     case 5:
-                        angle = 90f;
+                        angle = 150f;
                         break;
                     case 6:
                         angle = -30f;
                         break;
                     case 7:
-                        angle = 120f;
+                        angle = 165f;
                         break;
                 }
                 string anchorName = "MazeAnchor" + i;
