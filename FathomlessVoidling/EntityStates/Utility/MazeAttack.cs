@@ -1,49 +1,36 @@
 using EntityStates;
-using EntityStates.GrandParentBoss;
 using EntityStates.VoidRaidCrab;
-using EntityStates.VoidRaidCrab.Weapon;
-using FathomlessVoidling.Components;
 using FathomlessVoidling.Controllers;
 using RoR2;
 using RoR2.Audio;
-using RoR2.Projectile;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Networking;
-using UnityEngine.Networking.Types;
 
 namespace FathomlessVoidling.EntityStates.Utility
 {
     public class MazeAttack : BaseMazeAttackState
     {
-        // choose X spots to spawn the beams -> spawn portal(s) + warning vfx -> attack
-        // beamtick 30
-        // beamradius 8
-        // beammaxdistance 400
-        // beamdpscoeff 40
         public static GameObject beamVfxPrefab = Main.mazeLaserPrefab;
-        public static float beamRadius = 16f;
-        public static float beamMaxDistance = 400f;
-        public static float beamDpsCoefficient = 40f;
-        public static float beamTickFrequency = 30f;
+        public static float beamRadius = 24f; // 8f orig
+        public static float beamMaxDistance = 400f; // 400 orig
+        public static float beamDpsCoefficient = 40f; // 40 orig
+        public static float beamTickFrequency = 30f; // 30 orig
         public static GameObject beamImpactEffectPrefab = Main.mazeImpactEffect;
         public static GameObject portalEffectPrefab = Main.mazePortalEffect;
         public static GameObject chargeEffectPrefab = Main.mazeChargeUpPrefab;
         public static GameObject muzzleEffectPrefab = Main.mazeMuzzleEffect;
         public static LoopSoundDef loopSound = SpinBeamAttack.loopSound;
-        // Play_voidRaid_superLaser_chargeUp
         public static string chargeSoundString = "Play_voidRaid_superLaser_chargeUp";
         public static string fireSoundString = "Play_voidRaid_superLaser_start";
         public static string endSoundString = "Play_voidRaid_superLaser_end";
-        public float laserDelayDuration = 2f;
-        public float laserFireDuration = 3f;
-        public float baseDuration = 10f; // 8f orig
+
         private float duration;
         private float fireStopwatch = 0f;
         private float delayStopwatch = 0f;
         private float beamTickTimer = 0f;
         private bool beamsFiring = false;
+        private int lastFiredAxis = -1;
         private int wavesFired = 0;
         private List<LoopSoundManager.SoundLoopPtr> loopPtrs = new List<LoopSoundManager.SoundLoopPtr>();
         private List<GameObject> chargeEffectInstances = new List<GameObject>();
@@ -60,11 +47,11 @@ namespace FathomlessVoidling.EntityStates.Utility
             new List<int>() { 1, 1 },
         };
 
-        // TODO prevent same selection on single
         public override void OnEnter()
         {
             base.OnEnter();
-            this.duration = (this.waves * (this.laserDelayDuration + this.laserFireDuration)) + 1;
+
+            this.duration = (this.waves * (this.beamDelay + this.beamDuration)) + 0.5f;
             ChildLocator modelChildLocator = this.GetModelChildLocator();
             if (modelChildLocator && MazeAttack.muzzleEffectPrefab)
             {
@@ -75,7 +62,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                     this.eyeEffectInstance.transform.parent = transform;
                     ScaleParticleSystemDuration component = this.eyeEffectInstance.GetComponent<ScaleParticleSystemDuration>();
                     if (component)
-                        component.newDuration = this.duration;
+                        component.newDuration = this.duration / 2f;
                 }
             }
 
@@ -104,10 +91,9 @@ namespace FathomlessVoidling.EntityStates.Utility
                 this.beamTickTimer -= this.GetDeltaTime();
             }
 
-            if (this.delayStopwatch >= this.laserDelayDuration)
+            if (this.delayStopwatch >= this.beamDelay)
             {
                 this.delayStopwatch = 0f;
-                this.wavesFired++;
                 foreach (GameObject instance in this.chargeEffectInstances)
                 {
                     Debug.LogWarning(instance.transform.parent);
@@ -119,7 +105,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                 this.beamsFiring = true;
             }
 
-            if (this.fireStopwatch >= this.laserFireDuration)
+            if (this.fireStopwatch >= this.beamDuration)
             {
                 this.beamsFiring = false;
                 this.fireStopwatch = 0f;
@@ -141,11 +127,43 @@ namespace FathomlessVoidling.EntityStates.Utility
         // Row 0 & 1 = Horizontal (LR) lasers
         // Row 2 & 3 = Vertical (UD) lasers
         // Overlap rule: max 1 selection per row
-        private List<int> SelectBeamPositions()
+        private List<int> SelectBeamPositions(bool randomizeBeams)
         {
             List<int> horizontalRows = new List<int> { 0, 1 };
             List<int> verticalRows = new List<int> { 2, 3 };
-            List<int> availableRows = new List<int> { 0, 1, 2, 3 };
+            List<int> availableRows;
+
+            if (!randomizeBeams)
+            {
+                if (this.lastFiredAxis == -1)
+                {
+                    if (Random.value > 0.5f)
+                    {
+                        availableRows = horizontalRows;
+                        this.lastFiredAxis = 0;
+                    }
+                    else
+                    {
+                        availableRows = verticalRows;
+                        this.lastFiredAxis = 1;
+                    }
+                }
+                else
+                {
+                    if (this.lastFiredAxis == 0)
+                    {
+                        availableRows = verticalRows;
+                        this.lastFiredAxis = 1;
+                    }
+                    else
+                    {
+                        availableRows = horizontalRows;
+                        this.lastFiredAxis = 0;
+                    }
+                }
+            }
+            else
+                availableRows = new List<int> { 0, 1, 2, 3 };
 
             availableRows = availableRows.OrderBy(_ => Random.value).ToList();
 
@@ -188,7 +206,8 @@ namespace FathomlessVoidling.EntityStates.Utility
 
         private void BeginMaze()
         {
-            List<int> spawnPositions = SelectBeamPositions();
+            this.wavesFired++;
+            List<int> spawnPositions = SelectBeamPositions(this.randomBeams);
 
             foreach (int position in spawnPositions)
             {

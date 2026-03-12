@@ -72,7 +72,7 @@ public class VoidlingHauntManager : BaseState
         FireProjectileInfo fireProjectileInfo = default(FireProjectileInfo);
         fireProjectileInfo.projectilePrefab = VoidlingHauntManager.projectilePrefab;
         fireProjectileInfo.owner = this.gameObject;
-        fireProjectileInfo.damage = this.damageStat * VoidlingHauntManager.damageCoefficient;
+        fireProjectileInfo.damage = 1f;// this.damageStat * VoidlingHauntManager.damageCoefficient;
         fireProjectileInfo.position = position;
         DamageTypeCombo damageType = DamageType.Generic | DamageType.BypassBlock;
         damageType.AddModdedDamageType(Main.gravityDamageType);

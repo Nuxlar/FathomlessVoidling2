@@ -63,7 +63,7 @@ namespace FathomlessVoidling.EntityStates.Barnacle
             FireProjectileInfo fireProjectileInfo = default(FireProjectileInfo);
             fireProjectileInfo.projectilePrefab = this.projectilePrefab;
             fireProjectileInfo.owner = this.gameObject;
-            fireProjectileInfo.damage = this.damageStat * this.damageCoefficient;
+            fireProjectileInfo.damage = 1f;//this.damageStat * this.damageCoefficient;
             fireProjectileInfo.position = ray.origin;
             fireProjectileInfo.rotation = Util.QuaternionSafeLookRotation(ray.direction);
             fireProjectileInfo.force = this.force;

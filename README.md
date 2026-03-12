@@ -1,40 +1,54 @@
 # Fathomless Voidling
 
-Also need to think for haunt, how to mix up the attacks, maybe changing intensity or intervals as the fight goes on, for now though, I think it's fine, need to work on the actual attacks
+TODOs:
+    - Reimplement Wandering Singularity (add velocity over lifetime curve)
+    - Add logic to EyeBlast and PortalBeam tracking to choose players/turrets if available
+    - Tweaks to Master and Voidling mission controllers to account for the defined flow
+    - Tweak VoidlingHaunt to increase intensity after P1
+    - Tweak VoidlingHaunt to force gravity bombs during Maze in P3
+    - See how difficult it would be for the Ward Wipe teleport
+    - Think of what to do for Phase 4
+    - Set up Ward Wipe (phase transition attack)
+    - Handle Voidling death properly
+
+What would 1.0 entail?
+    - The complete move/attack set for voidling and voidling haunt
+    - Properly ending the fight instead of manually ending the run
+    - (MAYBE) Phase transition to alternate donuts
+    - MP compat
 
 Voidling Skills
-    - Primary: Eye Blast (larger missiles, much weaker tracking, fired upwards in a volley then rain down after pausing for a second)
-    - Secondary: Portal Beams (really liked this from the initial draft)
-    - Utility: Void Laser
-    - Special: One of the singularities ig
-    - Per phase changes
-        - So not sure if I wanna make new abilities for the phases or just add more hazards/joint skills instead while buffing each ability based on the phase
-        - PortalBeam is pretty simple, increase the quantity and frequency values per phase
-        - EyeBlast could either add more missiles or more "waves"
-
-Voidling Haunt is going to be an invisible body that adds some chaos to the fight so Voidling doesn't have the same issues as Solus Wing
-Thinking of adding some kind of mechanics as well, like another way to mix things up so Haunt/Voidling aren't just cycling the same things
-I think for Haunt specifically, maybe a counter for how many hits it lands, land X hits and goes into an "enrage"
+    - Primary: Eye Blast (fires a volley of "mortars" that rain down, they have slight tracking)
+    - Secondary: Portal Beams (spawns portals that fire out predictive laser beams)
+    - Utility: Maze (laser pizza)
+    - Special: Wandering Singularity (spawns a black hole that slowly follows players)
 
 Voidling Haunt Attacks:
-- Gravity Bombs: spawns bombs across the arena, if hit, you'll get launched into a random direction
-- Gravity Barnacles: has a combat director for spawning special barnacles, they shoot gravity bullets that have the same effect as the bombs
+    - Gravity Bombs: spawns bombs across the arena, if hit, you'll get launched into a random direction
+    - Gravity Barnacles: has a combat director for spawning special barnacles, they shoot gravity bullets that have the same effect as the bombs
 
 Joints:
-Do I wanna add stomping to the legs?
-HP thresholds: 75% 50% 25% go immune and spawn barnacles on the leg, immunity dissipated once barnacles are killed?
+    - 75% HP threshold event: go immune and spawn barnacles on the leg, immunity dissipated once barnacles are killed
 
 ## Phase Flow
+
+P1, 80% HP activates singularity, voidling haunt intermittently spawns gravity bombs and gravity barnacles are active (get familiar with the attacks, voidling haunt, and the singularity)
+P2, 80% HP activates maze, singularity is active automatically
+P3, maze is active automatically, maze overrides voidling haunt to trigger gravity bombs during the ability
 
 ### Phase 1
 
 Voidling spawns in at the center, shield up for the main body
 
 Voidling attacks:
-    - Primary: Mortar Blast I (fires a volley of "mortars" that rain down)
-    - Secondary: Portal Beams I (fires beams from portals)
-    - Utility: Maze I (fires 1 large laser into the arena)
-    - Special: UNDEFINED (maybe wandering singularity?)
+    - Primary: Mortar Blast I
+    - Secondary: Portal Beams I
+    - Utility: NONE
+    - Special: Wandering Singularity (active after 80% HP)
+
+Voidling Haunt:
+    - Intermittent Gravity Bombs
+    - Gravity Barnacle director active after 80% HP
 
 ### Phase 2
 
@@ -43,8 +57,12 @@ Joint break, 1 leg retracted, other joints heal
 Voidling attacks:
     - Primary: Mortar Blast II (increase missile count 6 -> 8)
     - Secondary: Portal Beams II (increase beam spawn frequency)
-    - Utility: Maze II (2 lasers)
-    - Special: Singularity (creates a giant black hole at the center of the arena)
+    - Utility: Maze I (active after 80% HP)
+    - Special: Wandering Singularity 
+
+Voidling Haunt:
+    - Intermittent Gravity Bombs (increased bomb quantity)
+    - Gravity Barnacle director still active
 
 ### Phase 3
 
@@ -53,8 +71,12 @@ Joint break, 2 legs retracted, other joints heal
 Voidling attacks:
     - Primary: Mortar Blast III (increase attack speed)
     - Secondary: Portal Beams III (increase beam spawn frequency)
-    - Utility: Maze III (more waves)
-    - Special: UNDEFINED
+    - Utility: Maze II (full line randomness)
+    - Special: Wandering Singularity
+
+Voidling Haunt:
+    - Intermittent Gravity Bombs (forced active during Maze)
+    - Gravity Barnacle director still active
 
 ### Phase 4
 
@@ -72,19 +94,3 @@ OR
 
 Do something to prevent yourself from being taken with Voidling when it dies
 
-What would 1.0 entail?
-- The complete move/attack set for voidling and voidling haunt
-- Properly ending the fight instead of manually ending the run
-- (MAYBE) Phase transition to alternate donuts
-- MP compat
-
-Notes:
-- Need to reduce the insta-death attacks or at least make them not target drones for some, like ward wipe
-- Bring back Wandering Singularity instead of the big center one
-- Or make the spawn point of the center one lower
-
-TODOs:
-- Complete Maze attack, ensure the phase differences work
-- Force Gravity bombs and barnacle spawn during Singularity
-- Tweak Gravity Bump VFX for Maze
-- Change targeting on VoidRain, EyeBlast, and 

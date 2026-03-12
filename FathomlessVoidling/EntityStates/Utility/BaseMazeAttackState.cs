@@ -1,15 +1,9 @@
 using EntityStates;
-using EntityStates.GrandParentBoss;
-using EntityStates.VoidRaidCrab.Weapon;
-using FathomlessVoidling.Components;
 using RoR2;
-using RoR2.Projectile;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.Networking.Types;
 
 namespace FathomlessVoidling.EntityStates.Utility
 {
@@ -18,9 +12,9 @@ namespace FathomlessVoidling.EntityStates.Utility
         public static string headTransformNameInChildLocator = "Head";
         public static string muzzleTransformNameInChildLocator = "EyeMuzzle";
         public int waves = 3;
-        public float beamDuration = 2f;
-        public bool dualBeams = false;
-        public bool alternatingBeams = false;
+        public float beamDuration = 3f;
+        public float beamDelay = 2f;
+        public bool randomBeams = false;
 
         public Transform headTransform;
         public Transform muzzleTransform;
@@ -46,13 +40,13 @@ namespace FathomlessVoidling.EntityStates.Utility
                 switch (this.phaseIndex)
                 {
                     case 0:
-                        this.alternatingBeams = false;
+                        this.randomBeams = false;
                         break;
                     case 1:
-                        this.alternatingBeams = false;
+                        this.randomBeams = false;
                         break;
                     case 2:
-                        this.alternatingBeams = true;
+                        this.randomBeams = true;
                         break;
                 }
             }

@@ -733,8 +733,8 @@ namespace FathomlessVoidling
         mazeLaserPrefab = PrefabAPI.InstantiateClone(prefab, "MazeLaserVFXNux");
         mazeLaserPrefab.AddComponent<NetworkIdentity>();
         Transform meshTransform = mazeLaserPrefab.transform.Find("Mesh, Additive");
-        meshTransform.localScale *= 2f;
-        meshTransform.localPosition = new Vector3(0f, 0f, 33.5f);
+        meshTransform.localScale *= 3f;
+        meshTransform.localPosition = new Vector3(0f, 0f, 50.16f); // 16.72 -> 33.44
         // 0 0 33.5
         Transform ppTransform = mazeLaserPrefab.transform.Find("Point Light, End").GetChild(0);
         ppTransform.gameObject.SetActive(true);
@@ -744,7 +744,7 @@ namespace FathomlessVoidling
           if (item.gameObject.name != "MuzzleRayParticles")
           {
             ParticleSystem.MainModule main = item.main;
-            main.startSizeMultiplier *= 2f;
+            main.startSizeMultiplier *= 3f;
           }
         }
       };
@@ -757,7 +757,7 @@ namespace FathomlessVoidling
         {
           ParticleSystem.MainModule main = item.main;
           main.duration *= 1.25f;
-          main.startSizeMultiplier *= 1.5f;
+          main.startSizeMultiplier *= 1.25f;
         }
         mazeMuzzleEffect = newMuzzlePrefab;
       };
@@ -770,7 +770,7 @@ namespace FathomlessVoidling
         foreach (ParticleSystem ps in newPortalPrefab.GetComponentsInChildren<ParticleSystem>())
         {
           var mainModule = ps.main;
-          mainModule.startSizeMultiplier *= 1.5f;
+          mainModule.startSizeMultiplier *= 2f;
           mainModule.startLifetimeMultiplier *= 4f;
         }
         Transform ring = newPortalPrefab.transform.Find("Ring");
