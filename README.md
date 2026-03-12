@@ -17,6 +17,8 @@ What would 1.0 entail?
     - (MAYBE) Phase transition to alternate donuts
     - MP compat
 
+## Attack Details and Phase Flow
+
 Voidling Skills
     - Primary: Eye Blast (fires a volley of "mortars" that rain down, they have slight tracking)
     - Secondary: Portal Beams (spawns portals that fire out predictive laser beams)
@@ -29,12 +31,6 @@ Voidling Haunt Attacks:
 
 Joints:
     - 75% HP threshold event: go immune and spawn barnacles on the leg, immunity dissipated once barnacles are killed
-
-## Phase Flow
-
-P1, 80% HP activates singularity, voidling haunt intermittently spawns gravity bombs and gravity barnacles are active (get familiar with the attacks, voidling haunt, and the singularity)
-P2, 80% HP activates maze, singularity is active automatically
-P3, maze is active automatically, maze overrides voidling haunt to trigger gravity bombs during the ability
 
 ### Phase 1
 
