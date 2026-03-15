@@ -22,6 +22,10 @@ namespace FathomlessVoidling.Hooks
             On.RoR2.CharacterMaster.OnBodyStart += FixPipReviveBug;
 
             On.EntityStates.VoidBarnacle.Weapon.ChargeFire.OnEnter += LazyMf;
+            /*
+                PhaseControllerStateMachine (GameObject)
+                has NetworkIdentity, EntityStateMachine, and NetworkStateMachine
+            */
 
             // On.EntityStates.VoidRaidCrab.VacuumAttack.OnEnter += IncreaseSingularitySize;
         }
@@ -77,6 +81,7 @@ namespace FathomlessVoidling.Hooks
                 GameObject phase1Obj = missionObj.transform.GetChild(0).gameObject;
                 if (missionObj && phase1Obj)
                 {
+                    missionObj.AddComponent<FathomlessMissionController>();
                     missionObj.transform.GetChild(1).gameObject.SetActive(false);
                     missionObj.transform.GetChild(2).gameObject.SetActive(false);
 

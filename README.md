@@ -2,8 +2,6 @@
 
 TODOs:
     - Tweaks to Master and Voidling mission controllers to account for the defined flow
-    - Tweak VoidlingHaunt to increase intensity after P1
-    - Tweak VoidlingHaunt to force gravity bombs during Maze in P3
     - See how difficult it would be for the Ward Wipe teleport
     - Set up Ward Wipe (phase transition attack)
     - Handle Voidling death properly

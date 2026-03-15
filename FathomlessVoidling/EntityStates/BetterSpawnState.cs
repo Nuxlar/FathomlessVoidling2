@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using EntityStates;
 using System;
+using FathomlessVoidling.Controllers;
 
 namespace FathomlessVoidling.EntityStates
 {
@@ -42,6 +43,9 @@ namespace FathomlessVoidling.EntityStates
 
             this.characterBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
 
+            if (!NetworkServer.active)
+                return;
+
             DirectorSpawnRequest spawnRequest = new DirectorSpawnRequest(
                 Main.voidlingHauntCard,
                 new DirectorPlacementRule
@@ -54,12 +58,13 @@ namespace FathomlessVoidling.EntityStates
             spawnRequest.teamIndexOverride = this.GetTeam();
             spawnRequest.ignoreTeamMemberLimit = true;
 
-            Main.voidlingHauntCard.DoSpawn(Vector3.zero, Quaternion.identity, spawnRequest);
+            SpawnCard.SpawnResult spawnResult = Main.voidlingHauntCard.DoSpawn(Vector3.zero, Quaternion.identity, spawnRequest);
+            if (FathomlessMissionController.instance && spawnResult.spawnedInstance)
+                FathomlessMissionController.instance.hauntBody = spawnResult.spawnedInstance.GetComponent<CharacterMaster>().GetBody();
 
-            if (!this.doLegs || !NetworkServer.active)
+            if (!this.doLegs || !this.jointSpawnCard || !modelChildLocator)
                 return;
-            if (!(bool)this.jointSpawnCard || !(bool)modelChildLocator)
-                return;
+
             DirectorPlacementRule placementRule = new DirectorPlacementRule()
             {
                 placementMode = DirectorPlacementRule.PlacementMode.Direct,

@@ -1,11 +1,13 @@
 using EntityStates;
 using EntityStates.VoidRaidCrab;
 using FathomlessVoidling.Controllers;
+using FathomlessVoidling.EntityStates.Haunt;
 using RoR2;
 using RoR2.Audio;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace FathomlessVoidling.EntityStates.Utility
 {
@@ -52,6 +54,15 @@ namespace FathomlessVoidling.EntityStates.Utility
             base.OnEnter();
 
             this.duration = (this.waves * (this.beamDelay + this.beamDuration)) + 0.5f;
+            if (FathomlessMissionController.instance && NetworkServer.active && this.randomBeams)
+            {
+                if (FathomlessMissionController.instance.hauntBody)
+                {
+                    VoidlingHauntManager manager = (VoidlingHauntManager)FathomlessMissionController.instance.hauntBody.GetComponent<EntityStateMachine>().state;
+                    manager.MazeOverride();
+                }
+                else Debug.LogWarning("FathomlessVoidling.MazeAttack: FathomlessMissionController does not have a HauntBody!");
+            }
             ChildLocator modelChildLocator = this.GetModelChildLocator();
             if (modelChildLocator && MazeAttack.muzzleEffectPrefab)
             {

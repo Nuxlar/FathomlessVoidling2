@@ -5,32 +5,33 @@ using EntityStates;
 using System.Collections.Generic;
 using UnityEngine;
 using R2API;
+using FathomlessVoidling.Controllers;
+using UnityEngine.Networking;
 
 namespace FathomlessVoidling.EntityStates.Haunt;
 
 public class VoidlingHauntManager : BaseState
 {
-    // TODO: add "override" functionality, forcing gravity bombs to spawn
-    // TODO: add "director start" functionality, activating the barnacle director
     // TODO: add "director boost" functionality, giving X credits to the barnacle director
     public static GameObject projectilePrefab = Main.gravityBombProjectile;
     public static float damageCoefficient = 1f;
-    public static float duration = 20f;
-    public static float cooldown = 40f;
-    public static float chanceToFirePerSecond = 0.15f;
+    public float duration = 20f;
+    public float cooldown = 40f;
+    public float chanceToFirePerSecond = 0.15f;
     private float chargeTimer;
     private float cooldownTimer;
     private GameObject barnacleDirector;
+    private int phaseNumber = 0;
 
     public override void OnEnter()
     {
         base.OnEnter();
-        // TODO add some logic for the director to prevent immediate spawns
         Transform directorTransform = this.characterBody.transform.Find("Barnacle Director");
         if (directorTransform)
             barnacleDirector = directorTransform.gameObject;
         this.chargeTimer = 0f;
         this.cooldownTimer = cooldown;
+        CheckCurrentPhase();
     }
 
     public override void FixedUpdate()
@@ -43,20 +44,52 @@ public class VoidlingHauntManager : BaseState
         if (this.chargeTimer <= 0f)
         {
             this.cooldownTimer -= this.GetDeltaTime();
-            //  if (!barnacleDirector.activeSelf)
-            // barnacleDirector.SetActive(true);
             if (this.cooldownTimer <= 0f)
             {
-                if (barnacleDirector.activeSelf)
-                    barnacleDirector.SetActive(false);
+                CheckCurrentPhase();
                 this.chargeTimer = duration;
                 this.cooldownTimer = cooldown;
+
+                if (!barnacleDirector.activeSelf)
+                    barnacleDirector.SetActive(true);
             }
         }
         else
         {
-            if ((double)Random.value < VoidlingHauntManager.chanceToFirePerSecond)
+            if ((double)Random.value < this.chanceToFirePerSecond)
                 this.FireProjectile();
+        }
+    }
+
+    public void MazeOverride()
+    {
+        CheckCurrentPhase();
+        this.chargeTimer = duration;
+        this.cooldownTimer = cooldown;
+    }
+
+    private void CheckCurrentPhase()
+    {
+        if (FathomlessMissionController.instance && NetworkServer.active)
+        {
+            int phaseIndex = FathomlessMissionController.instance.GetCurrentPhase();
+            if (phaseIndex != -1)
+            {
+                this.phaseNumber = phaseIndex;
+                switch (this.phaseNumber)
+                {
+                    case 0:
+                        this.cooldown = 40f;
+                        this.chanceToFirePerSecond = 0.15f;
+                        break;
+                    case 1:
+                        this.cooldown = 30f;
+                        break;
+                    case 2:
+                        this.chanceToFirePerSecond = 0.2f;
+                        break;
+                }
+            }
         }
     }
 
