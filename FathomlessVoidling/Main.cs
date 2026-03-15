@@ -15,22 +15,22 @@ using System.Reflection;
 using RoR2.Audio;
 using RoR2.Projectile;
 using EntityStates;
-using FathomlessVoidling.EntityStates;
-using FathomlessVoidling.EntityStates.Primary;
-using FathomlessVoidling.EntityStates.Secondary;
-//using FathomlessVoidling.EntityStates.Special;
-using FathomlessVoidling.EntityStates.Barnacle;
-using FathomlessVoidling.Components;
 using RoR2.CharacterAI;
 using EntityStates.VoidRaidCrab;
 using RoR2.Skills;
-using FathomlessVoidling.EntityStates.Haunt;
 using EntityStates.VoidBarnacle.Weapon;
-using FathomlessVoidling.Controllers;
 using UnityEngine.Networking;
-using FathomlessVoidling.EntityStates.Utility;
 using UnityEngine.Rendering.PostProcessing;
 
+using FathomlessVoidling.Controllers;
+using FathomlessVoidling.EntityStates;
+using FathomlessVoidling.EntityStates.Haunt;
+using FathomlessVoidling.EntityStates.Primary;
+using FathomlessVoidling.EntityStates.Secondary;
+using FathomlessVoidling.EntityStates.Utility;
+using FathomlessVoidling.EntityStates.Special;
+using FathomlessVoidling.EntityStates.Barnacle;
+using FathomlessVoidling.Components;
 namespace FathomlessVoidling
 {
   [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
@@ -60,6 +60,7 @@ namespace FathomlessVoidling
     public static GameObject eyeBlastChargeEffect;
     public static GameObject eyeBlastMuzzleFlash;
 
+    // Voidling Haunt Variables
     public static GameObject barnacleMuzzleFlash;
     public static GameObject gravityBulletChargeEffect;
     public static GameObject gravityBulletProjectile;
@@ -70,31 +71,30 @@ namespace FathomlessVoidling
     private static GameObject airborneGravityEffect;
     public static DirectorCardCategorySelection barnacleDccs = ScriptableObject.CreateInstance<DirectorCardCategorySelection>();
 
+    // Maze Variables
     public static GameObject mazePortalEffect;
     public static GameObject mazeMuzzleEffect;
     public static GameObject mazeLaserPrefab;
     public static GameObject mazeChargeUpPrefab;
     public static GameObject mazeImpactEffect;
-    /*
-    public static AnimationClip newClip;
-    public static AssetBundle assetBundle;
-    public const string bundleName = "fathomlessvoidling.bundle";
-    */
+
+    // Wandering Singularity Variables
+    public static GameObject wSingularityProjectile;
+
+    private static Material voidCylinderMat;
 
     public void Awake()
     {
       Instance = this;
 
       Log.Init(Logger);
-      /*
-        Main.assetBundle = AssetBundle.LoadFromFile(Assembly.GetExecutingAssembly().Location.Replace("FathomlessVoidling.dll", "fathomlessvoidling.bundle"));
-        newClip = Main.assetBundle.LoadAsset<AnimationClip>("Assets/Recorded.anim");
-      */
+
       AddContent();
       LoadAssets();
       CreateVoidlingHaunt();
-      CreateGravityProjectiles();
       CreateNewEyeMissiles();
+      CreateGravityProjectiles();
+      CreateSingularityProjectile();
       TweakBigVoidling();
       TweakBigVoidlingMaster();
       //CreateAttachableBarnacle();
@@ -105,25 +105,26 @@ namespace FathomlessVoidling
       On.RoR2.HealthComponent.SendDamageDealt += ThresholdCheck;
       // EntityState Hooks
       On.EntityStates.VoidBarnacle.Weapon.ChargeFire.OnEnter += LazyMf;
-      On.EntityStates.VoidRaidCrab.VacuumAttack.OnEnter += IncreaseSingularitySize;
+      // On.EntityStates.VoidRaidCrab.VacuumAttack.OnEnter += IncreaseSingularitySize;
     }
 
-    private void IncreaseSingularitySize(On.EntityStates.VoidRaidCrab.VacuumAttack.orig_OnEnter orig, VacuumAttack self)
-    {
-      AnimationCurve newRadiusCurve = new AnimationCurve();
-      newRadiusCurve.preWrapMode = WrapMode.ClampForever;
-      newRadiusCurve.postWrapMode = WrapMode.ClampForever;
-      newRadiusCurve.AddKey(new Keyframe() { time = 0f, value = 0f, inTangent = 125f, outTangent = 125f, inWeight = 0f, outWeight = 0.3333333432674408f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
-      newRadiusCurve.AddKey(new Keyframe() { time = 1f, value = 125f, inTangent = 125f, outTangent = 125f, inWeight = 0.3333333432674408f, outWeight = 0f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
-      // original curve
-      // {"preWrapMode":8,"postWrapMode":8,"keys":[{"time":0.0,"value":0.0,"inTangent":50.0,"outTangent":50.0,"inWeight":0.0,"outWeight":0.3333333432674408,"weightedMode":0,"tangentMode":34},{"time":1.0,"value":50.0,"inTangent":50.0,"outTangent":50.0,"inWeight":0.3333333432674408,"outWeight":0.0,"weightedMode":0,"tangentMode":34}]}
-      VacuumAttack.killRadiusCurve = newRadiusCurve;
-      //   VacuumAttack.killRadiusCurve = AnimationCurve.Linear(0, 0, 1, 150); // 50
-      // VacuumAttack.pullMagnitudeCurve = AnimationCurve.Linear(0, 0, 1, 45);
-      // TODO tweak pull magnitude if it's too much in testing
-      orig(self);
-    }
-
+    /*
+        private void IncreaseSingularitySize(On.EntityStates.VoidRaidCrab.VacuumAttack.orig_OnEnter orig, VacuumAttack self)
+        {
+          AnimationCurve newRadiusCurve = new AnimationCurve();
+          newRadiusCurve.preWrapMode = WrapMode.ClampForever;
+          newRadiusCurve.postWrapMode = WrapMode.ClampForever;
+          newRadiusCurve.AddKey(new Keyframe() { time = 0f, value = 0f, inTangent = 125f, outTangent = 125f, inWeight = 0f, outWeight = 0.3333333432674408f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
+          newRadiusCurve.AddKey(new Keyframe() { time = 1f, value = 125f, inTangent = 125f, outTangent = 125f, inWeight = 0.3333333432674408f, outWeight = 0f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
+          // original curve
+          // {"preWrapMode":8,"postWrapMode":8,"keys":[{"time":0.0,"value":0.0,"inTangent":50.0,"outTangent":50.0,"inWeight":0.0,"outWeight":0.3333333432674408,"weightedMode":0,"tangentMode":34},{"time":1.0,"value":50.0,"inTangent":50.0,"outTangent":50.0,"inWeight":0.3333333432674408,"outWeight":0.0,"weightedMode":0,"tangentMode":34}]}
+          VacuumAttack.killRadiusCurve = newRadiusCurve;
+          //   VacuumAttack.killRadiusCurve = AnimationCurve.Linear(0, 0, 1, 150); // 50
+          // VacuumAttack.pullMagnitudeCurve = AnimationCurve.Linear(0, 0, 1, 45);
+          // TODO tweak pull magnitude if it's too much in testing
+          orig(self);
+        }
+    */
     private void LazyMf(On.EntityStates.VoidBarnacle.Weapon.ChargeFire.orig_OnEnter orig, ChargeFire self)
     {
       string sceneName = SceneManager.GetActiveScene().name;
@@ -168,6 +169,7 @@ namespace FathomlessVoidling
       ContentAddition.AddEntityState<EnterMaze>(out _);
       ContentAddition.AddEntityState<ExitMaze>(out _);
       ContentAddition.AddEntityState<MazeAttack>(out _);
+      ContentAddition.AddEntityState<WanderingSingularity>(out _);
 
       ContentAddition.AddEntityState<VoidlingHauntManager>(out _);
       ContentAddition.AddEntityState<ChargeGravityBullet>(out _);
@@ -650,7 +652,7 @@ namespace FathomlessVoidling
             ModelLocator modelLocator = body.GetComponent<ModelLocator>();
 
             body.GetComponent<SkillLocator>().primary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeEyeBlast));
-            body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(EnterMaze));
+            body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(WanderingSingularity));
             //   body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
             body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.baseMaxStock = 1;
 
@@ -692,6 +694,9 @@ namespace FathomlessVoidling
 
     private static void LoadAssets()
     {
+      AssetReferenceT<Material> voidCylinderMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_GameModes_InfiniteTowerRun_ITAssets.matITSafeWardAreaIndicator1_mat);
+      AssetAsyncReferenceManager<Material>.LoadAsset(voidCylinderMatRef).Completed += (x) => voidCylinderMat = x.Result;
+
       AssetReferenceT<Material> spinBeamMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabSpinBeamSphere1_mat);
       Material spinBeamSphereMat = AssetAsyncReferenceManager<Material>.LoadAsset(spinBeamMatRef).WaitForCompletion();
 
@@ -916,6 +921,103 @@ x -0.44 0.44
 
       AssetReferenceT<CharacterSpawnCard> voidlingCardRef = new AssetReferenceT<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrab_asset);
       AssetAsyncReferenceManager<CharacterSpawnCard>.LoadAsset(voidlingCardRef).Completed += (x) => bigVoidlingCard = x.Result;
+    }
+
+    private static void CreateSingularityProjectile()
+    {
+      AssetReferenceT<GameObject> suckSphereRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.KillSphereVfxPlaceholder_prefab);
+      GameObject sphereEffect = AssetAsyncReferenceManager<GameObject>.LoadAsset(suckSphereRef).WaitForCompletion();
+      sphereEffect = PrefabAPI.InstantiateClone(sphereEffect, "WSingularitySphere", true);
+      AssetReferenceT<GameObject> suckCenterRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSuckLoopFX_prefab);
+      GameObject centerEffect = AssetAsyncReferenceManager<GameObject>.LoadAsset(suckCenterRef).WaitForCompletion();
+      centerEffect = PrefabAPI.InstantiateClone(centerEffect, "WSingularityCenter", true);
+      AssetReferenceT<GameObject> projectileRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMissileProjectile_prefab);
+      GameObject projectile = AssetAsyncReferenceManager<GameObject>.LoadAsset(projectileRef).WaitForCompletion();
+      projectile = PrefabAPI.InstantiateClone(projectile, "WSingularityProjectile", true);
+      AssetReferenceT<GameObject> ghostRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_LunarWisp.LunarWispTrackingBombGhost_prefab);
+      GameObject ghost = AssetAsyncReferenceManager<GameObject>.LoadAsset(ghostRef).WaitForCompletion();
+      ghost = PrefabAPI.InstantiateClone(ghost, "WSingularityGhost", true);
+      AssetReferenceT<LoopSoundDef> lsdRef = new AssetReferenceT<LoopSoundDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.lsdVoidRaidCrabVacuumAttack_asset);
+      LoopSoundDef singularityLSD = AssetAsyncReferenceManager<LoopSoundDef>.LoadAsset(lsdRef).WaitForCompletion();
+
+      Destroy(sphereEffect.GetComponent<VFXHelper.VFXTransformController>());
+      Destroy(centerEffect.GetComponent<VFXHelper.VFXTransformController>());
+      sphereEffect.transform.localScale = new Vector3(20f, 20f, 20f);
+
+      foreach (Transform child in ghost.transform)
+      {
+        Destroy(child.gameObject);
+      }
+
+      centerEffect.transform.parent = ghost.transform;
+      sphereEffect.transform.parent = ghost.transform;
+      sphereEffect.transform.GetChild(1).GetChild(1).gameObject.SetActive(false);
+      centerEffect.GetComponent<VFXAttributes>().vfxIntensity = VFXAttributes.VFXIntensity.Low;
+      sphereEffect.GetComponent<VFXAttributes>().vfxIntensity = VFXAttributes.VFXIntensity.Low;
+
+      foreach (Transform child in projectile.transform)
+      {
+        Destroy(child.gameObject);
+      }
+      Destroy(projectile.GetComponent<BoxCollider>());
+      Destroy(projectile.GetComponent<ProjectileSingleTargetImpact>());
+      projectile.AddComponent<SingularityComponent>();
+      SphereCollider sphereCollider = projectile.AddComponent<SphereCollider>();
+      sphereCollider.radius = 19f;
+      sphereCollider.isTrigger = true;
+      projectile.GetComponent<Rigidbody>().useGravity = false;
+      // projectile.GetComponent<ProjectileSingleTargetImpact>().destroyOnWorld = false;
+      ProjectileDirectionalTargetFinder targetFinder = projectile.GetComponent<ProjectileDirectionalTargetFinder>();
+      targetFinder.allowTargetLoss = false;
+      targetFinder.lookCone = 360f;
+      targetFinder.lookRange = 1000f;
+      ProjectileController projectileController = projectile.GetComponent<ProjectileController>();
+      projectileController.ghostPrefab = ghost;
+      projectileController.cannotBeDeleted = true;
+      projectileController.flightSoundLoop = singularityLSD;
+      projectileController.myColliders = new Collider[1] { sphereCollider };
+      ProjectileSimple projectileSimple = projectile.GetComponent<ProjectileSimple>();
+      projectileSimple.desiredForwardSpeed = 30f; // 10f orig
+      projectileSimple.lifetime = 15f;
+
+      AnimationCurve newVelocityCurve = new AnimationCurve();
+      newVelocityCurve.preWrapMode = WrapMode.ClampForever;
+      newVelocityCurve.postWrapMode = WrapMode.ClampForever;
+      newVelocityCurve.AddKey(new Keyframe() { time = 0f, value = 1f, inTangent = 125f, outTangent = 125f, inWeight = 0f, outWeight = 0.3333333432674408f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
+      newVelocityCurve.AddKey(new Keyframe() { time = 1f, value = 0.2f, inTangent = 125f, outTangent = 125f, inWeight = 0.3333333432674408f, outWeight = 0f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
+      projectileSimple.enableVelocityOverLifetime = true;
+      projectileSimple.velocityOverLifetime = newVelocityCurve;
+
+      projectile.transform.localScale = Vector3.one;
+
+      ContentAddition.AddProjectile(projectile);
+      wSingularityProjectile = projectile;
+    }
+
+    public static void CreateTube()
+    {
+      GameObject gameObject = new("WallHolder");
+      gameObject.transform.position = new Vector3(-2.5f, 0.0f, 0.0f);
+      GameObject primitive = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+      primitive.GetComponent<MeshRenderer>().material = voidCylinderMat;
+      UnityEngine.Object.Destroy(primitive.GetComponent<CapsuleCollider>());
+      MeshCollider collider = primitive.AddComponent<MeshCollider>();
+      // primitive.AddComponent<ReverseNormals>();
+      primitive.transform.localScale = new Vector3(110f, 1250f, 110f);
+      primitive.name = "Cheese Deterrent";
+      primitive.transform.SetParent(gameObject.transform);
+      primitive.transform.localPosition = Vector3.zero;
+      primitive.layer = LayerIndex.world.intVal;
+
+      GameObject disableCollisions = new("DisableCollisions");
+      disableCollisions.transform.parent = primitive.transform;
+      disableCollisions.transform.localScale = new Vector3(0.0091f, 0.0008f, 0.0091f);
+      disableCollisions.layer = LayerIndex.entityPrecise.intVal;
+      DisableCollisionsIfInTrigger disableTrigger = disableCollisions.AddComponent<DisableCollisionsIfInTrigger>();
+      disableTrigger.colliderToIgnore = collider;
+      SphereCollider sphereCollider = disableCollisions.GetComponent<SphereCollider>();
+      sphereCollider.radius = 85f;
+      sphereCollider.isTrigger = true;
     }
 
     private void TweakEntityState(string path, string fieldName, string value)

@@ -1,10 +1,11 @@
 using System.Collections.ObjectModel;
 using RoR2;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace FathomlessVoidling.Components
 {
-    public class SingularityComponent : MonoBehaviour
+    public class SingularityComponent : NetworkBehaviour
     {
         private SphereCollider collider;
 

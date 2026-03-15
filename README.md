@@ -1,15 +1,17 @@
 # Fathomless Voidling
 
 TODOs:
-    - Reimplement Wandering Singularity (add velocity over lifetime curve)
     - Add logic to EyeBlast and PortalBeam tracking to choose players/turrets if available
     - Tweaks to Master and Voidling mission controllers to account for the defined flow
     - Tweak VoidlingHaunt to increase intensity after P1
     - Tweak VoidlingHaunt to force gravity bombs during Maze in P3
     - See how difficult it would be for the Ward Wipe teleport
-    - Think of what to do for Phase 4
+    - Think of what to do for Phase 4 (or just ship without a P4)
     - Set up Ward Wipe (phase transition attack)
     - Handle Voidling death properly
+    - NETWORKING STUFF (check after testing)
+        - Redo VoidRain to use the entitystate rather than random components, will probably end up with bad networking
+        - Redo Wandering Singularity to use the entitystate rather than random components, will probably end up with bad networking
 
 What would 1.0 entail?
     - The complete move/attack set for voidling and voidling haunt

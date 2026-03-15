@@ -39,6 +39,8 @@ namespace FathomlessVoidling.EntityStates
             ChildLocator modelChildLocator = this.GetModelChildLocator();
             this.modelLocator.modelTransform.Find("VoidRaidCrabArmature/ROOT/HeadBase/eyeballRoot").gameObject.SetActive(false);
 
+            this.characterBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
+
             DirectorSpawnRequest spawnRequest = new DirectorSpawnRequest(
                 Main.voidlingHauntCard,
                 new DirectorPlacementRule
@@ -96,7 +98,7 @@ namespace FathomlessVoidling.EntityStates
             base.FixedUpdate();
             if ((double)this.fixedAge >= (double)this.delay && !playedAnim)
             {
-                // FathomlessVoidling.CreateTube();
+                Main.CreateTube();
             }
             if (this.fixedAge >= 4.5f && !this.activatedEye)
             {
