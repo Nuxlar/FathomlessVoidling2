@@ -18,16 +18,17 @@ namespace FathomlessVoidling.EntityStates
         public string animationStateName = "Spawn";
         public string animationPlaybackRateParam = "Spawn.playbackRate";
         public bool doLegs = true;
-        public bool activatedEye = false;
-        public bool disabledCam = false;
-        public bool playedAnim = false;
         public CharacterSpawnCard jointSpawnCard = Main.jointCard;
-        public string leg1Name = "FrontLegL";
-        public string leg2Name = "FrontLegR";
-        public string leg3Name = "MidLegL";
-        public string leg4Name = "MidLegR";
-        public string leg5Name = "BackLegL";
-        public string leg6Name = "BackLegR";
+
+        private string leg1Name = "FrontLegL";
+        private string leg2Name = "FrontLegR";
+        private string leg3Name = "MidLegL";
+        private string leg4Name = "MidLegR";
+        private string leg5Name = "BackLegL";
+        private string leg6Name = "BackLegR";
+        private bool activatedEye = false;
+        private bool disabledCam = false;
+        private bool spawnedTube = false;
 
         public override void OnEnter()
         {
@@ -96,8 +97,9 @@ namespace FathomlessVoidling.EntityStates
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            if ((double)this.fixedAge >= (double)this.delay && !playedAnim)
+            if (this.fixedAge >= this.delay && !spawnedTube)
             {
+                this.spawnedTube = true;
                 Main.CreateTube();
             }
             if (this.fixedAge >= 4.5f && !this.activatedEye)
@@ -110,7 +112,7 @@ namespace FathomlessVoidling.EntityStates
                 GameObject.Find("Forced Camera").SetActive(false);
                 this.disabledCam = true;
             }
-            if ((double)this.fixedAge < (double)this.duration || !this.isAuthority)
+            if (this.fixedAge < this.duration || !this.isAuthority)
                 return;
             this.outer.SetNextStateToMain();
         }

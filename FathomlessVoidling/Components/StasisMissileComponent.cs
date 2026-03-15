@@ -43,7 +43,7 @@ namespace FathomlessVoidling.Components
             projectileSimple.desiredForwardSpeed = 0f;
             Ray aimRay = new Ray(this.transform.position, transform.forward);
             BullseyeSearch enemyFinder = new BullseyeSearch();
-            enemyFinder.maxDistanceFilter = 2000f;
+            enemyFinder.maxDistanceFilter = 500f;
             enemyFinder.maxAngleFilter = 360f;
             enemyFinder.searchOrigin = aimRay.origin;
             enemyFinder.searchDirection = aimRay.direction;
@@ -51,11 +51,22 @@ namespace FathomlessVoidling.Components
             enemyFinder.sortMode = BullseyeSearch.SortMode.DistanceAndAngle;
             enemyFinder.teamMaskFilter = TeamMask.GetEnemyTeams(TeamIndex.Void);
             enemyFinder.RefreshCandidates();
-            HurtBox foundBullseye = enemyFinder.GetResults().LastOrDefault<HurtBox>();
-            if (!(bool)foundBullseye)
+
+            HurtBox targetHurtBox;
+            targetHurtBox = enemyFinder.GetResults().First((hurtBox) =>
+            {
+                if (hurtBox.healthComponent && hurtBox.healthComponent.body && hurtBox.healthComponent.body.isPlayerControlled)
+                    return true;
+                else return false;
+            });
+
+            if (!targetHurtBox)
+                targetHurtBox = enemyFinder.GetResults().FirstOrDefault();
+
+            if (!targetHurtBox)
                 return;
 
-            Vector3 direction = foundBullseye.transform.position - aimRay.origin;
+            Vector3 direction = targetHurtBox.transform.position - aimRay.origin;
             Quaternion quaternion = Util.QuaternionSafeLookRotation(direction);
             Quaternion newRotation = quaternion * this.GetRandomRollPitch();
             this.transform.rotation = newRotation;

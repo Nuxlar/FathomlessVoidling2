@@ -31,6 +31,7 @@ using FathomlessVoidling.EntityStates.Utility;
 using FathomlessVoidling.EntityStates.Special;
 using FathomlessVoidling.EntityStates.Barnacle;
 using FathomlessVoidling.Components;
+using FathomlessVoidling.Hooks;
 namespace FathomlessVoidling
 {
   [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
@@ -67,8 +68,8 @@ namespace FathomlessVoidling
     public static GameObject gravityBombProjectile;
     public static SpawnCard voidlingHauntCard = ScriptableObject.CreateInstance<CharacterSpawnCard>();
     public static SpawnCard attachableBarnacleCard = ScriptableObject.CreateInstance<CharacterSpawnCard>();
-    private static GameObject groundedGravityEffect;
-    private static GameObject airborneGravityEffect;
+    public static GameObject groundedGravityEffect;
+    public static GameObject airborneGravityEffect;
     public static DirectorCardCategorySelection barnacleDccs = ScriptableObject.CreateInstance<DirectorCardCategorySelection>();
 
     // Maze Variables
@@ -98,63 +99,9 @@ namespace FathomlessVoidling
       TweakBigVoidling();
       TweakBigVoidlingMaster();
       //CreateAttachableBarnacle();
+      // VoidRaidCrabAISkillDriverController
 
-      GlobalEventManager.onServerDamageDealt += ApplyGravityDamageType;
-      // Regular Hooks
-      On.RoR2.SceneDirector.Start += TweakBossDirector;
-      On.RoR2.HealthComponent.SendDamageDealt += ThresholdCheck;
-      // EntityState Hooks
-      On.EntityStates.VoidBarnacle.Weapon.ChargeFire.OnEnter += LazyMf;
-      // On.EntityStates.VoidRaidCrab.VacuumAttack.OnEnter += IncreaseSingularitySize;
-    }
-
-    /*
-        private void IncreaseSingularitySize(On.EntityStates.VoidRaidCrab.VacuumAttack.orig_OnEnter orig, VacuumAttack self)
-        {
-          AnimationCurve newRadiusCurve = new AnimationCurve();
-          newRadiusCurve.preWrapMode = WrapMode.ClampForever;
-          newRadiusCurve.postWrapMode = WrapMode.ClampForever;
-          newRadiusCurve.AddKey(new Keyframe() { time = 0f, value = 0f, inTangent = 125f, outTangent = 125f, inWeight = 0f, outWeight = 0.3333333432674408f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
-          newRadiusCurve.AddKey(new Keyframe() { time = 1f, value = 125f, inTangent = 125f, outTangent = 125f, inWeight = 0.3333333432674408f, outWeight = 0f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
-          // original curve
-          // {"preWrapMode":8,"postWrapMode":8,"keys":[{"time":0.0,"value":0.0,"inTangent":50.0,"outTangent":50.0,"inWeight":0.0,"outWeight":0.3333333432674408,"weightedMode":0,"tangentMode":34},{"time":1.0,"value":50.0,"inTangent":50.0,"outTangent":50.0,"inWeight":0.3333333432674408,"outWeight":0.0,"weightedMode":0,"tangentMode":34}]}
-          VacuumAttack.killRadiusCurve = newRadiusCurve;
-          //   VacuumAttack.killRadiusCurve = AnimationCurve.Linear(0, 0, 1, 150); // 50
-          // VacuumAttack.pullMagnitudeCurve = AnimationCurve.Linear(0, 0, 1, 45);
-          // TODO tweak pull magnitude if it's too much in testing
-          orig(self);
-        }
-    */
-    private void LazyMf(On.EntityStates.VoidBarnacle.Weapon.ChargeFire.orig_OnEnter orig, ChargeFire self)
-    {
-      string sceneName = SceneManager.GetActiveScene().name;
-      if (sceneName == "voidraid")
-        self.outer.SetState(new ChargeGravityBullet());
-      else
-        orig(self);
-    }
-
-    private void ThresholdCheck(On.RoR2.HealthComponent.orig_SendDamageDealt orig, DamageReport damageReport)
-    {
-      HealthComponent hc = damageReport.victim.gameObject.GetComponent<HealthComponent>();
-      CharacterBody body = hc.body;
-
-      if (body && hc && body.name == "VoidRaidCrabJointBody(Clone)")
-      {
-
-        if (hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
-        {
-          JointThresholdController jointThresholdController = body.GetComponent<JointThresholdController>();
-          if (!jointThresholdController.defeatedServer)
-          {
-            body.AddBuff(RoR2Content.Buffs.Immune);
-            body.GetComponent<JointThresholdController>().TriggerThresholdEvent();
-            hc.health = hc.fullHealth * 0.75f;
-            damageReport.damageDealt = 1f;
-          }
-        }
-      }
-      orig(damageReport);
+      new ConnectHooks();
     }
 
     private void AddContent()
@@ -175,90 +122,6 @@ namespace FathomlessVoidling
       ContentAddition.AddEntityState<ChargeGravityBullet>(out _);
       ContentAddition.AddEntityState<FireGravityBullet>(out _);
       ContentAddition.AddEntityState<FindSurfaceAccurate>(out _);
-    }
-
-    private void ApplyGravityDamageType(DamageReport obj)
-    {
-      if (obj.damageInfo.HasModdedDamageType(gravityDamageType) && obj.victimBody)
-      {
-        CharacterDirection direction = obj.victimBody.GetComponent<CharacterDirection>();
-        CharacterMotor motor = obj.victimBody.GetComponent<CharacterMotor>();
-        if (direction && motor)
-        {
-          float airborneForce = 3000f;
-          float groundedForce = 3000f; // 7000 orig
-          Vector3 airborneForceVector;
-          Vector3 groundedForceVector;
-          bool preventAirControl = false;
-          bool isLeft = (double)UnityEngine.Random.value > 0.5;
-          Vector3 vector3 = Vector3.Cross(direction.forward, Vector3.up);
-
-          if (!isLeft)
-            vector3 *= -1f;
-
-          airborneForceVector = Vector3.up * -1f * airborneForce + vector3 * airborneForce;
-          groundedForceVector = Vector3.up * groundedForce + vector3 * groundedForce;
-
-          EffectData effectData = new EffectData()
-          {
-            origin = obj.victimBody.transform.position
-          };
-          GameObject effectPrefab;
-          if (motor.isGrounded)
-          {
-            // this.disableAirControlUntilCollision
-            motor.ApplyForce(groundedForceVector, true, preventAirControl);
-            effectPrefab = groundedGravityEffect;
-            effectData.rotation = Util.QuaternionSafeLookRotation(groundedForceVector);
-          }
-          else
-          {
-            motor.ApplyForce(airborneForceVector, true, preventAirControl);
-            effectPrefab = airborneGravityEffect;
-            effectData.rotation = Util.QuaternionSafeLookRotation(airborneForceVector);
-          }
-          EffectManager.SpawnEffect(effectPrefab, effectData, true);
-        }
-      }
-    }
-
-    private void TweakBossDirector(On.RoR2.SceneDirector.orig_Start orig, RoR2.SceneDirector self)
-    {
-      if (SceneManager.GetActiveScene().name == "voidraid")
-      {
-        GameObject missionObj = GameObject.Find("EncounterPhases");
-        GameObject phase1Obj = missionObj.transform.GetChild(0).gameObject;
-        if (missionObj && phase1Obj)
-        {
-          missionObj.transform.GetChild(1).gameObject.SetActive(false);
-          missionObj.transform.GetChild(2).gameObject.SetActive(false);
-
-          Transform transform = new GameObject().transform;
-          transform.position = new Vector3(0, -15, 0);
-
-          ScriptedCombatEncounter.SpawnInfo spawnInfo = new ScriptedCombatEncounter.SpawnInfo();
-          spawnInfo.explicitSpawnPosition = transform;
-          spawnInfo.spawnCard = Main.bigVoidlingCard;
-
-          phase1Obj.GetComponent<ScriptedCombatEncounter>().spawns = [spawnInfo];
-
-          Transform cam = GameObject.Find("RaidVoid").transform.GetChild(5);
-          Transform forcedCam = cam.GetChild(1);
-          forcedCam.GetComponent<PlayableDirector>().playableAsset = introTimeline;
-          Transform curve = cam.GetChild(2);
-          // y -6.812038f
-          curve.position = new Vector3(-110.27766f, 15f, -300f);
-          curve.GetChild(0).position = new Vector3(-50f, 28.9719f, -396.993f); // orig -6.215 28.9719 -396.993
-
-          if (NetworkServer.active)
-          {
-            GameObject mazeController = new GameObject("MazeSpawnPointController");
-            mazeController.transform.localPosition = Vector3.zero;
-            mazeController.AddComponent<MazeSpawnPointController>();
-          }
-        }
-      }
-      orig(self);
     }
 
     private static void CreateNewEyeMissiles()
@@ -880,7 +743,6 @@ namespace FathomlessVoidling
       {
         GameObject body = x.Result;
         JointThresholdController thresholdController = body.AddComponent<JointThresholdController>();
-        CombatDirector combatDirector = body.AddComponent<CombatDirector>();
         /*
         Using the Xi Construct's implementation, there needs to be a NetworkedBodySpawnSlot for each spawn
 Needs: spawncard, owner body, owner child locator, owner attach child name, spawn effect prefab (can be null), and kill effect prefab
@@ -927,16 +789,16 @@ x -0.44 0.44
     {
       AssetReferenceT<GameObject> suckSphereRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.KillSphereVfxPlaceholder_prefab);
       GameObject sphereEffect = AssetAsyncReferenceManager<GameObject>.LoadAsset(suckSphereRef).WaitForCompletion();
-      sphereEffect = PrefabAPI.InstantiateClone(sphereEffect, "WSingularitySphere", true);
+      sphereEffect = PrefabAPI.InstantiateClone(sphereEffect, "WSingularitySphere", false);
       AssetReferenceT<GameObject> suckCenterRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSuckLoopFX_prefab);
       GameObject centerEffect = AssetAsyncReferenceManager<GameObject>.LoadAsset(suckCenterRef).WaitForCompletion();
-      centerEffect = PrefabAPI.InstantiateClone(centerEffect, "WSingularityCenter", true);
+      centerEffect = PrefabAPI.InstantiateClone(centerEffect, "WSingularityCenter", false);
       AssetReferenceT<GameObject> projectileRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMissileProjectile_prefab);
       GameObject projectile = AssetAsyncReferenceManager<GameObject>.LoadAsset(projectileRef).WaitForCompletion();
       projectile = PrefabAPI.InstantiateClone(projectile, "WSingularityProjectile", true);
       AssetReferenceT<GameObject> ghostRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_LunarWisp.LunarWispTrackingBombGhost_prefab);
       GameObject ghost = AssetAsyncReferenceManager<GameObject>.LoadAsset(ghostRef).WaitForCompletion();
-      ghost = PrefabAPI.InstantiateClone(ghost, "WSingularityGhost", true);
+      ghost = PrefabAPI.InstantiateClone(ghost, "WSingularityGhost", false);
       AssetReferenceT<LoopSoundDef> lsdRef = new AssetReferenceT<LoopSoundDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.lsdVoidRaidCrabVacuumAttack_asset);
       LoopSoundDef singularityLSD = AssetAsyncReferenceManager<LoopSoundDef>.LoadAsset(lsdRef).WaitForCompletion();
 
@@ -977,16 +839,11 @@ x -0.44 0.44
       projectileController.flightSoundLoop = singularityLSD;
       projectileController.myColliders = new Collider[1] { sphereCollider };
       ProjectileSimple projectileSimple = projectile.GetComponent<ProjectileSimple>();
-      projectileSimple.desiredForwardSpeed = 30f; // 10f orig
-      projectileSimple.lifetime = 15f;
+      projectileSimple.desiredForwardSpeed = 20f; // 10f orig
+      projectileSimple.lifetime = 20f; // 15 orig
 
-      AnimationCurve newVelocityCurve = new AnimationCurve();
-      newVelocityCurve.preWrapMode = WrapMode.ClampForever;
-      newVelocityCurve.postWrapMode = WrapMode.ClampForever;
-      newVelocityCurve.AddKey(new Keyframe() { time = 0f, value = 1f, inTangent = 125f, outTangent = 125f, inWeight = 0f, outWeight = 0.3333333432674408f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
-      newVelocityCurve.AddKey(new Keyframe() { time = 1f, value = 0.2f, inTangent = 125f, outTangent = 125f, inWeight = 0.3333333432674408f, outWeight = 0f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
       projectileSimple.enableVelocityOverLifetime = true;
-      projectileSimple.velocityOverLifetime = newVelocityCurve;
+      projectileSimple.velocityOverLifetime = AnimationCurve.EaseInOut(0f, 1f, 1f, 0.2f);
 
       projectile.transform.localScale = Vector3.one;
 

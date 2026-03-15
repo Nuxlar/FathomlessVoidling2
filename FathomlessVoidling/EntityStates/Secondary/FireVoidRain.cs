@@ -126,13 +126,23 @@ namespace FathomlessVoidling.EntityStates.Secondary
             search.filterByLoS = true;
             search.searchOrigin = aimRay.origin;
             search.sortMode = BullseyeSearch.SortMode.DistanceAndAngle;
-            search.maxDistanceFilter = 1000f;
+            search.maxDistanceFilter = 500f;
             search.minAngleFilter = 0.0f;
             search.maxAngleFilter = 180f;
             search.RefreshCandidates();
 
-            HurtBox targetHurtBox = search.GetResults().FirstOrDefault();
-            bool hasHurtbox = targetHurtBox && targetHurtBox.healthComponent && targetHurtBox.healthComponent.body && targetHurtBox.healthComponent.body.characterMotor;
+            HurtBox targetHurtBox;
+            targetHurtBox = search.GetResults().First((hurtBox) =>
+            {
+                if (hurtBox.healthComponent && hurtBox.healthComponent.body && hurtBox.healthComponent.body.isPlayerControlled)
+                    return true;
+                else return false;
+            });
+
+            if (!targetHurtBox)
+                targetHurtBox = search.GetResults().FirstOrDefault();
+
+            bool hasHurtbox = targetHurtBox && targetHurtBox.healthComponent.body.characterMotor;
 
             if (hasHurtbox)
             {
