@@ -79,7 +79,13 @@ namespace FathomlessVoidling.Hooks
                 VoidRaidGauntletController.instance.previousDonut.combatDirector.enabled = false;
 
             Vector3 crabPosition = VoidRaidGauntletController.instance.currentDonut.root.transform.Find("HOLDER: Terrain").Find("RaidTerrainHG").position;
-            TeleportHelper.TeleportBody(self.characterBody, new Vector3(crabPosition.x, crabPosition.y - 5, crabPosition.z), false);
+            Vector3 crabSpawnPos = new Vector3(crabPosition.x, crabPosition.y - 10, crabPosition.z);
+            TeleportHelper.TeleportBody(self.characterBody, crabSpawnPos, false);
+            if (FathomlessMissionController.instance && FathomlessMissionController.instance.hauntBody)
+            {
+                Debug.LogWarning("teleporting john haunt");
+                TeleportHelper.TeleportBody(FathomlessMissionController.instance.hauntBody, crabSpawnPos, false);
+            }
 
             List<CharacterBody> playerBodies = new List<CharacterBody>();
             foreach (TeamComponent teamComponent in TeamComponent.GetTeamMembers(TeamIndex.Player).ToList())
@@ -95,36 +101,14 @@ namespace FathomlessVoidling.Hooks
             {
                 foreach (CharacterBody playerBody in playerBodies)
                 {
-                    // // Play_nullifier_death_vortex_explode
                     Vector3? teleportPos = TeleportHelper.FindSafeTeleportDestination(VoidRaidGauntletController.instance.currentDonut.returnPoint.position, playerBody, Run.instance.runRNG);
-                    TeleportHelper.TeleportBody(playerBody, (Vector3)teleportPos, false);
-                    GameObject effectPrefab = Run.instance.GetTeleportEffectPrefab(playerBody.gameObject);
-                    if (Main.raidTeleportEffect)
-                        effectPrefab = Main.raidTeleportEffect;
-                    if (effectPrefab)
-                        EffectManager.SimpleEffect(effectPrefab, (Vector3)teleportPos, Quaternion.identity, true);
+                    //  TeleportHelper.TeleportBody(playerBody, (Vector3)teleportPos, false);
+                    TeleportHelper.TeleportGameObject(playerBody.gameObject, (Vector3)teleportPos);
+                    EffectManager.SimpleEffect(Main.raidTeleportEffect, (Vector3)teleportPos, Quaternion.identity, true);
+                    Util.PlaySound("Play_nullifier_death_vortex_explode", playerBody.gameObject);
                 }
 
             }
-            /*
-            if (!Util.HasEffectiveAuthority(characterBody.gameObject) || Physics.GetIgnoreLayerCollision(this.gameObject.layer, characterBody.gameObject.layer))
-                return;
-            Vector3 teleportPosition = Run.instance.FindSafeTeleportPosition(characterBody, this.explicitDestination, 0.0f, this.destinationIdealRadius);
-            TeleportHelper.TeleportBody(characterBody, teleportPosition);
-            GameObject effectPrefab = Run.instance.GetTeleportEffectPrefab(characterBody.gameObject);
-            if ((bool))this.explicitSpawnEffectPrefab)
-                effectPrefab = this.explicitSpawnEffectPrefab;
-            if ((bool))effectPrefab)
-                EffectManager.SimpleEffect(effectPrefab, teleportPosition, Quaternion.identity, true);
-            Action<CharacterBody> onBodyTeleport = this.onBodyTeleport;
-            if (onBodyTeleport != null)
-                onBodyTeleport(characterBody);
-            Action<CharacterBody> bodyTeleportGlobal = MapZone.onBodyTeleportGlobal;
-            if (bodyTeleportGlobal == null)
-                return;
-            bodyTeleportGlobal(characterBody);
-            VoidRaidCrabTeleportEffect
-            */
         }
 
         private void FixPipReviveBug(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)

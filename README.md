@@ -2,20 +2,24 @@
 
 TODOs:
     - Tweaks to Master and Voidling mission controllers to account for the defined flow
-    - Ensure everything still works after wardwipe (shield, maze, etc...)
+    - Ensure maze works after WardWipe
     - Handle Voidling death properly
     - Disable footstep SFX/VFX when joint is destroyed
-    - Prevent barnacles from spawning mid air
-    - Fix barnacles getting stuck in the joints sometimes
+    - Fix SafeWard being visually too large
+    - Tweak WardWipe safe ward spawn distance
+    - Teleport VoidlingHaunt along with the main body during WardWipe
+    - Fix threshold barnacles spawning inside the joint sometimes
+    - Change Voidling Toe and Calf collisions being on the world layer (fixes barnacles spawning on them)
     - Add event to damage main body after joint death
+    - Add event to enable skill drivers for abilities on joint threshold
     - NETWORKING STUFF (check after testing)
-        - Redo VoidRain to use the entitystate rather than random components, will probably end up with bad networking
-        - Redo Wandering Singularity to use the entitystate rather than random components, will probably end up with bad networking
+        - (MAYBE) Redo VoidRain to use the entitystate rather than random components, will probably end up with bad networking
+        - (MAYBE) Redo Wandering Singularity to use the entitystate rather than random components, will probably end up with bad networking
 
 What would 1.0 entail?
     - The complete move/attack set for voidling and voidling haunt
     - Properly ending the fight instead of manually ending the run
-    - (MAYBE) Phase transition to alternate donuts
+    - Phase transition to alternate donuts
     - MP compat
 
 ## Attack Details and Phase Flow
