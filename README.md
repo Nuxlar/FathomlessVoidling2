@@ -2,11 +2,12 @@
 
 TODOs:
     - Tweaks to Master and Voidling mission controllers to account for the defined flow
-    - Increase Safe Ward size for WardWipe
     - Ensure everything still works after wardwipe (shield, maze, etc...)
     - Handle Voidling death properly
     - Disable footstep SFX/VFX when joint is destroyed
-    - Heal other joints after joint death
+    - Prevent barnacles from spawning mid air
+    - Fix barnacles getting stuck in the joints sometimes
+    - Add event to damage main body after joint death
     - NETWORKING STUFF (check after testing)
         - Redo VoidRain to use the entitystate rather than random components, will probably end up with bad networking
         - Redo Wandering Singularity to use the entitystate rather than random components, will probably end up with bad networking

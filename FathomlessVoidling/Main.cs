@@ -1,24 +1,20 @@
 using BepInEx;
-using HG;
 using R2API;
 using RoR2;
 using RoR2.ContentManagement;
 using RoR2.Mecanim;
+using RoR2.VoidRaidCrab;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.Playables;
-using UnityEngine.SceneManagement;
 using UnityEngine.Timeline;
-using System.Reflection;
 using RoR2.Audio;
 using RoR2.Projectile;
 using EntityStates;
 using RoR2.CharacterAI;
 using EntityStates.VoidRaidCrab;
 using RoR2.Skills;
-using EntityStates.VoidBarnacle.Weapon;
 using UnityEngine.Networking;
 using UnityEngine.Rendering.PostProcessing;
 
@@ -32,7 +28,6 @@ using FathomlessVoidling.EntityStates.Special;
 using FathomlessVoidling.EntityStates.Barnacle;
 using FathomlessVoidling.Components;
 using FathomlessVoidling.Hooks;
-using RoR2.VoidRaidCrab;
 
 namespace FathomlessVoidling
 {
@@ -62,6 +57,7 @@ namespace FathomlessVoidling
     public static GameObject eyeMissileProjectile;
     public static GameObject eyeBlastChargeEffect;
     public static GameObject eyeBlastMuzzleFlash;
+    public static GameObject raidTeleportEffect;
 
     // Voidling Haunt Variables
     public static GameObject barnacleMuzzleFlash;
@@ -581,6 +577,16 @@ namespace FathomlessVoidling
 
     private static void LoadAssets()
     {
+      AssetReferenceT<GameObject> raidTpEffectRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_gauntlets.VoidRaidCrabGauntletTeleportEffect_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(raidTpEffectRef).Completed += (x) => raidTeleportEffect = x.Result;
+
+      AssetReferenceT<GameObject> safeWardRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidSafeWard_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(safeWardRef).Completed += (x) =>
+      {
+        GameObject safeWard = x.Result;
+        safeWard.transform.localScale = new Vector3(3f, 1f, 3f);
+        safeWard.GetComponent<VerticalTubeZone>().radius = 12f;
+      };
       AssetReferenceT<Material> voidCylinderMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_GameModes_InfiniteTowerRun_ITAssets.matITSafeWardAreaIndicator1_mat);
       AssetAsyncReferenceManager<Material>.LoadAsset(voidCylinderMatRef).Completed += (x) => voidCylinderMat = x.Result;
 
@@ -909,7 +915,6 @@ x -0.44 0.44
       mazeController.transform.parent = parent;
       mazeController.transform.position = Vector3.zero;
       mazeController.AddComponent<MazeSpawnPointController>();
-      // Play_nullifier_death_vortex_explode
     }
 
     private void TweakEntityState(string path, string fieldName, string value)

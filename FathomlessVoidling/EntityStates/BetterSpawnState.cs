@@ -3,7 +3,6 @@ using RoR2.VoidRaidCrab;
 using UnityEngine;
 using UnityEngine.Networking;
 using EntityStates;
-using System;
 using FathomlessVoidling.Controllers;
 
 namespace FathomlessVoidling.EntityStates

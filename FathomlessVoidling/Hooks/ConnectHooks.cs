@@ -23,9 +23,11 @@ namespace FathomlessVoidling.Hooks
             On.RoR2.SceneDirector.Start += TweakBossDirector;
             On.RoR2.HealthComponent.SendDamageDealt += ThresholdCheck;
             On.RoR2.CharacterMaster.OnBodyStart += FixPipReviveBug;
+            On.RoR2.VoidRaidCrab.LegController.RegenerateServer += PreventJointRegen;
 
             On.EntityStates.VoidBarnacle.Weapon.ChargeFire.OnEnter += LazyMf;
             On.EntityStates.VoidRaidCrab.FireWardWipe.OnEnter += WipingMyShit;
+            On.EntityStates.VoidRaidCrab.ChargeGauntlet.OnEnter += ReplaceGauntletWithWipe;
             /*
                 PhaseControllerStateMachine (GameObject)
                 has NetworkIdentity, EntityStateMachine, and NetworkStateMachine
@@ -34,15 +36,19 @@ namespace FathomlessVoidling.Hooks
             // On.EntityStates.VoidRaidCrab.VacuumAttack.OnEnter += IncreaseSingularitySize;
         }
 
+        private void PreventJointRegen(On.RoR2.VoidRaidCrab.LegController.orig_RegenerateServer orig, LegController self)
+        {
+
+        }
+
+        private void ReplaceGauntletWithWipe(On.EntityStates.VoidRaidCrab.ChargeGauntlet.orig_OnEnter orig, ChargeGauntlet self)
+        {
+            self.outer.SetState(new ChargeWardWipe());
+        }
+
         private void WipingMyShit(On.EntityStates.VoidRaidCrab.FireWardWipe.orig_OnEnter orig, FireWardWipe self)
         {
             orig(self);
-            // this.gauntletEntrancePosition, this.netId
-
-            // teleport everyone out
-            // Teleport Voidling to the next donut
-            // Teleport players to the next donut
-            //VoidRaidGauntletController.instance.currentDonut.returnPoint
             if (!VoidRaidGauntletController.instance || !NetworkServer.active)
                 return;
             VoidRaidGauntletController.instance.previousGauntlet = VoidRaidGauntletController.instance.currentGauntlet;
@@ -89,8 +95,14 @@ namespace FathomlessVoidling.Hooks
             {
                 foreach (CharacterBody playerBody in playerBodies)
                 {
+                    // // Play_nullifier_death_vortex_explode
                     Vector3? teleportPos = TeleportHelper.FindSafeTeleportDestination(VoidRaidGauntletController.instance.currentDonut.returnPoint.position, playerBody, Run.instance.runRNG);
                     TeleportHelper.TeleportBody(playerBody, (Vector3)teleportPos, false);
+                    GameObject effectPrefab = Run.instance.GetTeleportEffectPrefab(playerBody.gameObject);
+                    if (Main.raidTeleportEffect)
+                        effectPrefab = Main.raidTeleportEffect;
+                    if (effectPrefab)
+                        EffectManager.SimpleEffect(effectPrefab, (Vector3)teleportPos, Quaternion.identity, true);
                 }
 
             }
@@ -142,17 +154,31 @@ namespace FathomlessVoidling.Hooks
 
             if (body && hc && body.name == "VoidRaidCrabJointBody(Clone)")
             {
-
-                if (hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
+                JointThresholdController jointThresholdController = body.GetComponent<JointThresholdController>();
+                // heal other joints on a death blow
+                if (hc.health - damageReport.damageDealt <= 0f)
                 {
-                    JointThresholdController jointThresholdController = body.GetComponent<JointThresholdController>();
-                    if (!jointThresholdController.defeatedServer)
+                    List<CharacterBody> jointBodies = new List<CharacterBody>();
+                    foreach (TeamComponent teamComponent in TeamComponent.GetTeamMembers(TeamIndex.Void).ToList())
                     {
-                        body.AddBuff(RoR2Content.Buffs.Immune);
-                        body.GetComponent<JointThresholdController>().TriggerThresholdEvent();
-                        hc.health = hc.fullHealth * 0.75f;
-                        damageReport.damageDealt = 1f;
+                        CharacterBody characterBody = teamComponent.GetComponent<CharacterBody>();
+                        if (characterBody && characterBody != body && characterBody.name == "VoidRaidCrabJointBody(Clone)")
+                        {
+                            jointBodies.Add(body);
+                        }
                     }
+                    foreach (CharacterBody jointBody in jointBodies)
+                    {
+                        jointBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 10f);
+                        jointBody.healthComponent.Heal(hc.fullHealth, new ProcChainMask());
+                    }
+                }
+                if (jointThresholdController && !jointThresholdController.defeatedServer && hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
+                {
+                    body.AddBuff(RoR2Content.Buffs.Immune);
+                    jointThresholdController.TriggerThresholdEvent();
+                    hc.health = hc.fullHealth * 0.75f;
+                    damageReport.damageDealt = 1f;
                 }
             }
             orig(damageReport);
