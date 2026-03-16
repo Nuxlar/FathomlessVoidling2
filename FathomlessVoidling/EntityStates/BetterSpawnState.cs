@@ -105,7 +105,7 @@ namespace FathomlessVoidling.EntityStates
             if (this.fixedAge >= this.delay && !spawnedTube)
             {
                 this.spawnedTube = true;
-                Main.CreateTube();
+                Main.CreateTube(this.characterBody.transform);
             }
             if (this.fixedAge >= 4.5f && !this.activatedEye)
             {

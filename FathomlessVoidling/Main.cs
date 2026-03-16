@@ -32,6 +32,8 @@ using FathomlessVoidling.EntityStates.Special;
 using FathomlessVoidling.EntityStates.Barnacle;
 using FathomlessVoidling.Components;
 using FathomlessVoidling.Hooks;
+using RoR2.VoidRaidCrab;
+
 namespace FathomlessVoidling
 {
   [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
@@ -202,11 +204,33 @@ namespace FathomlessVoidling
       AssetAsyncReferenceManager<GameObject>.LoadAsset(voidlingMasterRef).Completed += (x) =>
       {
         GameObject masterPrefab = x.Result;
-        Debug.LogWarning("AISKILLDRIVERNAMES");
+        // VoidRaidCrabAISkillDriverController
+        VoidRaidCrabAISkillDriverController skillDriverController = masterPrefab.GetComponent<VoidRaidCrabAISkillDriverController>();
+        Debug.LogWarning("BODY SKILL DRIVERS");
+        foreach (AISkillDriver driver in skillDriverController.bodySkillDrivers)
+        {
+          Debug.LogWarning(driver.customName);
+        }
+        Debug.LogWarning("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+        Debug.LogWarning("GAUNTLET SKILL DRIVERS");
+        foreach (AISkillDriver driver in skillDriverController.gauntletSkillDrivers)
+        {
+          Debug.LogWarning(driver.customName);
+        }
+        Debug.LogWarning("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+        Debug.LogWarning("WEAPON SKILL DRIVERS");
+        foreach (AISkillDriver driver in skillDriverController.weaponSkillDrivers)
+        {
+          Debug.LogWarning(driver.customName);
+        }
+        Debug.LogWarning("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
         List<AISkillDriver> driverList = masterPrefab.GetComponents<AISkillDriver>().ToList();
         foreach (AISkillDriver driver in driverList)
         {
-          Debug.LogWarning(driver.customName);
+          //  Debug.LogWarning(driver.customName);
           switch (driver.customName)
           {
             case "Channel Gauntlet 1":
@@ -513,9 +537,9 @@ namespace FathomlessVoidling
           {
             GameObject body = x.Result;
             ModelLocator modelLocator = body.GetComponent<ModelLocator>();
-
+            body.GetComponent<CharacterBody>().baseMaxHealth = 2000f;
             body.GetComponent<SkillLocator>().primary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeEyeBlast));
-            body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(WanderingSingularity));
+            body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeWardWipe));
             //   body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
             body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.baseMaxStock = 1;
 
@@ -741,8 +765,11 @@ namespace FathomlessVoidling
       AssetReferenceT<GameObject> jointBodyRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabJointBody_prefab);
       AssetAsyncReferenceManager<GameObject>.LoadAsset(jointBodyRef).Completed += (x) =>
       {
-        GameObject body = x.Result;
-        JointThresholdController thresholdController = body.AddComponent<JointThresholdController>();
+        GameObject prefab = x.Result;
+        JointThresholdController thresholdController = prefab.AddComponent<JointThresholdController>();
+        CharacterBody body = prefab.GetComponent<CharacterBody>();
+        body.baseMaxHealth = 1250f; // 1000f mithrix
+        body.levelMaxHealth = 350f; // 325f mithrix
         /*
         Using the Xi Construct's implementation, there needs to be a NetworkedBodySpawnSlot for each spawn
 Needs: spawncard, owner body, owner child locator, owner attach child name, spawn effect prefab (can be null), and kill effect prefab
@@ -751,14 +778,14 @@ BodyPrefab -> Model Base -> mockModel -> Toe -> ToeJoint
 z -0.44 0.44
 x -0.44 0.44
         */
-        body.AddComponent<MasterSpawnSlotController>();
-        ChildLocator childLocator = body.GetComponent<ModelLocator>().modelChildLocator;
+        prefab.AddComponent<MasterSpawnSlotController>();
+        ChildLocator childLocator = prefab.GetComponent<ModelLocator>().modelChildLocator;
 
-        Transform toeJoint = body.transform.GetChild(0).GetChild(0).GetChild(2).GetChild(0);
+        Transform toeJoint = prefab.transform.GetChild(0).GetChild(0).GetChild(2).GetChild(0);
         for (int i = 0; i < 4; i++)
         {
           string attachName = "AttachPoint" + i;
-          NetworkedBodySpawnSlot spawnSlot = body.AddComponent<NetworkedBodySpawnSlot>();
+          NetworkedBodySpawnSlot spawnSlot = prefab.AddComponent<NetworkedBodySpawnSlot>();
           GameObject newAttachment = new GameObject(attachName);
           newAttachment.transform.parent = toeJoint;
           if (i < 2)
@@ -773,12 +800,12 @@ x -0.44 0.44
           }
           childLocator.AddChild(attachName, newAttachment.transform);
           spawnSlot.spawnCard = attachableBarnacleCard;
-          spawnSlot.ownerBody = body.GetComponent<CharacterBody>();
+          spawnSlot.ownerBody = body;
           spawnSlot.ownerChildLocator = childLocator;
           spawnSlot.ownerAttachChildName = attachName;
         }
 
-        body.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(JointSpawnState));
+        prefab.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(JointSpawnState));
       };
 
       AssetReferenceT<CharacterSpawnCard> voidlingCardRef = new AssetReferenceT<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrab_asset);
@@ -851,10 +878,12 @@ x -0.44 0.44
       wSingularityProjectile = projectile;
     }
 
-    public static void CreateTube()
+    public static void CreateTube(Transform parent)
     {
       GameObject gameObject = new("WallHolder");
-      gameObject.transform.position = new Vector3(-2.5f, 0.0f, 0.0f);
+      gameObject.transform.parent = parent;
+      gameObject.transform.position = Vector3.zero;
+      gameObject.transform.localPosition = new Vector3(-2.5f, 0.0f, 0.0f);
       GameObject primitive = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
       primitive.GetComponent<MeshRenderer>().material = voidCylinderMat;
       UnityEngine.Object.Destroy(primitive.GetComponent<CapsuleCollider>());
@@ -875,6 +904,12 @@ x -0.44 0.44
       SphereCollider sphereCollider = disableCollisions.GetComponent<SphereCollider>();
       sphereCollider.radius = 85f;
       sphereCollider.isTrigger = true;
+
+      GameObject mazeController = new GameObject("MazeSpawnPointController");
+      mazeController.transform.parent = parent;
+      mazeController.transform.position = Vector3.zero;
+      mazeController.AddComponent<MazeSpawnPointController>();
+      // Play_nullifier_death_vortex_explode
     }
 
     private void TweakEntityState(string path, string fieldName, string value)

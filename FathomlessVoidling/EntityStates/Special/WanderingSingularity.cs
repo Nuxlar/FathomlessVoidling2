@@ -64,12 +64,12 @@ namespace FathomlessVoidling.EntityStates.Special
                     });
                 }
             }
-            if (this.fixedAge >= this.duration - this.windDuration && !this.hasPlayedExit)
+            if (this.fixedAge >= this.duration && !this.hasPlayedExit)
             {
                 this.PlayAnimation(this.animLayerName, this.animExitStateName, this.animPlaybackRateParamName, this.windDuration);
                 this.hasPlayedExit = true;
             }
-            if (!this.isAuthority || (double)this.fixedAge < (double)this.duration)
+            if (!this.isAuthority || (double)this.fixedAge < (double)this.duration + this.windDuration)
                 return;
             this.outer.SetNextStateToMain();
         }

@@ -2,10 +2,11 @@
 
 TODOs:
     - Tweaks to Master and Voidling mission controllers to account for the defined flow
-    - See how difficult it would be for the Ward Wipe teleport
-    - Set up Ward Wipe (phase transition attack)
+    - Increase Safe Ward size for WardWipe
+    - Ensure everything still works after wardwipe (shield, maze, etc...)
     - Handle Voidling death properly
-    - Think of what to do for Phase 4 (or just ship without a P4 based on workload)
+    - Disable footstep SFX/VFX when joint is destroyed
+    - Heal other joints after joint death
     - NETWORKING STUFF (check after testing)
         - Redo VoidRain to use the entitystate rather than random components, will probably end up with bad networking
         - Redo Wandering Singularity to use the entitystate rather than random components, will probably end up with bad networking
