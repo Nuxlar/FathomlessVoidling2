@@ -12,9 +12,7 @@ TODOs:
         - (MAYBE) Redo Wandering Singularity to use the entitystate rather than random components, will probably end up with bad networking
     
 Bugs:
-    - if u deal enough damage to oneshot the joint, it skips the threshold
     - Barnacle spawning in weird spot on the joint
-    - WardWipe SFX still doesn't play
 
 What would 1.0 entail?
     - The complete move/attack set for voidling and voidling haunt

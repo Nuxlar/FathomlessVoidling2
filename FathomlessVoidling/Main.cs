@@ -58,6 +58,11 @@ namespace FathomlessVoidling
     public static GameObject eyeBlastChargeEffect;
     public static GameObject eyeBlastMuzzleFlash;
     public static GameObject raidTeleportEffect;
+    public static LoopSoundDef lsdVoidMegaCrabDeathBomb;
+    public static GameObject chargeWardWipeChargeEffect;
+    public static GameObject fireWardWipeMuzzleFlash;
+    public static BuffDef bdWardWipeFog;
+    public static InteractableSpawnCard iscSafeWard;
 
     // Voidling Haunt Variables
     public static GameObject barnacleMuzzleFlash;
@@ -120,6 +125,20 @@ namespace FathomlessVoidling
       ContentAddition.AddEntityState<ChargeGravityBullet>(out _);
       ContentAddition.AddEntityState<FireGravityBullet>(out _);
       ContentAddition.AddEntityState<FindSurfaceAccurate>(out _);
+      ContentAddition.AddEntityState<ChargeWardWipeNux>(out _);
+      ContentAddition.AddEntityState<FireWardWipeNux>(out _);
+    }
+
+    public static List<CharacterBody> GetPlayerBodies()
+    {
+      List<CharacterBody> playerBodies = new List<CharacterBody>();
+      foreach (TeamComponent teamComponent in TeamComponent.GetTeamMembers(TeamIndex.Player).ToList())
+      {
+        CharacterBody body = teamComponent.GetComponent<CharacterBody>();
+        if (body && body.isPlayerControlled)
+          playerBodies.Add(body);
+      }
+      return playerBodies;
     }
 
     private static void CreateNewEyeMissiles()
@@ -535,7 +554,7 @@ namespace FathomlessVoidling
             ModelLocator modelLocator = body.GetComponent<ModelLocator>();
             body.GetComponent<CharacterBody>().baseMaxHealth = 2000f;
             body.GetComponent<SkillLocator>().primary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeEyeBlast));
-            body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeWardWipe));
+            body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeWardWipeNux));
             //   body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
             body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.baseMaxStock = 1;
 
@@ -586,6 +605,21 @@ namespace FathomlessVoidling
 
     private static void LoadAssets()
     {
+      AssetReferenceT<LoopSoundDef> lsdVoidMegaCrabDeathBombRef = new AssetReferenceT<LoopSoundDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidMegaCrab.lsdVoidMegaCrabDeathBomb_asset);
+      AssetAsyncReferenceManager<LoopSoundDef>.LoadAsset(lsdVoidMegaCrabDeathBombRef).Completed += (x) => lsdVoidMegaCrabDeathBomb = x.Result;
+
+      AssetReferenceT<GameObject> chargeWardWipeChargeEffectRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabWardWipeChargeup_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(chargeWardWipeChargeEffectRef).Completed += (x) => chargeWardWipeChargeEffect = x.Result;
+
+      AssetReferenceT<GameObject> fireWardWipeMuzzleFlashRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabWardWipeMuzzleflash_prefab);
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(fireWardWipeMuzzleFlashRef).Completed += (x) => fireWardWipeMuzzleFlash = x.Result;
+
+      AssetReferenceT<BuffDef> bdWardWipeFogRef = new AssetReferenceT<BuffDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.bdVoidRaidCrabWardWipeFog_asset);
+      AssetAsyncReferenceManager<BuffDef>.LoadAsset(bdWardWipeFogRef).Completed += (x) => bdWardWipeFog = x.Result;
+
+      AssetReferenceT<InteractableSpawnCard> iscSafeWardRef = new AssetReferenceT<InteractableSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.iscVoidRaidSafeWard_asset);
+      AssetAsyncReferenceManager<InteractableSpawnCard>.LoadAsset(iscSafeWardRef).Completed += (x) => iscSafeWard = x.Result;
+
       AssetReferenceT<GameObject> raidTpEffectRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_gauntlets.VoidRaidCrabGauntletTeleportEffect_prefab);
       AssetAsyncReferenceManager<GameObject>.LoadAsset(raidTpEffectRef).Completed += (x) => raidTeleportEffect = x.Result;
 
