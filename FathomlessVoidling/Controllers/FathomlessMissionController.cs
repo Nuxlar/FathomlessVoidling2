@@ -1,7 +1,7 @@
 
 using RoR2;
+using RoR2.CharacterAI;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -12,9 +12,12 @@ public class FathomlessMissionController : NetworkBehaviour
     public static FathomlessMissionController instance { get; private set; }
     public CombatSquad bossCombatSquad;
     public CharacterBody hauntBody;
-    private CharacterMaster voidlingMaster;
-    private CharacterBody voidlingBody;
-    private PhasedInventorySetter inventorySetter;
+    public CharacterMaster voidlingMaster;
+    public AISkillDriver wardWipeDriver;
+    public AISkillDriver singularityDriver;
+    public AISkillDriver mazeDriver;
+    public CharacterBody voidlingBody;
+    public PhasedInventorySetter inventorySetter;
 
     private void OnEnable()
     {
@@ -32,6 +35,15 @@ public class FathomlessMissionController : NetworkBehaviour
     private void BossCombatSquad_onMemberDiscovered(CharacterMaster characterMaster)
     {
         this.voidlingMaster = characterMaster;
+        foreach (AISkillDriver driver in characterMaster.GetComponents<AISkillDriver>())
+        {
+            switch (driver.customName)
+            {
+                case "WardWipe": this.wardWipeDriver = driver; break;
+                case "Vacuum Attack": this.singularityDriver = driver; break;
+                case "SpinBeam": this.mazeDriver = driver; break;
+            }
+        }
         this.voidlingBody = characterMaster.GetBody();
         PhasedInventorySetter setter = this.voidlingBody.GetComponent<PhasedInventorySetter>();
         if (setter)

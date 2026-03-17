@@ -13,7 +13,7 @@ namespace FathomlessVoidling.EntityStates.Barnacle
         public string animationLayerName = "Gesture";
         public string animationStateName = "Fire";
         public string animationPlaybackRateName = "firePlaybackRate";
-        private float _interFireballDuration;
+        private float _interFireballDuration = 1f;
         private float _animationDuration;
         private Transform muzzleTransform;
 

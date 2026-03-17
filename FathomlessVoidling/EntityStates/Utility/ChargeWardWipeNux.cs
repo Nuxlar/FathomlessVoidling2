@@ -1,5 +1,6 @@
 using EntityStates;
 using EntityStates.VoidRaidCrab;
+using FathomlessVoidling.Controllers;
 using RoR2;
 using RoR2.Audio;
 using System.Collections.Generic;
@@ -54,6 +55,8 @@ namespace FathomlessVoidling.EntityStates.Utility
             this.fogDamageController = this.GetComponent<FogDamageController>();
             this.fogDamageController.enabled = true;
             this.safeWards = new List<GameObject>();
+            if (FathomlessMissionController.instance && FathomlessMissionController.instance.wardWipeDriver)
+                FathomlessMissionController.instance.wardWipeDriver.enabled = false;
         }
 
         public override void FixedUpdate()

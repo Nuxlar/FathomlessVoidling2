@@ -28,23 +28,15 @@ namespace FathomlessVoidling.Hooks
             On.RoR2.VoidRaidCrab.LegController.RegenerateServer += PreventJointRegen;
 
             On.EntityStates.VoidBarnacle.Weapon.ChargeFire.OnEnter += LazyMf;
-            On.EntityStates.VoidRaidCrab.ChargeGauntlet.OnEnter += ReplaceGauntletWithWipe;
             /*
                 PhaseControllerStateMachine (GameObject)
                 has NetworkIdentity, EntityStateMachine, and NetworkStateMachine
             */
-
-            // On.EntityStates.VoidRaidCrab.VacuumAttack.OnEnter += IncreaseSingularitySize;
         }
 
         private void PreventJointRegen(On.RoR2.VoidRaidCrab.LegController.orig_RegenerateServer orig, LegController self)
         {
 
-        }
-
-        private void ReplaceGauntletWithWipe(On.EntityStates.VoidRaidCrab.ChargeGauntlet.orig_OnEnter orig, ChargeGauntlet self)
-        {
-            self.outer.SetState(new ChargeWardWipeNux());
         }
 
         private void FixPipReviveBug(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)
@@ -93,6 +85,27 @@ namespace FathomlessVoidling.Hooks
                             jointBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 5f);
                             jointBody.healthComponent.Heal(hc.fullHealth, new ProcChainMask());
                         }
+                        // damage main body
+                        if (FathomlessMissionController.instance && FathomlessMissionController.instance.voidlingBody)
+                        {
+                            CharacterBody bossBody = FathomlessMissionController.instance.voidlingBody;
+                            bossBody.RemoveBuff(RoR2Content.Buffs.HiddenInvincibility);
+                            bossBody.healthComponent.TakeDamage(new DamageInfo()
+                            {
+                                damage = 9999999f,
+                                crit = false,
+                                rejected = false,
+                                delayedDamageSecondHalf = false,
+                                firstHitOfDelayedDamageSecondHalf = false,
+                            });
+                            bossBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
+                            // swap special skill to ward wipe and enable its driver
+                            SkillLocator skillLocator = bossBody.GetComponent<SkillLocator>();
+                            if (skillLocator && Main.sdWardWipe)
+                                skillLocator.special.SetBaseSkill(Main.sdWardWipe);
+                            if (FathomlessMissionController.instance.wardWipeDriver)
+                                FathomlessMissionController.instance.wardWipeDriver.enabled = true;
+                        }
                     }
                 }
                 if (jointThresholdController && !jointThresholdController.defeatedServer && hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
@@ -101,6 +114,14 @@ namespace FathomlessVoidling.Hooks
                     jointThresholdController.TriggerThresholdEvent();
                     hc.health = hc.fullHealth * 0.75f;
                     damageReport.damageDealt = 1f;
+                    if (FathomlessMissionController.instance)
+                    {
+                        int phase = FathomlessMissionController.instance.GetCurrentPhase();
+                        if (phase == 0 && FathomlessMissionController.instance.singularityDriver)
+                            FathomlessMissionController.instance.singularityDriver.enabled = true;
+                        else if (phase == 1 && FathomlessMissionController.instance.mazeDriver)
+                            FathomlessMissionController.instance.mazeDriver.enabled = true;
+                    }
                 }
             }
             orig(damageReport);

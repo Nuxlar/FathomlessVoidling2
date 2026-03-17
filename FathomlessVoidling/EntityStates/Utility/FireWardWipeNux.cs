@@ -18,8 +18,8 @@ namespace FathomlessVoidling.EntityStates.Utility
         public string animationStateName = "FireWipe";
         public string animationPlaybackRateParam = "Wipe.playbackRate";
         public string enterSoundString;
-        public SkillDef skillDefToReplaceAtStocksEmpty;
-        public SkillDef nextSkillDef;
+        public SkillDef skillDefToReplaceAtStocksEmpty = Main.sdSingularity;
+        public SkillDef nextSkillDef = Main.sdSingularity;
         public BuffDef requiredBuffToKill = Main.bdWardWipeFog;
         public float teleportDelay = 0.55f;
         private float teleportStopwatch = 0f;
@@ -106,18 +106,27 @@ namespace FathomlessVoidling.EntityStates.Utility
             }
 
             List<CharacterBody> playerBodies = Main.GetPlayerBodies();
+            // RaidDC
+            if (VoidRaidGauntletController.instance.currentDonut.root.name == "RaidDC")
+            {
+                Transform roof = VoidRaidGauntletController.instance.currentDonut.root.transform.Find("HOLDER: ROOF");
+                if (roof.gameObject.activeSelf)
+                    roof.gameObject.SetActive(false);
+            }
+            /*
             if (VoidRaidGauntletController.instance.currentDonut.root.name == "RaidBB")
             {
                 Transform pp = VoidRaidGauntletController.instance.currentDonut.root.transform.Find("HOLDER: Skybox+PP");
                 pp.Find("PP + Amb").GetComponent<SetAmbientLight>().ApplyLighting();
             }
+            */
             if (playerBodies.Count > 0)
             {
                 foreach (CharacterBody playerBody in playerBodies)
                 {
+
                     Vector3? teleportPos = TeleportHelper.FindSafeTeleportDestination(VoidRaidGauntletController.instance.currentDonut.returnPoint.position, playerBody, Run.instance.runRNG);
                     //  TeleportHelper.TeleportBody(playerBody, (Vector3)teleportPos, false);
-                    // TeleportHelper.TeleportBody(playerBody.gameObject, , false);
                     TeleportHelper.TeleportBody(new TeleportHelper.TeleportBodyArgs()
                     {
                         body = playerBody,
@@ -126,7 +135,10 @@ namespace FathomlessVoidling.EntityStates.Utility
                         teleportMinions = true,
                         resetStateMachines = true
                     });
-                    EffectManager.SimpleEffect(Main.raidTeleportEffect, (Vector3)teleportPos, Quaternion.identity, true);
+                    GameObject effectPrefab = Run.instance.GetTeleportEffectPrefab(playerBody.gameObject);
+                    effectPrefab = Main.raidTeleportEffect;
+                    if (effectPrefab)
+                        EffectManager.SimpleEffect(effectPrefab, (Vector3)teleportPos, Quaternion.identity, true);
                 }
             }
         }

@@ -75,6 +75,9 @@ namespace FathomlessVoidling
     public static GameObject fireWardWipeMuzzleFlash;
     public static BuffDef bdWardWipeFog;
     public static InteractableSpawnCard iscSafeWard;
+    public static SkillDef sdWardWipe;
+    public static SkillDef sdSingularity;
+    public static SkillDef sdMaze;
 
     // Voidling Haunt Variables
     public static GameObject barnacleMuzzleFlash;
@@ -231,63 +234,38 @@ namespace FathomlessVoidling
       AssetAsyncReferenceManager<GameObject>.LoadAsset(voidlingMasterRef).Completed += (x) =>
       {
         GameObject masterPrefab = x.Result;
-        // VoidRaidCrabAISkillDriverController
-        VoidRaidCrabAISkillDriverController skillDriverController = masterPrefab.GetComponent<VoidRaidCrabAISkillDriverController>();
-        Debug.LogWarning("BODY SKILL DRIVERS");
-        foreach (AISkillDriver driver in skillDriverController.bodySkillDrivers)
-        {
-          Debug.LogWarning(driver.customName);
-        }
-        Debug.LogWarning("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
-        Debug.LogWarning("GAUNTLET SKILL DRIVERS");
-        foreach (AISkillDriver driver in skillDriverController.gauntletSkillDrivers)
-        {
-          Debug.LogWarning(driver.customName);
-        }
-        Debug.LogWarning("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-
-        Debug.LogWarning("WEAPON SKILL DRIVERS");
-        foreach (AISkillDriver driver in skillDriverController.weaponSkillDrivers)
-        {
-          Debug.LogWarning(driver.customName);
-        }
-        Debug.LogWarning("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        GameObject.Destroy(masterPrefab.GetComponent<VoidRaidCrabAISkillDriverController>());
 
         List<AISkillDriver> driverList = masterPrefab.GetComponents<AISkillDriver>().ToList();
         foreach (AISkillDriver driver in driverList)
         {
-          //  Debug.LogWarning(driver.customName);
           switch (driver.customName)
           {
             case "Channel Gauntlet 1":
-              //driver.maxUserHealthFraction = 0.66f;
-              driver.requiredSkill = null;
-              break;
             case "Channel Gauntlet 2":
-              // driver.maxUserHealthFraction = 0.33f;
-              driver.requiredSkill = null;
+            case "GravityBump":
+              GameObject.Destroy(driver);
               break;
             case "FireMissiles":
               driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
-              // driver.activationRequiresAimConfirmation = true;
+              driver.enabled = true;
               break;
             case "FireMultiBeam":
               driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
               driver.aimType = AISkillDriver.AimType.AtMoveTarget;
+              driver.skillSlot = SkillSlot.Secondary;
+              driver.enabled = true;
               break;
             case "SpinBeam":
-              driver.maxUserHealthFraction = 1f;
-              driver.requiredSkill = null;
-              break;
-            case "GravityBump":
-              driver.maxUserHealthFraction = 1f;
-              driver.requiredSkill = null;
               driver.skillSlot = SkillSlot.Utility;
+              driver.maxUserHealthFraction = float.PositiveInfinity;
               break;
             case "Vacuum Attack":
-              driver.maxUserHealthFraction = 0.9f;
-              driver.requiredSkill = null;
+              driver.maxUserHealthFraction = float.PositiveInfinity;
+              break;
+            case "WardWipe":
+              driver.maxUserHealthFraction = 0.66f; // 0.67 orig
               break;
             case "LookAtTarget":
               driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
@@ -566,8 +544,7 @@ namespace FathomlessVoidling
             ModelLocator modelLocator = body.GetComponent<ModelLocator>();
             body.GetComponent<CharacterBody>().baseMaxHealth = 2000f;
             body.GetComponent<SkillLocator>().primary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeEyeBlast));
-            body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeWardWipeNux));
-            //   body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
+            body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
             body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.baseMaxStock = 1;
 
             // Add new spawn state
@@ -882,6 +859,27 @@ x -0.44 0.44
 
       AssetReferenceT<CharacterSpawnCard> voidlingCardRef = new AssetReferenceT<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrab_asset);
       AssetAsyncReferenceManager<CharacterSpawnCard>.LoadAsset(voidlingCardRef).Completed += (x) => bigVoidlingCard = x.Result;
+
+      AssetReferenceT<SkillDef> sdWardWipeRef = new AssetReferenceT<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabWardWipe_asset);
+      AssetAsyncReferenceManager<SkillDef>.LoadAsset(sdWardWipeRef).Completed += (x) =>
+      {
+        sdWardWipe = x.Result;
+        sdWardWipe.activationState = new SerializableEntityStateType(typeof(ChargeWardWipeNux));
+      };
+
+      AssetReferenceT<SkillDef> sdSingularityRef = new AssetReferenceT<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabVacuumAttack_asset);
+      AssetAsyncReferenceManager<SkillDef>.LoadAsset(sdSingularityRef).Completed += (x) =>
+      {
+        sdSingularity = x.Result;
+        sdSingularity.activationState = new SerializableEntityStateType(typeof(WanderingSingularity));
+      };
+
+      AssetReferenceT<SkillDef> sdMazeRef = new AssetReferenceT<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabSpinBeam_asset);
+      AssetAsyncReferenceManager<SkillDef>.LoadAsset(sdMazeRef).Completed += (x) =>
+      {
+        sdMaze = x.Result;
+        sdMaze.activationState = new SerializableEntityStateType(typeof(EnterMaze));
+      };
     }
 
     private static void CreateSingularityProjectile()
@@ -961,7 +959,7 @@ x -0.44 0.44
       UnityEngine.Object.Destroy(primitive.GetComponent<CapsuleCollider>());
       MeshCollider collider = primitive.AddComponent<MeshCollider>();
       // primitive.AddComponent<ReverseNormals>();
-      primitive.transform.localScale = new Vector3(110f, 1250f, 110f);
+      primitive.transform.localScale = new Vector3(115f, 1250f, 115f); // 110 orig
       primitive.name = "Cheese Deterrent";
       primitive.transform.SetParent(gameObject.transform);
       primitive.transform.localPosition = Vector3.zero;

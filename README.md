@@ -2,17 +2,15 @@
 
 TODOs:
     - Tweaks to Master and Voidling mission controllers to account for the defined flow
-    - Handle Voidling death properly
-    - Disable footstep SFX/VFX when joint is destroyed
-    - Tweak PP/lighting to be brighter (especially on BB donut)
-    - Add event to damage main body after joint death
-    - Add event to enable skill drivers for abilities on joint threshold
+    - Replace FinalStand with immediate death
+    - Spawn outro portal
+    - Remove "roof" off of AD donut
     - NETWORKING STUFF (check after testing)
         - (MAYBE) Redo VoidRain to use the entitystate rather than random components, will probably end up with bad networking
         - (MAYBE) Redo Wandering Singularity to use the entitystate rather than random components, will probably end up with bad networking
     
-Bugs:
-    - Barnacle spawning in weird spot on the joint
+BUGS:
+    - Barnacle spawning in weird spot on the joint sometimes
 
 What would 1.0 entail?
     - The complete move/attack set for voidling and voidling haunt
