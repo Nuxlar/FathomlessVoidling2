@@ -28,7 +28,19 @@ using FathomlessVoidling.EntityStates.Special;
 using FathomlessVoidling.EntityStates.Barnacle;
 using FathomlessVoidling.Components;
 using FathomlessVoidling.Hooks;
+/*
+  STUFF TO REFERENCE
+    SFX
+    // Play_voidRaid_fog_explode ominous, subtle explosion
+    // Play_voidDevastator_spawn_loop ominous portal sounds
+    // Play_voidDevastator_death quick "explosion"
+    // Play_voidDevastator_death_vortex_explode crunchier nullifier explosion
+    // Play_voidJailer_death_vortex_explode quick distored explosion
+    // Play_voidRaid_fog_chargeUp good starter for wardwipe
+    // Play_voidRaid_fog_affectPlayer whispering loop
+    // Play_item_void_slowOnHit weird sorta tp?
 
+*/
 namespace FathomlessVoidling
 {
   [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
@@ -621,7 +633,16 @@ namespace FathomlessVoidling
       AssetAsyncReferenceManager<InteractableSpawnCard>.LoadAsset(iscSafeWardRef).Completed += (x) => iscSafeWard = x.Result;
 
       AssetReferenceT<GameObject> raidTpEffectRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_gauntlets.VoidRaidCrabGauntletTeleportEffect_prefab);
-      AssetAsyncReferenceManager<GameObject>.LoadAsset(raidTpEffectRef).Completed += (x) => raidTeleportEffect = x.Result;
+      AssetAsyncReferenceManager<GameObject>.LoadAsset(raidTpEffectRef).Completed += (x) =>
+      {
+        raidTeleportEffect = x.Result;
+        raidTeleportEffect.GetComponent<EffectComponent>().soundName = "Play_voidRaid_fog_explode";
+        ParticleSystem.MinMaxGradient omniSparksColor = raidTeleportEffect.transform.Find("OmniSparks").GetComponent<ParticleSystem>().main.startColor;
+        ParticleSystem.MainModule sphereBrief = raidTeleportEffect.transform.Find("Sphere, Brief").GetComponent<ParticleSystem>().main;
+        ParticleSystem.MainModule sphereLong = raidTeleportEffect.transform.Find("Sphere, Long").GetComponent<ParticleSystem>().main;
+        sphereBrief.startColor = omniSparksColor;
+        sphereLong.startColor = omniSparksColor;
+      };
 
       AssetReferenceT<GameObject> safeWardRef = new AssetReferenceT<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidSafeWard_prefab);
       AssetAsyncReferenceManager<GameObject>.LoadAsset(safeWardRef).Completed += (x) =>

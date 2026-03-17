@@ -16,7 +16,7 @@ namespace FathomlessVoidling.EntityStates.Utility
         public string animationLayerName = "Body";
         public string animationStateName = "ChargeWipe";
         public string animationPlaybackRateParam = "Wipe.playbackRate";
-        public string enterSoundString;
+        public string enterSoundString = "Play_voidRaid_fog_chargeUp";
         public LoopSoundDef loopSound = Main.lsdVoidMegaCrabDeathBomb;
         public InteractableSpawnCard safeWardSpawnCard = Main.iscSafeWard;
         public AnimationCurve safeWardSpawnCurve = new AnimationCurve(
@@ -27,6 +27,9 @@ namespace FathomlessVoidling.EntityStates.Utility
         public float minDistanceBetweenConsecutiveWards = 200f;
         public float maxDistanceBetweenConsecutiveWards = 600f;
         public float maxDistanceToInitialWard = 600f;
+        public float loopSoundDelay = 2.65f;
+        private float loopSoundStopwatch = 0f;
+        private bool loopSoundFired = false;
         private GameObject chargeEffectInstance;
         private List<LoopSoundManager.SoundLoopPtr> loopPtrs = new List<LoopSoundManager.SoundLoopPtr>();
 
@@ -50,14 +53,19 @@ namespace FathomlessVoidling.EntityStates.Utility
             }
             this.fogDamageController = this.GetComponent<FogDamageController>();
             this.fogDamageController.enabled = true;
-            foreach (CharacterBody playerBody in Main.GetPlayerBodies())
-                this.loopPtrs.Add(LoopSoundManager.PlaySoundLoopLocal(playerBody.gameObject, this.loopSound));
             this.safeWards = new List<GameObject>();
         }
 
         public override void FixedUpdate()
         {
             base.FixedUpdate();
+            this.loopSoundStopwatch += Time.fixedDeltaTime;
+            if (!this.loopSoundFired && this.loopSoundStopwatch >= this.loopSoundDelay)
+            {
+                this.loopSoundFired = true;
+                foreach (CharacterBody playerBody in Main.GetPlayerBodies())
+                    this.loopPtrs.Add(LoopSoundManager.PlaySoundLoopLocal(playerBody.gameObject, this.loopSound));
+            }
             if (NetworkServer.active && this.safeWardSpawnCard)
             {
                 float f = this.safeWardSpawnCurve.Evaluate(this.fixedAge / this.duration);

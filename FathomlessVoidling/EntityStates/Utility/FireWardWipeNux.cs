@@ -21,7 +21,7 @@ namespace FathomlessVoidling.EntityStates.Utility
         public SkillDef skillDefToReplaceAtStocksEmpty;
         public SkillDef nextSkillDef;
         public BuffDef requiredBuffToKill = Main.bdWardWipeFog;
-        public float teleportDelay = 0.65f;
+        public float teleportDelay = 0.55f;
         private float teleportStopwatch = 0f;
         private bool teleportFired = false;
 
@@ -117,7 +117,15 @@ namespace FathomlessVoidling.EntityStates.Utility
                 {
                     Vector3? teleportPos = TeleportHelper.FindSafeTeleportDestination(VoidRaidGauntletController.instance.currentDonut.returnPoint.position, playerBody, Run.instance.runRNG);
                     //  TeleportHelper.TeleportBody(playerBody, (Vector3)teleportPos, false);
-                    TeleportHelper.TeleportGameObject(playerBody.gameObject, (Vector3)teleportPos);
+                    // TeleportHelper.TeleportBody(playerBody.gameObject, , false);
+                    TeleportHelper.TeleportBody(new TeleportHelper.TeleportBodyArgs()
+                    {
+                        body = playerBody,
+                        targetPosition = (Vector3)teleportPos,
+                        forceOutOfVehicle = true,
+                        teleportMinions = true,
+                        resetStateMachines = true
+                    });
                     EffectManager.SimpleEffect(Main.raidTeleportEffect, (Vector3)teleportPos, Quaternion.identity, true);
                 }
             }
