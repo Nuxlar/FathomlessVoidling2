@@ -2,19 +2,19 @@
 
 TODOs:
     - Tweaks to Master and Voidling mission controllers to account for the defined flow
-    - Ensure maze works after WardWipe
     - Handle Voidling death properly
     - Disable footstep SFX/VFX when joint is destroyed
-    - Fix SafeWard being visually too large
-    - Tweak WardWipe safe ward spawn distance
-    - Teleport VoidlingHaunt along with the main body during WardWipe
-    - Fix threshold barnacles spawning inside the joint sometimes
-    - Change Voidling Toe and Calf collisions being on the world layer (fixes barnacles spawning on them)
+    - Tweak PP/lighting to be brighter (especially on BB donut)
     - Add event to damage main body after joint death
     - Add event to enable skill drivers for abilities on joint threshold
     - NETWORKING STUFF (check after testing)
         - (MAYBE) Redo VoidRain to use the entitystate rather than random components, will probably end up with bad networking
         - (MAYBE) Redo Wandering Singularity to use the entitystate rather than random components, will probably end up with bad networking
+    
+Bugs:
+    - if u deal enough damage to oneshot the joint, it skips the threshold
+    - Barnacle spawning in weird spot on the joint
+    - WardWipe SFX still doesn't play
 
 What would 1.0 entail?
     - The complete move/attack set for voidling and voidling haunt

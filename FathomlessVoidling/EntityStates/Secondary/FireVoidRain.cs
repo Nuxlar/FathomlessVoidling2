@@ -132,15 +132,12 @@ namespace FathomlessVoidling.EntityStates.Secondary
             search.RefreshCandidates();
 
             HurtBox targetHurtBox;
-            targetHurtBox = search.GetResults().First((hurtBox) =>
+            targetHurtBox = search.GetResults().FirstOrDefault((hurtBox) =>
             {
                 if (hurtBox.healthComponent && hurtBox.healthComponent.body && hurtBox.healthComponent.body.isPlayerControlled)
                     return true;
                 else return false;
             });
-
-            if (!targetHurtBox)
-                targetHurtBox = search.GetResults().FirstOrDefault();
 
             bool hasHurtbox = targetHurtBox && targetHurtBox.healthComponent.body.characterMotor;
 

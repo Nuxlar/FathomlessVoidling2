@@ -98,7 +98,7 @@ public class VoidlingHauntManager : BaseState
         NodeGraph groundNodes = SceneInfo.instance.groundNodes;
         if (!(bool)groundNodes)
             return;
-        List<NodeGraph.NodeIndex> nodesInRange = groundNodes.FindNodesInRange(Vector3.zero, 25f, 200f, HullMask.Human);
+        List<NodeGraph.NodeIndex> nodesInRange = groundNodes.FindNodesInRange(this.characterBody.corePosition, 25f, 200f, HullMask.Human);
         NodeGraph.NodeIndex nodeIndex = nodesInRange[Random.Range(0, nodesInRange.Count)];
         Vector3 position;
         groundNodes.GetNodePosition(nodeIndex, out position);

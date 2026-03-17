@@ -53,15 +53,12 @@ namespace FathomlessVoidling.Components
             enemyFinder.RefreshCandidates();
 
             HurtBox targetHurtBox;
-            targetHurtBox = enemyFinder.GetResults().First((hurtBox) =>
+            targetHurtBox = enemyFinder.GetResults().FirstOrDefault((hurtBox) =>
             {
                 if (hurtBox.healthComponent && hurtBox.healthComponent.body && hurtBox.healthComponent.body.isPlayerControlled)
                     return true;
                 else return false;
             });
-
-            if (!targetHurtBox)
-                targetHurtBox = enemyFinder.GetResults().FirstOrDefault();
 
             if (!targetHurtBox)
                 return;

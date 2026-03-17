@@ -12,13 +12,13 @@ namespace FathomlessVoidling.Controllers
         List<Vector3> mazePositions = new List<Vector3>()
           {
              // Top Left, Top Right
-            new Vector3(-258.2f, 0f, 25.5f), new Vector3(83.8f, 0f, 223f), // new Vector3(83.8f, 21.1f, 223f) 21.3f, 19, 20
+            new Vector3(-258.2f, 12f, 25.5f), new Vector3(83.8f, 12f, 223f), // new Vector3(83.8f, 21.1f, 223f) 21.3f, 19, 20
             // Bottom Left, Bottom Right
-            new Vector3(-201f, 0f, -195f), new Vector3(205f, 0f, -101f),
+            new Vector3(-201f, 12f, -195f), new Vector3(205f, 12f, -101f),
             // Bottom Up Left, Top Down Left
-            new Vector3(-141.3f, 0f, -261.7f), new Vector3(-232.2f, 0f, 93.4f),
+            new Vector3(-141.3f, 12f, -261.7f), new Vector3(-232.2f, 12f, 93.4f),
             // Bottom Up Right, Top Down Right
-            new Vector3(204.3f, 0f, -130.1f), new Vector3(73f,  0f, 217.3f)
+            new Vector3(204.3f, 12f, -130.1f), new Vector3(73f,  12f, 217.3f)
           };
 
         private void Start()

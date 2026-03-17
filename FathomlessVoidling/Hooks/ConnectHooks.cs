@@ -11,6 +11,7 @@ using R2API;
 using EntityStates.VoidRaidCrab;
 using System.Linq;
 using System.Collections.Generic;
+using UnityEngine.Rendering.PostProcessing;
 
 namespace FathomlessVoidling.Hooks
 {
@@ -79,7 +80,7 @@ namespace FathomlessVoidling.Hooks
                 VoidRaidGauntletController.instance.previousDonut.combatDirector.enabled = false;
 
             Vector3 crabPosition = VoidRaidGauntletController.instance.currentDonut.root.transform.Find("HOLDER: Terrain").Find("RaidTerrainHG").position;
-            Vector3 crabSpawnPos = new Vector3(crabPosition.x, crabPosition.y - 10, crabPosition.z);
+            Vector3 crabSpawnPos = new Vector3(crabPosition.x, crabPosition.y - 15f, crabPosition.z);
             TeleportHelper.TeleportBody(self.characterBody, crabSpawnPos, false);
             if (FathomlessMissionController.instance && FathomlessMissionController.instance.hauntBody)
             {
@@ -96,7 +97,11 @@ namespace FathomlessVoidling.Hooks
                     playerBodies.Add(body);
                 }
             }
-
+            if (VoidRaidGauntletController.instance.currentDonut.root.name == "RaidBB")
+            {
+                Transform pp = VoidRaidGauntletController.instance.currentDonut.root.transform.Find("HOLDER: Skybox+PP");
+                pp.Find("PP + Amb").GetComponent<SetAmbientLight>().ApplyLighting();
+            }
             if (playerBodies.Count > 0)
             {
                 foreach (CharacterBody playerBody in playerBodies)
@@ -105,10 +110,11 @@ namespace FathomlessVoidling.Hooks
                     //  TeleportHelper.TeleportBody(playerBody, (Vector3)teleportPos, false);
                     TeleportHelper.TeleportGameObject(playerBody.gameObject, (Vector3)teleportPos);
                     EffectManager.SimpleEffect(Main.raidTeleportEffect, (Vector3)teleportPos, Quaternion.identity, true);
-                    Util.PlaySound("Play_nullifier_death_vortex_explode", playerBody.gameObject);
                 }
-
             }
+
+            if (self.muzzleFlashPrefab)
+                EffectManager.SimpleMuzzleFlash(self.muzzleFlashPrefab, self.gameObject, self.muzzleName, false);
         }
 
         private void FixPipReviveBug(On.RoR2.CharacterMaster.orig_OnBodyStart orig, CharacterMaster self, CharacterBody body)
@@ -146,18 +152,17 @@ namespace FathomlessVoidling.Hooks
                     foreach (TeamComponent teamComponent in TeamComponent.GetTeamMembers(TeamIndex.Void).ToList())
                     {
                         CharacterBody characterBody = teamComponent.GetComponent<CharacterBody>();
-                        if (characterBody && characterBody != body && characterBody.name == "VoidRaidCrabJointBody(Clone)")
-                        {
-                            jointBodies.Add(body);
-                        }
+                        if (characterBody && characterBody.name == "VoidRaidCrabJointBody(Clone)" && characterBody.netId != body.netId)
+                            jointBodies.Add(characterBody);
                     }
+
                     foreach (CharacterBody jointBody in jointBodies)
                     {
                         jointBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 10f);
                         jointBody.healthComponent.Heal(hc.fullHealth, new ProcChainMask());
                     }
                 }
-                if (jointThresholdController && !jointThresholdController.defeatedServer && hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
+                else if (jointThresholdController && !jointThresholdController.defeatedServer && hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
                 {
                     body.AddBuff(RoR2Content.Buffs.Immune);
                     jointThresholdController.TriggerThresholdEvent();
@@ -172,11 +177,15 @@ namespace FathomlessVoidling.Hooks
         {
             if (SceneManager.GetActiveScene().name == "voidraid")
             {
+                // Weather, Void Raid Starry Night Variant PP + Amb postprocessvolume rampfog setting fogcolorstart 0.1887 0.1629 0.1629 0
+                // Weather Tweaks
+                //   PostProcessVolume ppv = GameObject.Find("Weather, Void Raid Starry Night Variant").transform.Find("PP + Amb").GetComponent<PostProcessVolume>();
+                //   ppv.profile.GetSetting<RampFog>().fogColorStart.value = new Color(0.1887f, 0.1629f, 0.1629f, 0.2f);
                 GameObject missionObj = GameObject.Find("EncounterPhases");
                 GameObject phase1Obj = missionObj.transform.GetChild(0).gameObject;
                 if (missionObj && phase1Obj)
                 {
-                    missionObj.AddComponent<FathomlessMissionController>();
+                    phase1Obj.AddComponent<FathomlessMissionController>();
                     missionObj.transform.GetChild(1).gameObject.SetActive(false);
                     missionObj.transform.GetChild(2).gameObject.SetActive(false);
 

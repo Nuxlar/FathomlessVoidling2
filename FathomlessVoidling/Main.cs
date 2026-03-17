@@ -572,6 +572,15 @@ namespace FathomlessVoidling
 
             // Add eye blinking
             model.AddComponent<RandomBlinkController>();
+
+            Transform legBase = model.transform.Find("VoidRaidCrabArmature").Find("ROOT").Find("LegBase");
+            List<SurfaceDefProvider> providers = legBase.GetComponentsInChildren<SurfaceDefProvider>().ToList();
+            foreach (SurfaceDefProvider provider in providers)
+            {
+              provider.gameObject.layer = (int)LayerIndex.defaultLayer;
+            }
+            // VoidRaidCrabArmature -> ROOT -> LegBase get surfacedefprovide
+
           };
     }
 
@@ -584,8 +593,9 @@ namespace FathomlessVoidling
       AssetAsyncReferenceManager<GameObject>.LoadAsset(safeWardRef).Completed += (x) =>
       {
         GameObject safeWard = x.Result;
-        safeWard.transform.localScale = new Vector3(3f, 1f, 3f);
-        safeWard.GetComponent<VerticalTubeZone>().radius = 12f;
+        //  Transform indicatorTransform = safeWard.transform.Find("Indicator").GetChild(0);
+        // indicatorTransform.localScale = new Vector3(8f, 120f, 8f); // 2 120 2
+        safeWard.GetComponent<VerticalTubeZone>().radius = 16f; // 4
       };
       AssetReferenceT<Material> voidCylinderMatRef = new AssetReferenceT<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_GameModes_InfiniteTowerRun_ITAssets.matITSafeWardAreaIndicator1_mat);
       AssetAsyncReferenceManager<Material>.LoadAsset(voidCylinderMatRef).Completed += (x) => voidCylinderMat = x.Result;
@@ -651,11 +661,12 @@ namespace FathomlessVoidling
       {
         GameObject gravityPrefab = x.Result;
         GameObject newMuzzlePrefab = PrefabAPI.InstantiateClone(gravityPrefab, "MazeMuzzleEffectNux", false);
+        newMuzzlePrefab.transform.eulerAngles = new Vector3(90f, 0f, 0f);
         foreach (ParticleSystem item in newMuzzlePrefab.transform.GetComponentsInChildren<ParticleSystem>())
         {
           ParticleSystem.MainModule main = item.main;
           main.duration *= 1.25f;
-          main.startSizeMultiplier *= 1.25f;
+          //   main.startSizeMultiplier *= 1.25f;
         }
         mazeMuzzleEffect = newMuzzlePrefab;
       };
@@ -796,13 +807,13 @@ x -0.44 0.44
           newAttachment.transform.parent = toeJoint;
           if (i < 2)
           {
-            float zVector = i == 0 ? 0.44f : -0.66f;
-            newAttachment.transform.localPosition = new Vector3(0f, -0.1f, zVector);
+            float zVector = i == 0 ? 0.46f : -0.66f;
+            newAttachment.transform.localPosition = new Vector3(0f, 0.15f, zVector);
           }
           else
           {
-            float xVector = i == 2 ? 0.44f : -0.66f;
-            newAttachment.transform.localPosition = new Vector3(xVector, -0.1f, 0f);
+            float xVector = i == 2 ? 0.46f : -0.66f;
+            newAttachment.transform.localPosition = new Vector3(xVector, 0.15f, 0f);
           }
           childLocator.AddChild(attachName, newAttachment.transform);
           spawnSlot.spawnCard = attachableBarnacleCard;

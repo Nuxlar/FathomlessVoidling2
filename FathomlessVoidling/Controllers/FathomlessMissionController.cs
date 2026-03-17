@@ -19,6 +19,7 @@ public class FathomlessMissionController : NetworkBehaviour
     private void OnEnable()
     {
         FathomlessMissionController.instance = SingletonHelper.Assign<FathomlessMissionController>(FathomlessMissionController.instance, this);
+        this.bossCombatSquad = this.GetComponent<CombatSquad>();
         this.bossCombatSquad.onMemberDiscovered += new Action<CharacterMaster>(this.BossCombatSquad_onMemberDiscovered);
     }
 
