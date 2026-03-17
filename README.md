@@ -4,6 +4,7 @@ TODOs:
     - Tweaks to Master and Voidling mission controllers to account for the defined flow
     - Replace FinalStand with immediate death
     - Spawn outro portal
+    - Tweak skill cooldown values
     - Remove "roof" off of AD donut
     - NETWORKING STUFF (check after testing)
         - (MAYBE) Redo VoidRain to use the entitystate rather than random components, will probably end up with bad networking
@@ -11,6 +12,11 @@ TODOs:
     
 BUGS:
     - Barnacle spawning in weird spot on the joint sometimes
+MP BUGS:
+    - Joints don't show up on spawn
+    - Missiles are still small visually
+    - WardWipe doesn't teleport other players
+    - Voidling is a zombie after teleporting
 
 What would 1.0 entail?
     - The complete move/attack set for voidling and voidling haunt
