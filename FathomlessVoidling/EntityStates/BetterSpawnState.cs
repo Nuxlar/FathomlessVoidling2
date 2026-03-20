@@ -3,6 +3,7 @@ using RoR2.VoidRaidCrab;
 using UnityEngine;
 using UnityEngine.Networking;
 using EntityStates;
+using FathomlessVoidling.Components;
 using FathomlessVoidling.Controllers;
 
 namespace FathomlessVoidling.EntityStates
@@ -89,13 +90,38 @@ namespace FathomlessVoidling.EntityStates
             Transform child = childLocator.FindChild(legName);
             if (!(bool)gameObject && !(bool)child)
                 return;
-            CharacterMaster component1 = gameObject.GetComponent<CharacterMaster>();
-            if (!(bool)component1)
+            CharacterMaster characterMaster = gameObject.GetComponent<CharacterMaster>();
+            if (!(bool)characterMaster)
                 return;
-            LegController component2 = child.GetComponent<LegController>();
-            if (!(bool)component2)
+
+            // get legcontroller from child of voidling main body
+            LegController legController = child.GetComponent<LegController>();
+            if (!(bool)legController)
                 return;
-            component2.SetJointMaster(component1, child.GetComponent<ChildLocator>());
+
+            legController.SetJointMaster(characterMaster, child.GetComponent<ChildLocator>());
+
+
+
+            // meaning ig uess this is where we should tell the client to........... ok
+            // so first off do we even have a fucking body this early
+            if (characterMaster.GetBodyObject() != null)
+            {
+                GameObject bodyObj = characterMaster.GetBodyObject();
+
+                if (bodyObj.TryGetComponent(out LegControllerNetworkHelper lcnh))
+                {
+                    lcnh.RpcMirrorLegJoints(this.characterBody.gameObject, legName);
+                }
+                else
+                {
+                    Debug.Log("BetterSpawnState.SpawnJointBodyForLegServer : no lcnh");
+                }
+            }
+            else
+            {
+                Debug.Log("BetterSpawnState.SpawnJointBodyForLegServer : no charbody to send to lcnh");
+            }
         }
 
         public override void FixedUpdate()

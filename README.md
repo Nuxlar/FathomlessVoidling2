@@ -12,9 +12,8 @@ TODOs:
     
 BUGS:
     - Barnacle spawning in weird spot on the joint sometimes
+    - WardWipe doesn't immediately start, need to replace the skill differently
 MP BUGS:
-    - Joints don't show up on spawn
-    - Missiles are still small visually
     - WardWipe doesn't teleport other players
     - Voidling is a zombie after teleporting
 
