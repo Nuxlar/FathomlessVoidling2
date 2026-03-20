@@ -16,6 +16,7 @@ BUGS:
 MP BUGS:
     - WardWipe doesn't teleport other players
     - Voidling is a zombie after teleporting
+    - JointBreak VFX doesn't show up on clients
 
 What would 1.0 entail?
     - The complete move/attack set for voidling and voidling haunt
