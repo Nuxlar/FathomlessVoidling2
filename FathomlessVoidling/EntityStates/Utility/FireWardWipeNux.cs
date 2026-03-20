@@ -44,7 +44,7 @@ namespace FathomlessVoidling.EntityStates.Utility
             {
                 foreach (CharacterBody affectedBody in this.fogDamageController.GetAffectedBodies())
                 {
-                    if (!this.requiredBuffToKill || affectedBody.HasBuff(this.requiredBuffToKill))
+                    if (affectedBody.isPlayerControlled && affectedBody.HasBuff(this.requiredBuffToKill))
                         affectedBody.healthComponent.Suicide(this.gameObject, this.gameObject, DamageType.VoidDeath);
                 }
             }

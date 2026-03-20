@@ -516,15 +516,7 @@ namespace FathomlessVoidling
       skillLocator.primary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeEyeBlast));
       skillLocator.secondary.skillFamily.variants = new SkillFamily.Variant[] { new SkillFamily.Variant() { skillDef = sdMultiBeam } };
       skillLocator.utility.skillFamily.variants = new SkillFamily.Variant[] { new SkillFamily.Variant() { skillDef = sdMaze } };
-      Debug.LogWarning("SECONDARY CD: " + skillLocator.secondary.skillFamily.variants[0].skillDef.baseRechargeInterval);
-      Debug.LogWarning("UTILITY CD: " + skillLocator.utility.skillFamily.variants[0].skillDef.baseRechargeInterval);
-      /*
-        Skill Cooldowns
-        Primary 10s
-        Secondary 10s
-        Utility 40s
-        Special 60s
-      */
+
       // Add new spawn state
       List<EntityStateMachine> list = body.GetComponents<EntityStateMachine>().ToList();
       for (int i = 0; i < list.Count; i++)

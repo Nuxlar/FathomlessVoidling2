@@ -149,11 +149,11 @@ namespace FathomlessVoidling.Hooks
                         }
                     }
                 }
-                if (jointThresholdController && !jointThresholdController.defeatedServer && hc.health - damageReport.damageDealt <= hc.fullHealth * 0.75f)
+                if (jointThresholdController && !jointThresholdController.defeatedServer && hc.health - damageReport.damageDealt <= hc.fullHealth * 0.8f)
                 {
                     body.AddBuff(RoR2Content.Buffs.Immune);
                     jointThresholdController.TriggerThresholdEvent();
-                    hc.health = hc.fullHealth * 0.75f;
+                    hc.health = hc.fullHealth * 0.8f;
                     damageReport.damageDealt = 1f;
                     if (FathomlessMissionController.instance)
                     {

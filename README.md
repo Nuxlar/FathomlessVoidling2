@@ -3,6 +3,9 @@
 TODOs:
     - Tweaks to Master and Voidling mission controllers to account for the defined flow
     - Replace FinalStand with immediate death
+    - Tweak Maze positions/angles to ensure they work on other donuts
+    - Disable combatdirectors on other donuts
+    - Add a function to kill all barnacles after WardWipse
     - Code in logic for third joint death (suppress break -> kill main body)
     - Spawn outro portal
     
