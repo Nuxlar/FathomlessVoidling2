@@ -48,7 +48,7 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "1.0.0";
+    public const string PluginVersion = "0.9.12";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
@@ -85,8 +85,8 @@ namespace FathomlessVoidling
     public static GameObject gravityBombProjectile;
     public static SpawnCard voidlingHauntCard = ScriptableObject.CreateInstance<CharacterSpawnCard>();
     public static SpawnCard attachableBarnacleCard = ScriptableObject.CreateInstance<CharacterSpawnCard>();
-    public static GameObject groundedGravityEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabGravityBumpExplosionGround_prefab).WaitForCompletion();
-    public static GameObject airborneGravityEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabGravityBumpExplosionAir_prefab).WaitForCompletion();
+    public static GameObject groundedGravityEffect;
+    public static GameObject airborneGravityEffect;
     public static DirectorCardCategorySelection barnacleDccs = ScriptableObject.CreateInstance<DirectorCardCategorySelection>();
 
     // Maze Variables
@@ -146,11 +146,14 @@ namespace FathomlessVoidling
     public static List<CharacterBody> GetPlayerBodies()
     {
       List<CharacterBody> playerBodies = new List<CharacterBody>();
-      foreach (TeamComponent teamComponent in TeamComponent.GetTeamMembers(TeamIndex.Player).ToList())
+      foreach (PlayerCharacterMasterController playerMasterController in PlayerCharacterMasterController.instances)
       {
-        CharacterBody body = teamComponent.GetComponent<CharacterBody>();
-        if (body && body.isPlayerControlled)
-          playerBodies.Add(body);
+        if (playerMasterController && playerMasterController.isConnected && playerMasterController.master)
+        {
+          CharacterBody playerBody = playerMasterController.master.GetBody();
+          if (playerBody)
+            playerBodies.Add(playerBody);
+        }
       }
       return playerBodies;
     }
@@ -240,21 +243,28 @@ namespace FathomlessVoidling
           case "FireMissiles":
             driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
             driver.enabled = true;
+            driver.noRepeat = true;
             break;
           case "FireMultiBeam":
             driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
             driver.aimType = AISkillDriver.AimType.AtMoveTarget;
             driver.skillSlot = SkillSlot.Secondary;
             driver.enabled = true;
+            driver.maxUserHealthFraction = float.PositiveInfinity;
+            driver.activationRequiresAimConfirmation = false;
+            driver.noRepeat = true;
             break;
           case "SpinBeam":
+            driver.noRepeat = true;
             driver.skillSlot = SkillSlot.Utility;
             driver.maxUserHealthFraction = float.PositiveInfinity;
             break;
           case "Vacuum Attack":
+            driver.noRepeat = true;
             driver.maxUserHealthFraction = float.PositiveInfinity;
             break;
           case "WardWipe":
+            driver.noRepeat = true;
             driver.maxUserHealthFraction = 0.66f; // 0.67 orig
             break;
           case "LookAtTarget":
@@ -267,6 +277,11 @@ namespace FathomlessVoidling
 
     private static void CreateGravityProjectiles()
     {
+      groundedGravityEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabGravityBumpExplosionGround_prefab).WaitForCompletion();
+      groundedGravityEffect.GetComponent<EffectComponent>().soundName = "Play_voidRaid_fog_explode";
+      airborneGravityEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabGravityBumpExplosionAir_prefab).WaitForCompletion();
+      airborneGravityEffect.GetComponent<EffectComponent>().soundName = "Play_voidRaid_fog_explode";
+
       Material matGravitySphere = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabGravityBumpSphere_mat).WaitForCompletion();
       Material matGravitySphere2 = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabGravityBumpGem_mat).WaitForCompletion();
       Material matGravityStar = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabParticleBlue_mat).WaitForCompletion();

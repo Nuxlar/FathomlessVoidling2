@@ -27,12 +27,9 @@ namespace FathomlessVoidling.EntityStates.Primary
         public string animationLayerName = "Gesture";
         public string animationStateName = "ChargeEyeBlast";
         public string animationPlaybackRateParam = "Eyeblast.playbackRate";
-        public SkillDef skillDefToReplaceAtStocksEmpty;
-        public SkillDef nextSkillDef;
-        private Ray aimRay;
         private float delayBetweenWaves;
         private float duration;
-        private int numWavesFired;
+        private int numWavesFired = 0;
         private float timeUntilNextWave;
         private Transform muzzleTransform;
         public AimAnimator.DirectionOverrideRequest animatorDirectionOverrideRequest;
@@ -40,12 +37,6 @@ namespace FathomlessVoidling.EntityStates.Primary
         public override void OnEnter()
         {
             base.OnEnter();
-            if ((bool)this.nextSkillDef)
-            {
-                GenericSkill skillByDef = this.skillLocator.FindSkillByDef(this.skillDefToReplaceAtStocksEmpty);
-                if ((bool)skillByDef && skillByDef.stock == 0)
-                    skillByDef.SetBaseSkill(this.nextSkillDef);
-            }
             PhasedInventorySetter inventorySetter = this.GetComponent<PhasedInventorySetter>();
             if ((bool)inventorySetter && NetworkServer.active)
             {
@@ -67,14 +58,13 @@ namespace FathomlessVoidling.EntityStates.Primary
             this.timeUntilNextWave = this.baseInitialDelay / this.attackSpeedStat;
             this.delayBetweenWaves = FireEyeBlast.baseDelayBetweenWaves / this.attackSpeedStat;
             this.muzzleTransform = this.FindModelChild(this.muzzleName);
-            this.aimRay = this.GetAimRay();
         }
 
         public override void FixedUpdate()
         {
             base.FixedUpdate();
             this.timeUntilNextWave -= this.GetDeltaTime();
-            while (this.timeUntilNextWave < 0.0 && this.numWavesFired < this.numWaves)
+            while (this.timeUntilNextWave < 0.0 && this.numWavesFired < FireEyeBlast.numMissilesPerWave)
             {
                 this.PlayAnimation(this.animationLayerName, this.animationStateName, this.animationPlaybackRateParam, this.duration);
                 this.timeUntilNextWave += this.delayBetweenWaves;
