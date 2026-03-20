@@ -36,7 +36,7 @@ namespace FathomlessVoidling.EntityStates.Utility
             {
                 GenericSkill skillByDef = this.skillLocator.FindSkillByDef(this.skillDefToReplaceAtStocksEmpty);
                 if (skillByDef && skillByDef.stock == 0)
-                    skillByDef.SetBaseSkill(this.nextSkillDef);
+                    skillByDef.SetSkillOverride(this.outer, this.nextSkillDef, GenericSkill.SkillOverridePriority.Contextual);
             }
             if (!this.fogDamageController)
                 return;
@@ -106,31 +106,19 @@ namespace FathomlessVoidling.EntityStates.Utility
             }
 
             List<CharacterBody> playerBodies = Main.GetPlayerBodies();
-            // RaidDC
-            if (VoidRaidGauntletController.instance.currentDonut.root.name == "RaidDC")
-            {
-                Transform roof = VoidRaidGauntletController.instance.currentDonut.root.transform.Find("HOLDER: ROOF");
-                if (roof.gameObject.activeSelf)
-                    roof.gameObject.SetActive(false);
-            }
-            /*
-            if (VoidRaidGauntletController.instance.currentDonut.root.name == "RaidBB")
-            {
-                Transform pp = VoidRaidGauntletController.instance.currentDonut.root.transform.Find("HOLDER: Skybox+PP");
-                pp.Find("PP + Amb").GetComponent<SetAmbientLight>().ApplyLighting();
-            }
-            */
             if (playerBodies.Count > 0)
             {
                 foreach (CharacterBody playerBody in playerBodies)
                 {
 
                     Vector3? teleportPos = TeleportHelper.FindSafeTeleportDestination(VoidRaidGauntletController.instance.currentDonut.returnPoint.position, playerBody, Run.instance.runRNG);
+                    if (!teleportPos.HasValue)
+                        continue;
                     //  TeleportHelper.TeleportBody(playerBody, (Vector3)teleportPos, false);
                     TeleportHelper.TeleportBody(new TeleportHelper.TeleportBodyArgs()
                     {
                         body = playerBody,
-                        targetPosition = (Vector3)teleportPos,
+                        targetPosition = teleportPos.Value,
                         forceOutOfVehicle = true,
                         teleportMinions = true,
                         resetStateMachines = true
@@ -138,8 +126,28 @@ namespace FathomlessVoidling.EntityStates.Utility
                     GameObject effectPrefab = Run.instance.GetTeleportEffectPrefab(playerBody.gameObject);
                     effectPrefab = Main.raidTeleportEffect;
                     if (effectPrefab)
-                        EffectManager.SimpleEffect(effectPrefab, (Vector3)teleportPos, Quaternion.identity, true);
+                        EffectManager.SimpleEffect(effectPrefab, teleportPos.Value, Quaternion.identity, true);
                 }
+            }
+        }
+
+        public override void OnExit()
+        {
+            base.OnExit();
+            if (NetworkServer.active)
+            {
+                PhasedInventorySetter phasedInventorySetter = this.characterBody.GetComponent<PhasedInventorySetter>();
+                if (phasedInventorySetter)
+                    phasedInventorySetter.AdvancePhase();
+            }
+            if (FathomlessMissionController.instance)
+            {
+                if (FathomlessMissionController.instance.singularityDriver)
+                    FathomlessMissionController.instance.singularityDriver.enabled = true;
+                if (FathomlessMissionController.instance.mazeDriver)
+                    FathomlessMissionController.instance.mazeDriver.enabled = true;
+                if (FathomlessMissionController.instance.fireMissileDriver)
+                    FathomlessMissionController.instance.fireMissileDriver.enabled = true;
             }
         }
 

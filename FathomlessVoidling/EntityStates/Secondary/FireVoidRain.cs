@@ -2,6 +2,7 @@ using EntityStates;
 using EntityStates.GrandParentBoss;
 using EntityStates.VoidRaidCrab.Weapon;
 using FathomlessVoidling.Components;
+using FathomlessVoidling.Controllers;
 using RoR2;
 using RoR2.Projectile;
 using System.Linq;
@@ -30,20 +31,24 @@ namespace FathomlessVoidling.EntityStates.Secondary
         public override void OnEnter()
         {
             base.OnEnter();
-            PhasedInventorySetter inventorySetter = this.GetComponent<PhasedInventorySetter>();
-            if ((bool)inventorySetter && NetworkServer.active)
+            if (FathomlessMissionController.instance)
             {
-                switch (inventorySetter.phaseIndex)
+                int phaseNumber = FathomlessMissionController.instance.GetCurrentPhase();
+                Debug.LogWarning("FIREVOIDRAIN PHASENUMBER: " + phaseNumber);
+                if (phaseNumber != -1)
                 {
-                    case 0:
-                        FireVoidRain.missileSpawnFrequency = 3f;
-                        break;
-                    case 1:
-                        FireVoidRain.missileSpawnFrequency = 5f;
-                        break;
-                    case 2:
-                        FireVoidRain.missileSpawnFrequency = 7f;
-                        break;
+                    switch (phaseNumber)
+                    {
+                        case 0:
+                            FireVoidRain.missileSpawnFrequency = 3f;
+                            break;
+                        case 1:
+                            FireVoidRain.missileSpawnFrequency = 5f;
+                            break;
+                        case 2:
+                            FireVoidRain.missileSpawnFrequency = 7f;
+                            break;
+                    }
                 }
             }
             this.missileStopwatch -= FireVoidRain.missileSpawnDelay;

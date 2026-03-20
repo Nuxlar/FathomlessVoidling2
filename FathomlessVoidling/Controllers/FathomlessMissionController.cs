@@ -16,6 +16,7 @@ public class FathomlessMissionController : NetworkBehaviour
     public AISkillDriver wardWipeDriver;
     public AISkillDriver singularityDriver;
     public AISkillDriver mazeDriver;
+    public AISkillDriver fireMissileDriver;
     public CharacterBody voidlingBody;
     public PhasedInventorySetter inventorySetter;
 
@@ -42,6 +43,7 @@ public class FathomlessMissionController : NetworkBehaviour
                 case "WardWipe": this.wardWipeDriver = driver; break;
                 case "Vacuum Attack": this.singularityDriver = driver; break;
                 case "SpinBeam": this.mazeDriver = driver; break;
+                case "FireMissiles": this.fireMissileDriver = driver; break;
             }
         }
         this.voidlingBody = characterMaster.GetBody();
@@ -57,4 +59,5 @@ public class FathomlessMissionController : NetworkBehaviour
         else
             return -1;
     }
+
 }

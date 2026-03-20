@@ -13,6 +13,11 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine.Rendering.PostProcessing;
 using FathomlessVoidling.EntityStates.Utility;
+using FathomlessVoidling.EntityStates.Joint;
+using EntityStates.VoidRaidCrab.Joint;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using System.Reflection;
 
 namespace FathomlessVoidling.Hooks
 {
@@ -26,12 +31,35 @@ namespace FathomlessVoidling.Hooks
             On.RoR2.HealthComponent.SendDamageDealt += ThresholdCheck;
             On.RoR2.CharacterMaster.OnBodyStart += FixPipReviveBug;
             On.RoR2.VoidRaidCrab.LegController.RegenerateServer += PreventJointRegen;
+            On.RoR2.VoidRaidGauntletController.RpcActivateDonut += DeactivateDonutRoof;
 
             On.EntityStates.VoidBarnacle.Weapon.ChargeFire.OnEnter += LazyMf;
+            IL.RoR2.VoidRaidCrab.LegController.CompleteBreakAuthority += ReplaceJointBreakState;
             /*
                 PhaseControllerStateMachine (GameObject)
                 has NetworkIdentity, EntityStateMachine, and NetworkStateMachine
             */
+        }
+
+        private void ReplaceJointBreakState(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+
+            if (c.TryGotoNext(MoveType.After, x => x.MatchIsinst<PreDeathState>()))
+                c.Prev.Operand = il.Import(typeof(JointPreDeathNux));
+            if (c.TryGotoNext(MoveType.After, x => x.MatchStfld<PreDeathState>("canProceed")))
+                c.Prev.Operand = il.Import(typeof(JointPreDeathNux).GetField("canProceed"));
+        }
+
+        private void DeactivateDonutRoof(On.RoR2.VoidRaidGauntletController.orig_RpcActivateDonut orig, VoidRaidGauntletController self, int donutIndex)
+        {
+            orig(self, donutIndex);
+            if (self.currentDonut?.root?.name == "RaidDC")
+            {
+                Transform roof = self.currentDonut.root.transform.Find("HOLDER: ROOF");
+                if (roof && roof.gameObject.activeSelf)
+                    roof.gameObject.SetActive(false);
+            }
         }
 
         private void PreventJointRegen(On.RoR2.VoidRaidCrab.LegController.orig_RegenerateServer orig, LegController self)
@@ -101,10 +129,23 @@ namespace FathomlessVoidling.Hooks
                             bossBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
                             // swap special skill to ward wipe and enable its driver
                             SkillLocator skillLocator = bossBody.GetComponent<SkillLocator>();
+
                             if (skillLocator && Main.sdWardWipe)
-                                skillLocator.special.SetBaseSkill(Main.sdWardWipe);
-                            if (FathomlessMissionController.instance.wardWipeDriver)
-                                FathomlessMissionController.instance.wardWipeDriver.enabled = true;
+                            {
+                                EntityStateMachine esm = bossBody.gameObject.GetComponent<EntityStateMachine>();
+                                skillLocator.special.SetSkillOverride(esm, Main.sdWardWipe, GenericSkill.SkillOverridePriority.Contextual);
+                            }
+                            if (FathomlessMissionController.instance)
+                            {
+                                if (FathomlessMissionController.instance.wardWipeDriver)
+                                    FathomlessMissionController.instance.wardWipeDriver.enabled = true;
+                                if (FathomlessMissionController.instance.singularityDriver)
+                                    FathomlessMissionController.instance.singularityDriver.enabled = false;
+                                if (FathomlessMissionController.instance.mazeDriver)
+                                    FathomlessMissionController.instance.mazeDriver.enabled = false;
+                                if (FathomlessMissionController.instance.fireMissileDriver)
+                                    FathomlessMissionController.instance.fireMissileDriver.enabled = false;
+                            }
                         }
                     }
                 }

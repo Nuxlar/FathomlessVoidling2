@@ -10,7 +10,7 @@ namespace FathomlessVoidling.EntityStates.Special
     public class WanderingSingularity : BaseState
     {
         private float duration;
-        private float baseDuration = 6f;
+        private float baseDuration = 5f;
         private float windDuration = 2f;
         private string animLayerName = "Body";
         private string animEnterStateName = "SuckEnter";

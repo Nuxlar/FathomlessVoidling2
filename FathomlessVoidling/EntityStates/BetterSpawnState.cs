@@ -36,7 +36,7 @@ namespace FathomlessVoidling.EntityStates
             base.OnEnter();
             Util.PlaySound(this.spawnSoundString, GameObject.Find("SpawnCamera"));
             if ((bool)this.spawnEffectPrefab)
-                EffectManager.SpawnEffect(this.spawnEffectPrefab, new EffectData() { origin = new Vector3(0, 0, 0), scale = 4, rotation = Quaternion.identity }, false);
+                EffectManager.SpawnEffect(this.spawnEffectPrefab, new EffectData() { origin = new Vector3(0f, 5f, 0f), scale = 4, rotation = Quaternion.identity }, false);
             this.PlayAnimation(this.animationLayerName, this.animationStateName, this.animationPlaybackRateParam, this.duration);
             ChildLocator modelChildLocator = this.GetModelChildLocator();
             this.modelLocator.modelTransform.Find("VoidRaidCrabArmature/ROOT/HeadBase/eyeballRoot").gameObject.SetActive(false);
@@ -150,8 +150,7 @@ namespace FathomlessVoidling.EntityStates
         public override void OnExit()
         {
             base.OnExit();
-            //  this.characterBody.skillLocator.secondary.RemoveAllStocks();
-            this.characterBody.skillLocator.utility.RemoveAllStocks();
+            // this.characterBody.skillLocator.secondary.RemoveAllStocks();
         }
 
         public override InterruptPriority GetMinimumInterruptPriority() => InterruptPriority.Death;

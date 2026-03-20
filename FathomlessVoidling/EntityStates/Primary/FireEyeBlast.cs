@@ -32,7 +32,7 @@ namespace FathomlessVoidling.EntityStates.Primary
         private int numWavesFired = 0;
         private float timeUntilNextWave;
         private Transform muzzleTransform;
-        public AimAnimator.DirectionOverrideRequest animatorDirectionOverrideRequest;
+        private AimAnimator.DirectionOverrideRequest animatorDirectionOverrideRequest;
 
         public override void OnEnter()
         {
@@ -58,6 +58,18 @@ namespace FathomlessVoidling.EntityStates.Primary
             this.timeUntilNextWave = this.baseInitialDelay / this.attackSpeedStat;
             this.delayBetweenWaves = FireEyeBlast.baseDelayBetweenWaves / this.attackSpeedStat;
             this.muzzleTransform = this.FindModelChild(this.muzzleName);
+            AimAnimator aimAnimator = this.GetAimAnimator();
+            if (aimAnimator)
+                this.animatorDirectionOverrideRequest = aimAnimator.RequestDirectionOverride(new Func<Vector3>(this.GetAimDirection));
+        }
+
+        private Vector3 GetAimDirection()
+        {
+            Ray aimRay = this.GetAimRay();
+            float degrees = 60f;
+            float angleFromForward = Vector3.SignedAngle(Vector3.forward, new Vector3(aimRay.direction.x, 0, aimRay.direction.z), Vector3.up);
+            Vector3 newRight = Quaternion.AngleAxis(angleFromForward, Vector3.up) * Vector3.right;
+            return (Quaternion.AngleAxis(-degrees, newRight) * aimRay.direction).normalized;
         }
 
         public override void FixedUpdate()
@@ -112,7 +124,7 @@ namespace FathomlessVoidling.EntityStates.Primary
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Skill; // TODO testing if the interrupt would be fun
+            return InterruptPriority.PrioritySkill; // TODO testing if the interrupt would be fun
         }
     }
 }

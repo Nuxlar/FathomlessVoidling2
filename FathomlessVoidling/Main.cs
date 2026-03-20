@@ -16,7 +16,6 @@ using EntityStates.VoidRaidCrab;
 using RoR2.Skills;
 using UnityEngine.Networking;
 using UnityEngine.Rendering.PostProcessing;
-
 using FathomlessVoidling.Controllers;
 using FathomlessVoidling.EntityStates;
 using FathomlessVoidling.EntityStates.Haunt;
@@ -25,6 +24,7 @@ using FathomlessVoidling.EntityStates.Secondary;
 using FathomlessVoidling.EntityStates.Utility;
 using FathomlessVoidling.EntityStates.Special;
 using FathomlessVoidling.EntityStates.Barnacle;
+using FathomlessVoidling.EntityStates.Joint;
 using FathomlessVoidling.Components;
 using FathomlessVoidling.Hooks;
 /*
@@ -58,6 +58,8 @@ namespace FathomlessVoidling
     public static SpawnCard barnacleSpawnCard;
     public static GameObject spawnEffect;
     public static CharacterSpawnCard jointCard = Addressables.LoadAssetAsync<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrabJoint_asset).WaitForCompletion();
+    public static GameObject jointPendingEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabJointPending_prefab).WaitForCompletion();
+    public static GameObject jointBreakEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabJointBreak_prefab).WaitForCompletion();
     public static SpawnCard bigVoidlingCard = Addressables.LoadAssetAsync<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrab_asset).WaitForCompletion();
     public static TimelineAsset introTimeline = Addressables.LoadAssetAsync<TimelineAsset>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabIntroTimeiline_playable).WaitForCompletion();
     public static GameObject chargeVoidRain;
@@ -77,6 +79,7 @@ namespace FathomlessVoidling
     public static SkillDef sdWardWipe;
     public static SkillDef sdSingularity;
     public static SkillDef sdMaze;
+    public static SkillDef sdMultiBeam;
 
     // Voidling Haunt Variables
     public static GameObject barnacleMuzzleFlash = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleMuzzleflash_prefab).WaitForCompletion();
@@ -141,6 +144,8 @@ namespace FathomlessVoidling
       ContentAddition.AddEntityState<FindSurfaceAccurate>(out _);
       ContentAddition.AddEntityState<ChargeWardWipeNux>(out _);
       ContentAddition.AddEntityState<FireWardWipeNux>(out _);
+      ContentAddition.AddEntityState<JointPreDeathNux>(out _);
+      ContentAddition.AddEntityState<JointDeathNux>(out _);
     }
 
     public static List<CharacterBody> GetPlayerBodies()
@@ -148,7 +153,7 @@ namespace FathomlessVoidling
       List<CharacterBody> playerBodies = new List<CharacterBody>();
       foreach (PlayerCharacterMasterController playerMasterController in PlayerCharacterMasterController.instances)
       {
-        if (playerMasterController && playerMasterController.isConnected && playerMasterController.master)
+        if (playerMasterController && playerMasterController.master)
         {
           CharacterBody playerBody = playerMasterController.master.GetBody();
           if (playerBody)
@@ -507,10 +512,19 @@ namespace FathomlessVoidling
       GameObject body = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabBody_prefab).WaitForCompletion();
       ModelLocator modelLocator = body.GetComponent<ModelLocator>();
       body.GetComponent<CharacterBody>().baseMaxHealth = 2000f;
-      body.GetComponent<SkillLocator>().primary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeEyeBlast));
-      body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
-      body.GetComponent<SkillLocator>().secondary.skillFamily.variants[0].skillDef.baseMaxStock = 1;
-
+      SkillLocator skillLocator = body.GetComponent<SkillLocator>();
+      skillLocator.primary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeEyeBlast));
+      skillLocator.secondary.skillFamily.variants = new SkillFamily.Variant[] { new SkillFamily.Variant() { skillDef = sdMultiBeam } };
+      skillLocator.utility.skillFamily.variants = new SkillFamily.Variant[] { new SkillFamily.Variant() { skillDef = sdMaze } };
+      Debug.LogWarning("SECONDARY CD: " + skillLocator.secondary.skillFamily.variants[0].skillDef.baseRechargeInterval);
+      Debug.LogWarning("UTILITY CD: " + skillLocator.utility.skillFamily.variants[0].skillDef.baseRechargeInterval);
+      /*
+        Skill Cooldowns
+        Primary 10s
+        Secondary 10s
+        Utility 40s
+        Special 60s
+      */
       // Add new spawn state
       List<EntityStateMachine> list = body.GetComponents<EntityStateMachine>().ToList();
       for (int i = 0; i < list.Count; i++)
@@ -545,13 +559,13 @@ namespace FathomlessVoidling
       // Add eye blinking
       model.AddComponent<RandomBlinkController>();
 
+      // Change legs to be on a normal entity layer instead of World
       Transform legBase = model.transform.Find("VoidRaidCrabArmature").Find("ROOT").Find("LegBase");
       List<SurfaceDefProvider> providers = legBase.GetComponentsInChildren<SurfaceDefProvider>().ToList();
       foreach (SurfaceDefProvider provider in providers)
       {
         provider.gameObject.layer = (int)LayerIndex.defaultLayer;
       }
-      // VoidRaidCrabArmature -> ROOT -> LegBase get surfacedefprovide
     }
 
     private static void LoadAssets()
@@ -713,6 +727,13 @@ x -0.44 0.44
       }
 
       jointBodyPrefab.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(JointSpawnState));
+      jointBodyPrefab.GetComponent<CharacterDeathBehavior>().deathState = new SerializableEntityStateType(typeof(JointPreDeathNux));
+
+      if (jointPendingEffect)
+      {
+        jointPendingEffect.AddComponent<NetworkIdentity>();
+        jointPendingEffect = PrefabAPI.InstantiateClone(jointPendingEffect, "FathomlessJointPendingEffect", true);
+      }
 
       sdWardWipe = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabWardWipe_asset).WaitForCompletion();
       sdWardWipe.activationState = new SerializableEntityStateType(typeof(ChargeWardWipeNux));
@@ -722,6 +743,11 @@ x -0.44 0.44
 
       sdMaze = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabSpinBeam_asset).WaitForCompletion();
       sdMaze.activationState = new SerializableEntityStateType(typeof(EnterMaze));
+      sdMaze.baseRechargeInterval = 45f; // 40s orig
+
+      sdMultiBeam = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabMultiBeam_asset).WaitForCompletion();
+      sdMultiBeam.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
+      sdMultiBeam.baseRechargeInterval = 15f; // 10s orig
     }
 
     private static void CreateSingularityProjectile()

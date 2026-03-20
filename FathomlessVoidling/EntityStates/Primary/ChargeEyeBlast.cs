@@ -42,6 +42,7 @@ namespace FathomlessVoidling.EntityStates.Primary
 
         public override void OnExit()
         {
+            this.animatorDirectionOverrideRequest?.Dispose();
             EntityState.Destroy(this.chargeEffectInstance);
             base.OnExit();
         }
@@ -51,7 +52,7 @@ namespace FathomlessVoidling.EntityStates.Primary
             base.FixedUpdate();
             if (!this.isAuthority || (double)this.fixedAge < this.duration)
                 return;
-            this.outer.SetNextState(new FireEyeBlast() { animatorDirectionOverrideRequest = this.animatorDirectionOverrideRequest });
+            this.outer.SetNextState(new FireEyeBlast());
         }
 
         private Vector3 GetAimDirection()

@@ -3,21 +3,14 @@
 TODOs:
     - Tweaks to Master and Voidling mission controllers to account for the defined flow
     - Replace FinalStand with immediate death
+    - Code in logic for third joint death (suppress break -> kill main body)
     - Spawn outro portal
-    - Tweak skill cooldown values
-    - Remove "roof" off of AD donut
-    - NETWORKING STUFF (check after testing)
-        - (MAYBE) Redo VoidRain to use the entitystate rather than random components, will probably end up with bad networking
-        - (MAYBE) Redo Wandering Singularity to use the entitystate rather than random components, will probably end up with bad networking
     
 BUGS:
     - Barnacle spawning in weird spot on the joint sometimes
-    - WardWipe doesn't immediately start, need to replace the skill differently
+    - Third join break makes him immediately fall
 MP BUGS:
     - WardWipe doesn't teleport other players
-    - Voidling is a zombie after teleporting
-    - JointBreak VFX doesn't show up on clients
-    - Keeps looking up after missiles
 
 What would 1.0 entail?
     - The complete move/attack set for voidling and voidling haunt
