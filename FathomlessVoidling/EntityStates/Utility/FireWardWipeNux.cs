@@ -36,6 +36,7 @@ namespace FathomlessVoidling.EntityStates.Utility
             if (this.nextSkillDef)
             {
                 this.skillLocator.special.SetSkillOverride(this.outer, this.nextSkillDef, GenericSkill.SkillOverridePriority.Contextual);
+                this.skillLocator.special.AddOneStock();
             }
             if (!this.fogDamageController)
                 return;
@@ -44,7 +45,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                 foreach (CharacterBody affectedBody in this.fogDamageController.GetAffectedBodies())
                 {
                     if (affectedBody.isPlayerControlled && affectedBody.HasBuff(this.requiredBuffToKill))
-                        affectedBody.healthComponent.Suicide(this.gameObject, this.gameObject, DamageType.VoidDeath);
+                        affectedBody.master.TrueKill(this.gameObject, this.gameObject, DamageType.VoidDeath);
                 }
             }
             this.fogDamageController.enabled = false;

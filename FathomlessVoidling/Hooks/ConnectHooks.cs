@@ -179,24 +179,21 @@ namespace FathomlessVoidling.Hooks
         {
             foreach (CharacterBody joint in GetOtherJoints(body))
             {
-                joint.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 5f);
+                joint.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 10f);
                 joint.healthComponent.Heal(hc.fullHealth, new ProcChainMask());
             }
 
             FathomlessMissionController mc = FathomlessMissionController.instance;
-            if (!mc || !mc.voidlingBody) return;
+            if (!mc || !mc.voidlingBody)
+                return;
 
             CharacterBody bossBody = mc.voidlingBody;
             bossBody.RemoveBuff(RoR2Content.Buffs.HiddenInvincibility);
             bossBody.healthComponent.TakeDamage(new DamageInfo() { damage = 9999999f });
             bossBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
-
-            SkillLocator skillLocator = bossBody.GetComponent<SkillLocator>();
-            if (skillLocator && Main.sdWardWipe)
-            {
-                skillLocator.special.SetSkillOverride(bossBody.gameObject.GetComponent<EntityStateMachine>(), Main.sdWardWipe, GenericSkill.SkillOverridePriority.Contextual);
-                skillLocator.special.AddOneStock();
-            }
+            EntityStateMachine esm = bossBody.gameObject.GetComponents<EntityStateMachine>().First((esm) => esm.customName == "Body");
+            bossBody.skillLocator.special.SetSkillOverride(esm, Main.sdWardWipe, GenericSkill.SkillOverridePriority.Contextual);
+            bossBody.skillLocator.special.AddOneStock();
 
             if (mc.wardWipeDriver)
                 mc.wardWipeDriver.enabled = true;

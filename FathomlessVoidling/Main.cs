@@ -508,7 +508,14 @@ namespace FathomlessVoidling
     {
       GameObject body = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabBody_prefab).WaitForCompletion();
       ModelLocator modelLocator = body.GetComponent<ModelLocator>();
+
       body.GetComponent<CharacterBody>().baseMaxHealth = 2000f;
+      FogDamageController fogDamageController = body.GetComponent<FogDamageController>();
+      if (fogDamageController)
+      {
+        fogDamageController.healthFractionPerSecond = 0.01f;
+        fogDamageController.healthFractionRampCoefficientPerSecond = 0.1f;
+      }
       SkillLocator skillLocator = body.GetComponent<SkillLocator>();
       skillLocator.primary.skillFamily.variants[0].skillDef.activationState = new SerializableEntityStateType(typeof(ChargeEyeBlast));
       skillLocator.secondary.skillFamily.variants = new SkillFamily.Variant[] { new SkillFamily.Variant() { skillDef = sdMultiBeam } };
@@ -726,10 +733,12 @@ x -0.44 0.44
 
       sdSingularity = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabVacuumAttack_asset).WaitForCompletion();
       sdSingularity.activationState = new SerializableEntityStateType(typeof(WanderingSingularity));
+      sdSingularity.interruptPriority = InterruptPriority.PrioritySkill;
 
       sdMaze = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabSpinBeam_asset).WaitForCompletion();
       sdMaze.activationState = new SerializableEntityStateType(typeof(EnterMaze));
       sdMaze.baseRechargeInterval = 45f; // 40s orig
+      sdMaze.interruptPriority = InterruptPriority.PrioritySkill;
 
       sdMultiBeam = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabMultiBeam_asset).WaitForCompletion();
       sdMultiBeam.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
