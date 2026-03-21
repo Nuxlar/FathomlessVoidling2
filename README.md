@@ -1,97 +1,106 @@
 # Fathomless Voidling
 
-TODOs:
-    - Tweaks to Master and Voidling mission controllers to account for the defined flow
-    - Replace FinalStand with immediate death
-    - Tweak Maze positions/angles to ensure they work on other donuts
-    - Disable combatdirectors on other donuts
-    - Add a function to kill all barnacles after WardWipse
-    - Code in logic for third joint death (suppress break -> kill main body)
-    - Spawn outro portal
-    
-BUGS:
-    - Barnacle spawning in weird spot on the joint sometimes
-    - Third join break makes him immediately fall
-MP BUGS:
-    - WardWipe doesn't teleport other players
+## TODOs
+- Add "void moon" path
 
-What would 1.0 entail?
-    - The complete move/attack set for voidling and voidling haunt
-    - Properly ending the fight instead of manually ending the run
-    - Phase transition to alternate donuts
-    - MP compat
+Releasing a short beta to catch any bugs/incompats before doing a full 1.0 release.
+
+**CONFIGS WILL BE ADDED WITH 1.0, USE THE FORM BELOW TO ASK FOR SPECIFIC CONFIGS**
+
+**INTENDED AS A STAGE 6 BOSS FIGHT**
+
+### Feedback form! [Link](https://forms.gle/ACmqSCYwPHCnDvv48)
+
+## Bug Reports
+
+Report bugs using the GitHub link above or in the **RoR2 Modding Discord**. Please include a detailed description and a log file. For multiplayer bugs, provide logs from **both the host and a client**.
+
+**SUBMIT A LOG WITH ALL BUG REPORTS PLEASE**
+
+### How to get a log
+
+If you are using **r2modman** or **Thunderstore Mod Manager**:
+You can copy your log by going to the `Settings` screen, selecting the `Debugging` tab.  Click the `Copy LogOutput.log file contents to clipboard` and use `Ctrl+V` to paste it
+
+NOTE: If it says `Log file does not exist` then you should double check in the `Locations tab` that your `Risk of Rain 2` and `Steam` folder paths are correct!
+
+If you are using **Gale Mod Manager**
+You can copy your log by either pressing the `File` tab then pressing either `Open game log` and use `Ctrl+A` then `Ctrl+C` and use `Ctrl+V` to paste it or `Open profile folder` then go to `BepInEx` and select `LogOutput.log` and use `Ctrl+V` to paste it
 
 ## Attack Details and Phase Flow
 
-Voidling Skills
-    - Primary: Eye Blast (fires a volley of "mortars" that rain down, they have slight tracking)
-    - Secondary: Portal Beams (spawns portals that fire out predictive laser beams)
-    - Utility: Maze (laser pizza)
-    - Special: Wandering Singularity (spawns a black hole that slowly follows enemies)
+***SPOILERS!** Use for reference when reporting bugs*
 
-Voidling Haunt Attacks:
-    - Gravity Bombs: spawns bombs across the arena, if hit, you'll get launched into a random direction
-    - Gravity Barnacles: has a combat director for spawning special barnacles, they shoot gravity bullets that have the same effect as the bombs
+<details>
+<summary>Expand</summary>
 
-Joints:
-    - 75% HP threshold event: go immune and spawn barnacles on the leg, immunity dissipated once barnacles are killed
+<details>
+<summary>Attack Details</summary>
+
+### Voidling Skills
+
+- **Eye Blast:** fires a volley of mortars that rain down with slight tracking
+- **Portal Beams:** spawns portals that fire predictive laser beams
+- **Maze:** laser pizza
+- **Wandering Singularity:** spawns a black hole that slowly follows enemies
+
+***Maze and Singularity can interrupt the Eye Blast and Portal Beams***
+
+### Voidling Haunt Attacks
+
+- **Gravity Bombs:** spawns bombs across the arena, if hit you get launched in a random direction
+- **Gravity Barnacles:** combat director spawns special barnacles that shoot gravity bullets with the same effect as the bombs
+
+***Gravity attacks go through block but only deal 1 damage***
+
+### Joints
+
+- **75% HP threshold:** go immune and spawn barnacles on the leg, immunity lifts once barnacles are killed
+</details>
+
+<details>
+<summary>Phase Flow</summary>
 
 ### Phase 1
 
-Voidling spawns in at the center, shield up for the main body
+Voidling spawns at the center with the main body shielded.
 
-Voidling attacks:
-    - Primary: Mortar Blast I
-    - Secondary: Portal Beams I
-    - Utility: NONE
-    - Special: Wandering Singularity (active after 80% HP)
+**Voidling:**
+- **Primary:** Mortar Blast I
+- **Secondary:** Portal Beams I
+- **Utility:** none
+- **Special:** Wandering Singularity (active after 80% HP)
 
-Voidling Haunt:
-    - Intermittent Gravity Bombs
-    - Gravity Barnacle director active after 80% HP
+**Voidling Haunt:**
+- Intermittent Gravity Bombs
+- Gravity Barnacle director active after 80% HP
 
 ### Phase 2
 
-Joint break, 1 leg retracted, other joints heal
+Joint break, 1 leg retracted, other joints heal.
 
-Voidling attacks:
-    - Primary: Mortar Blast II (increase missile count 6 -> 8)
-    - Secondary: Portal Beams II (increase beam spawn frequency)
-    - Utility: Maze I (active after 80% HP)
-    - Special: Wandering Singularity 
+**Voidling:**
+- **Primary:** Mortar Blast II (missile count 6 -> 8)
+- **Secondary:** Portal Beams II (increased beam frequency)
+- **Utility:** Maze I (active after 80% HP)
+- **Special:** Wandering Singularity
 
-Voidling Haunt:
-    - Intermittent Gravity Bombs (increased bomb quantity)
-    - Gravity Barnacle director still active
+**Voidling Haunt:**
+- Intermittent Gravity Bombs (increased bomb quantity)
+- Gravity Barnacle director still active
 
 ### Phase 3
 
-Joint break, 2 legs retracted, other joints heal
+Joint break, 2 legs retracted, other joints heal.
 
-Voidling attacks:
-    - Primary: Mortar Blast III (increase attack speed)
-    - Secondary: Portal Beams III (increase beam spawn frequency)
-    - Utility: Maze II (full line randomness)
-    - Special: Wandering Singularity
+**Voidling:**
+- **Primary:** Mortar Blast III (increased attack speed)
+- **Secondary:** Portal Beams III (increased beam frequency)
+- **Utility:** Maze II (full line randomness)
+- **Special:** Wandering Singularity
 
-Voidling Haunt:
-    - Intermittent Gravity Bombs (forced active during Maze)
-    - Gravity Barnacle director still active
-
-### Phase 4
-
-Final joint doesn't fully break, Voidling's final stand begins...
-
-shield is down
-(i dont want it to be just an umbral p4 meme, so maybe throw some stuff in there for the player to do, some objectives)
-Deep void signals from locus? Few of these pop up and they protect you from the fog, could make it a charging meme but eh
-
-Simulacrum crab "wakes up" with a small safe zone, wandering around
-Disembodied eyes spawn to stop the crab, destroy them
-If the crab is "asleep" when voidling dies, everyone is taken with it
-
-OR 
-
-Do something to prevent yourself from being taken with Voidling when it dies
-
-<img width="1083" height="353" alt="Image" src="https://github.com/user-attachments/assets/cae570a0-e254-4ab1-8e6b-e5f3fedd16bc" />
+**Voidling Haunt:**
+- Intermittent Gravity Bombs (forced active during Maze)
+- Gravity Barnacle director still active
+</details>
+</details>

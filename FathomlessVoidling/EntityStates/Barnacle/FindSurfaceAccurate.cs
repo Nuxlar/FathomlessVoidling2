@@ -23,7 +23,7 @@ public class FindSurfaceAccurate : NoCastSpawn
             float f1 = UnityEngine.Random.Range(num * (float)index, (float)((double)num * (double)(index + 1) - 1.0)) * ((float)Math.PI / 180f);
             double f2 = (double)UnityEngine.Random.Range(FindSurface.raycastMinimumAngle, FindSurface.raycastMaximumAngle) * (Math.PI / 180.0);
             Vector3 direction = new Vector3(Mathf.Cos(f1), Mathf.Sin((float)f2), Mathf.Sin(f1));
-            if (Physics.Raycast(origin, direction, out hitInfo, FindSurface.maxRaycastLength, (int)LayerIndex.CommonMasks.bullet))
+            if (Physics.Raycast(origin, direction, out hitInfo, FindSurface.maxRaycastLength, (int)LayerIndex.enemyBody))
             {
                 this.transform.position = hitInfo.point;
                 this.transform.up = hitInfo.normal;

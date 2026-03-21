@@ -24,7 +24,6 @@ using FathomlessVoidling.EntityStates.Secondary;
 using FathomlessVoidling.EntityStates.Utility;
 using FathomlessVoidling.EntityStates.Special;
 using FathomlessVoidling.EntityStates.Barnacle;
-using FathomlessVoidling.EntityStates.Joint;
 using FathomlessVoidling.Components;
 using FathomlessVoidling.Hooks;
 /*
@@ -58,8 +57,6 @@ namespace FathomlessVoidling
     public static SpawnCard barnacleSpawnCard;
     public static GameObject spawnEffect;
     public static CharacterSpawnCard jointCard = Addressables.LoadAssetAsync<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrabJoint_asset).WaitForCompletion();
-    public static GameObject jointPendingEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabJointPending_prefab).WaitForCompletion();
-    public static GameObject jointBreakEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabJointBreak_prefab).WaitForCompletion();
     public static SpawnCard bigVoidlingCard = Addressables.LoadAssetAsync<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrab_asset).WaitForCompletion();
     public static TimelineAsset introTimeline = Addressables.LoadAssetAsync<TimelineAsset>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabIntroTimeiline_playable).WaitForCompletion();
     public static GameObject chargeVoidRain;
@@ -144,8 +141,6 @@ namespace FathomlessVoidling
       ContentAddition.AddEntityState<FindSurfaceAccurate>(out _);
       ContentAddition.AddEntityState<ChargeWardWipeNux>(out _);
       ContentAddition.AddEntityState<FireWardWipeNux>(out _);
-      ContentAddition.AddEntityState<JointPreDeathNux>(out _);
-      ContentAddition.AddEntityState<JointDeathNux>(out _);
     }
 
     public static List<CharacterBody> GetPlayerBodies()
@@ -719,13 +714,6 @@ x -0.44 0.44
       }
 
       jointBodyPrefab.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(JointSpawnState));
-      jointBodyPrefab.GetComponent<CharacterDeathBehavior>().deathState = new SerializableEntityStateType(typeof(JointPreDeathNux));
-
-      if (jointPendingEffect)
-      {
-        jointPendingEffect.AddComponent<NetworkIdentity>();
-        jointPendingEffect = PrefabAPI.InstantiateClone(jointPendingEffect, "FathomlessJointPendingEffect", true);
-      }
 
       sdWardWipe = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabWardWipe_asset).WaitForCompletion();
       sdWardWipe.activationState = new SerializableEntityStateType(typeof(ChargeWardWipeNux));

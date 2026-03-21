@@ -4,6 +4,7 @@ using FathomlessVoidling.Controllers;
 using RoR2;
 using RoR2.Skills;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -65,10 +66,21 @@ namespace FathomlessVoidling.EntityStates.Utility
             this.outer.SetNextStateToMain();
         }
 
+        private void KillBarnacles()
+        {
+            foreach (TeamComponent teamComponent in TeamComponent.GetTeamMembers(TeamIndex.Void).ToList())
+            {
+                CharacterBody characterBody = teamComponent.GetComponent<CharacterBody>();
+                if (characterBody && characterBody.name == "VoidBarnacleBody(Clone)")
+                    characterBody.healthComponent.Suicide();
+            }
+        }
+
         private void NextDonut()
         {
             if (!VoidRaidGauntletController.instance || !NetworkServer.active)
                 return;
+
             VoidRaidGauntletController.instance.previousGauntlet = VoidRaidGauntletController.instance.currentGauntlet;
             VoidRaidGauntletController.instance.previousDonut = VoidRaidGauntletController.instance.currentDonut;
             if (VoidRaidGauntletController.instance.previousDonut != null && (bool)VoidRaidGauntletController.instance.previousDonut.combatDirector)
@@ -129,6 +141,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                         EffectManager.SimpleEffect(effectPrefab, teleportPos.Value, Quaternion.identity, true);
                 }
             }
+            KillBarnacles();
         }
 
         public override void OnExit()
@@ -140,14 +153,16 @@ namespace FathomlessVoidling.EntityStates.Utility
                 if (phasedInventorySetter)
                     phasedInventorySetter.AdvancePhase();
             }
-            if (FathomlessMissionController.instance)
+            FathomlessMissionController mc = FathomlessMissionController.instance;
+            if (mc)
             {
-                if (FathomlessMissionController.instance.singularityDriver)
-                    FathomlessMissionController.instance.singularityDriver.enabled = true;
-                if (FathomlessMissionController.instance.mazeDriver)
-                    FathomlessMissionController.instance.mazeDriver.enabled = true;
-                if (FathomlessMissionController.instance.fireMissileDriver)
-                    FathomlessMissionController.instance.fireMissileDriver.enabled = true;
+                int phase = mc.GetCurrentPhase();
+                if (mc.singularityDriver)
+                    mc.singularityDriver.enabled = true;
+                if (mc.mazeDriver)
+                    mc.mazeDriver.enabled = phase >= 2;
+                if (mc.fireMissileDriver)
+                    mc.fireMissileDriver.enabled = true;
             }
         }
 

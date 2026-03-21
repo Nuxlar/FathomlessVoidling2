@@ -8,16 +8,8 @@ using UnityEngine.Playables;
 using UnityEngine.Networking;
 using EntityStates.VoidBarnacle.Weapon;
 using R2API;
-using EntityStates.VoidRaidCrab;
 using System.Linq;
 using System.Collections.Generic;
-using UnityEngine.Rendering.PostProcessing;
-using FathomlessVoidling.EntityStates.Utility;
-using FathomlessVoidling.EntityStates.Joint;
-using EntityStates.VoidRaidCrab.Joint;
-using Mono.Cecil.Cil;
-using MonoMod.Cil;
-using System.Reflection;
 
 namespace FathomlessVoidling.Hooks
 {
@@ -32,34 +24,48 @@ namespace FathomlessVoidling.Hooks
             On.RoR2.CharacterMaster.OnBodyStart += FixPipReviveBug;
             On.RoR2.VoidRaidCrab.LegController.RegenerateServer += PreventJointRegen;
             On.RoR2.VoidRaidGauntletController.RpcActivateDonut += DeactivateDonutRoof;
+            On.RoR2.VoidRaidGauntletController.TryOpenGauntlet += BlockGauntletInPhase3;
 
             On.EntityStates.VoidBarnacle.Weapon.ChargeFire.OnEnter += LazyMf;
-            IL.RoR2.VoidRaidCrab.LegController.CompleteBreakAuthority += ReplaceJointBreakState;
+            On.EntityStates.VoidRaidCrab.DeathState.OnEnter += FixDeathState;
+            On.EntityStates.VoidRaidCrab.DeathState.OnExit += KillJointsOnDeath;
             /*
                 PhaseControllerStateMachine (GameObject)
                 has NetworkIdentity, EntityStateMachine, and NetworkStateMachine
             */
         }
 
-        private void ReplaceJointBreakState(ILContext il)
-        {
-            ILCursor c = new ILCursor(il);
-
-            if (c.TryGotoNext(MoveType.After, x => x.MatchIsinst<PreDeathState>()))
-                c.Prev.Operand = il.Import(typeof(JointPreDeathNux));
-            if (c.TryGotoNext(MoveType.After, x => x.MatchStfld<PreDeathState>("canProceed")))
-                c.Prev.Operand = il.Import(typeof(JointPreDeathNux).GetField("canProceed"));
-        }
-
         private void DeactivateDonutRoof(On.RoR2.VoidRaidGauntletController.orig_RpcActivateDonut orig, VoidRaidGauntletController self, int donutIndex)
         {
             orig(self, donutIndex);
-            if (self.currentDonut?.root?.name == "RaidDC")
+            Transform root = self.currentDonut?.root?.transform;
+            if (!root) return;
+
+            if (root.name == "RaidDC")
             {
-                Transform roof = self.currentDonut.root.transform.Find("HOLDER: ROOF");
+                Transform roof = root.Find("HOLDER: ROOF");
                 if (roof && roof.gameObject.activeSelf)
                     roof.gameObject.SetActive(false);
             }
+
+            Transform scripting = root.Find("HOLDER: Scripting");
+            if (scripting)
+            {
+                Transform combatDirectorObj = scripting.Find("CombatDirector");
+                if (combatDirectorObj)
+                {
+                    CombatDirector combatDirector = combatDirectorObj.GetComponent<CombatDirector>();
+                    if (combatDirector)
+                        combatDirector.enabled = false;
+                }
+            }
+        }
+
+        private bool BlockGauntletInPhase3(On.RoR2.VoidRaidGauntletController.orig_TryOpenGauntlet orig, VoidRaidGauntletController self, Vector3 entrancePosition, NetworkInstanceId bossMasterId)
+        {
+            if (FathomlessMissionController.instance?.GetCurrentPhase() == 2)
+                return false;
+            return orig(self, entrancePosition, bossMasterId);
         }
 
         private void PreventJointRegen(On.RoR2.VoidRaidCrab.LegController.orig_RegenerateServer orig, LegController self)
@@ -87,83 +93,142 @@ namespace FathomlessVoidling.Hooks
                 orig(self);
         }
 
+        private void FixDeathState(On.EntityStates.VoidRaidCrab.DeathState.orig_OnEnter orig, global::EntityStates.VoidRaidCrab.DeathState self)
+        {
+            if (self.characterBody.name == "VoidRaidCrabBody(Clone)")
+            {
+                self.animationStateName = "ChargeWipe";
+                self.animationPlaybackRateParam = "Wipe.playbackRate";
+                self.addPrintController = false;
+                orig(self);
+                PrintController printController = self.modelTransform.gameObject.AddComponent<PrintController>();
+                printController.printTime = self.printDuration;
+                printController.enabled = true;
+                printController.startingPrintHeight = 200f;
+                printController.maxPrintHeight = 500f;
+                printController.startingPrintBias = self.startingPrintBias;
+                printController.maxPrintBias = self.maxPrintBias;
+                printController.disableWhenFinished = false;
+                printController.printCurve = AnimationCurve.EaseInOut(0.0f, 0.0f, 1f, 1f);
+            }
+            else orig(self);
+        }
+
+        private void KillJointsOnDeath(On.EntityStates.VoidRaidCrab.DeathState.orig_OnExit orig, global::EntityStates.VoidRaidCrab.DeathState self)
+        {
+            orig(self);
+            if (self.characterBody.name != "VoidRaidCrabBody(Clone)")
+                return;
+            if (VoidRaidGauntletController.instance)
+            {
+                VoidRaidGauntletController.instance.SpawnOutroPortal();
+            }
+            foreach (TeamComponent tc in TeamComponent.GetTeamMembers(TeamIndex.Void).ToList())
+            {
+                CharacterBody cb = tc.GetComponent<CharacterBody>();
+                if (!cb || cb.name != "VoidRaidCrabJointBody(Clone)") continue;
+
+                EntityStateMachine esm = cb.GetComponents<EntityStateMachine>().FirstOrDefault(e => e.customName == "Body");
+                if (esm)
+                    esm.SetState(new global::EntityStates.VoidRaidCrab.Joint.DeathState());
+            }
+        }
+
+        private List<CharacterBody> GetOtherJoints(CharacterBody exclude)
+        {
+            List<CharacterBody> result = new List<CharacterBody>();
+            foreach (TeamComponent tc in TeamComponent.GetTeamMembers(TeamIndex.Void).ToList())
+            {
+                CharacterBody cb = tc.GetComponent<CharacterBody>();
+                if (cb && cb.name == "VoidRaidCrabJointBody(Clone)" && cb.netId != exclude.netId)
+                    result.Add(cb);
+            }
+            return result;
+        }
+
+        private void OnFinalJointDeathBlow(DamageReport damageReport, HealthComponent hc, CharacterBody body)
+        {
+            damageReport.damageDealt = 0f;
+            hc.health = 1f;
+            body.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 5f);
+
+            List<CharacterBody> otherJoints = GetOtherJoints(body);
+            foreach (CharacterBody joint in otherJoints)
+                joint.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 5f);
+
+            FathomlessMissionController.instance?.voidlingBody?.healthComponent.Suicide();
+
+            foreach (CharacterBody joint in otherJoints)
+                joint.healthComponent.Suicide();
+        }
+
+        private void OnJointDeathBlow(DamageReport damageReport, HealthComponent hc, CharacterBody body)
+        {
+            foreach (CharacterBody joint in GetOtherJoints(body))
+            {
+                joint.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 5f);
+                joint.healthComponent.Heal(hc.fullHealth, new ProcChainMask());
+            }
+
+            FathomlessMissionController mc = FathomlessMissionController.instance;
+            if (!mc || !mc.voidlingBody) return;
+
+            CharacterBody bossBody = mc.voidlingBody;
+            bossBody.RemoveBuff(RoR2Content.Buffs.HiddenInvincibility);
+            bossBody.healthComponent.TakeDamage(new DamageInfo() { damage = 9999999f });
+            bossBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
+
+            SkillLocator skillLocator = bossBody.GetComponent<SkillLocator>();
+            if (skillLocator && Main.sdWardWipe)
+                skillLocator.special.SetSkillOverride(bossBody.gameObject.GetComponent<EntityStateMachine>(), Main.sdWardWipe, GenericSkill.SkillOverridePriority.Contextual);
+
+            if (mc.wardWipeDriver)
+                mc.wardWipeDriver.enabled = true;
+            if (mc.singularityDriver)
+                mc.singularityDriver.enabled = false;
+            if (mc.mazeDriver)
+                mc.mazeDriver.enabled = false;
+            if (mc.fireMissileDriver)
+                mc.fireMissileDriver.enabled = false;
+        }
+
+        private void OnJointThreshold(DamageReport damageReport, HealthComponent hc, CharacterBody body, JointThresholdController jtc)
+        {
+            body.AddBuff(RoR2Content.Buffs.Immune);
+            jtc.TriggerThresholdEvent();
+            hc.health = hc.fullHealth * 0.8f;
+            damageReport.damageDealt = 1f;
+
+            FathomlessMissionController mc = FathomlessMissionController.instance;
+            if (!mc)
+                return;
+            int phase = mc.GetCurrentPhase();
+            if (phase == 0 && mc.singularityDriver)
+                mc.singularityDriver.enabled = true;
+            else if (phase == 1 && mc.mazeDriver)
+                mc.mazeDriver.enabled = true;
+        }
+
         private void ThresholdCheck(On.RoR2.HealthComponent.orig_SendDamageDealt orig, DamageReport damageReport)
         {
             HealthComponent hc = damageReport.victim.gameObject.GetComponent<HealthComponent>();
             CharacterBody body = hc.body;
 
-            if (body && hc && body.name == "VoidRaidCrabJointBody(Clone)")
+            if (body && body.name == "VoidRaidCrabJointBody(Clone)")
             {
-                JointThresholdController jointThresholdController = body.GetComponent<JointThresholdController>();
-                // heal other joints on a death blow
-                if (hc.health - damageReport.damageDealt <= 0f)
-                {
-                    if (jointThresholdController && jointThresholdController.defeatedServer)
-                    {
-                        List<CharacterBody> jointBodies = new List<CharacterBody>();
-                        foreach (TeamComponent teamComponent in TeamComponent.GetTeamMembers(TeamIndex.Void).ToList())
-                        {
-                            CharacterBody characterBody = teamComponent.GetComponent<CharacterBody>();
-                            if (characterBody && characterBody.name == "VoidRaidCrabJointBody(Clone)" && characterBody.netId != body.netId)
-                                jointBodies.Add(characterBody);
-                        }
+                JointThresholdController jtc = body.GetComponent<JointThresholdController>();
+                bool isDeath = hc.health - damageReport.damageDealt <= 0f;
 
-                        foreach (CharacterBody jointBody in jointBodies)
-                        {
-                            jointBody.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 5f);
-                            jointBody.healthComponent.Heal(hc.fullHealth, new ProcChainMask());
-                        }
-                        // damage main body
-                        if (FathomlessMissionController.instance && FathomlessMissionController.instance.voidlingBody)
-                        {
-                            CharacterBody bossBody = FathomlessMissionController.instance.voidlingBody;
-                            bossBody.RemoveBuff(RoR2Content.Buffs.HiddenInvincibility);
-                            bossBody.healthComponent.TakeDamage(new DamageInfo()
-                            {
-                                damage = 9999999f,
-                                crit = false,
-                                rejected = false,
-                                delayedDamageSecondHalf = false,
-                                firstHitOfDelayedDamageSecondHalf = false,
-                            });
-                            bossBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
-                            // swap special skill to ward wipe and enable its driver
-                            SkillLocator skillLocator = bossBody.GetComponent<SkillLocator>();
-
-                            if (skillLocator && Main.sdWardWipe)
-                            {
-                                EntityStateMachine esm = bossBody.gameObject.GetComponent<EntityStateMachine>();
-                                skillLocator.special.SetSkillOverride(esm, Main.sdWardWipe, GenericSkill.SkillOverridePriority.Contextual);
-                            }
-                            if (FathomlessMissionController.instance)
-                            {
-                                if (FathomlessMissionController.instance.wardWipeDriver)
-                                    FathomlessMissionController.instance.wardWipeDriver.enabled = true;
-                                if (FathomlessMissionController.instance.singularityDriver)
-                                    FathomlessMissionController.instance.singularityDriver.enabled = false;
-                                if (FathomlessMissionController.instance.mazeDriver)
-                                    FathomlessMissionController.instance.mazeDriver.enabled = false;
-                                if (FathomlessMissionController.instance.fireMissileDriver)
-                                    FathomlessMissionController.instance.fireMissileDriver.enabled = false;
-                            }
-                        }
-                    }
-                }
-                if (jointThresholdController && !jointThresholdController.defeatedServer && hc.health - damageReport.damageDealt <= hc.fullHealth * 0.8f)
+                if (isDeath && jtc && jtc.defeatedServer)
                 {
-                    body.AddBuff(RoR2Content.Buffs.Immune);
-                    jointThresholdController.TriggerThresholdEvent();
-                    hc.health = hc.fullHealth * 0.8f;
-                    damageReport.damageDealt = 1f;
-                    if (FathomlessMissionController.instance)
-                    {
-                        int phase = FathomlessMissionController.instance.GetCurrentPhase();
-                        if (phase == 0 && FathomlessMissionController.instance.singularityDriver)
-                            FathomlessMissionController.instance.singularityDriver.enabled = true;
-                        else if (phase == 1 && FathomlessMissionController.instance.mazeDriver)
-                            FathomlessMissionController.instance.mazeDriver.enabled = true;
-                    }
+                    int phase = FathomlessMissionController.instance?.GetCurrentPhase() ?? -1;
+                    if (phase == 2)
+                        OnFinalJointDeathBlow(damageReport, hc, body);
+                    else
+                        OnJointDeathBlow(damageReport, hc, body);
                 }
+                else if (jtc && !jtc.defeatedServer && hc.health - damageReport.damageDealt <= hc.fullHealth * 0.8f)
+                    OnJointThreshold(damageReport, hc, body, jtc);
             }
             orig(damageReport);
         }
@@ -249,23 +314,5 @@ namespace FathomlessVoidling.Hooks
                 }
             }
         }
-
-        /*
-    private void IncreaseSingularitySize(On.EntityStates.VoidRaidCrab.VacuumAttack.orig_OnEnter orig, VacuumAttack self)
-    {
-      AnimationCurve newRadiusCurve = new AnimationCurve();
-      newRadiusCurve.preWrapMode = WrapMode.ClampForever;
-      newRadiusCurve.postWrapMode = WrapMode.ClampForever;
-      newRadiusCurve.AddKey(new Keyframe() { time = 0f, value = 0f, inTangent = 125f, outTangent = 125f, inWeight = 0f, outWeight = 0.3333333432674408f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
-      newRadiusCurve.AddKey(new Keyframe() { time = 1f, value = 125f, inTangent = 125f, outTangent = 125f, inWeight = 0.3333333432674408f, outWeight = 0f, weightedMode = WeightedMode.None, tangentModeInternal = 34 });
-      // original curve
-      // {"preWrapMode":8,"postWrapMode":8,"keys":[{"time":0.0,"value":0.0,"inTangent":50.0,"outTangent":50.0,"inWeight":0.0,"outWeight":0.3333333432674408,"weightedMode":0,"tangentMode":34},{"time":1.0,"value":50.0,"inTangent":50.0,"outTangent":50.0,"inWeight":0.3333333432674408,"outWeight":0.0,"weightedMode":0,"tangentMode":34}]}
-      VacuumAttack.killRadiusCurve = newRadiusCurve;
-      //   VacuumAttack.killRadiusCurve = AnimationCurve.Linear(0, 0, 1, 150); // 50
-      // VacuumAttack.pullMagnitudeCurve = AnimationCurve.Linear(0, 0, 1, 45);
-      // TODO tweak pull magnitude if it's too much in testing
-      orig(self);
-    }
-*/
     }
 }
