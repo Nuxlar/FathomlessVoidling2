@@ -1,15 +1,12 @@
 # Fathomless Voidling
 
-## TODOs
-- Add "void moon" path
-
 Releasing a short beta to catch any bugs/incompats before doing a full 1.0 release.
 
-**CONFIGS WILL BE ADDED WITH 1.0, USE THE FORM BELOW TO ASK FOR SPECIFIC CONFIGS**
-
-**INTENDED AS A STAGE 6 BOSS FIGHT**
+**CONFIGS WILL BE ADDED WITH 1.0, USE THE FORM BELOW TO ASK FOR SPECIFIC CONFIGS, ALSO INTENDED AS A STAGE 6 BOSS FIGHT SO THE BASE HP WILL REFLECT THAT**
 
 ### Feedback form! [Link](https://forms.gle/ACmqSCYwPHCnDvv48)
+
+Spawns a void locus portal on stage 5 and go to the locus as an alt moon, currently no void fog during void pillars but there are cauldrons. 
 
 ## Bug Reports
 

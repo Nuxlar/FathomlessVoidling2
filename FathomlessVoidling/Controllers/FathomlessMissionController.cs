@@ -17,6 +17,7 @@ public class FathomlessMissionController : NetworkBehaviour
     public AISkillDriver singularityDriver;
     public AISkillDriver mazeDriver;
     public AISkillDriver fireMissileDriver;
+    public AISkillDriver multibeamDriver;
     public CharacterBody voidlingBody;
     public PhasedInventorySetter inventorySetter;
 
@@ -44,6 +45,7 @@ public class FathomlessMissionController : NetworkBehaviour
                 case "Vacuum Attack": this.singularityDriver = driver; break;
                 case "SpinBeam": this.mazeDriver = driver; break;
                 case "FireMissiles": this.fireMissileDriver = driver; break;
+                case "FireMultiBeam": this.multibeamDriver = driver; break;
             }
         }
         this.voidlingBody = characterMaster.GetBody();

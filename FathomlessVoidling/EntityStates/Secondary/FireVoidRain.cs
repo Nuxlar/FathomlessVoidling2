@@ -34,7 +34,6 @@ namespace FathomlessVoidling.EntityStates.Secondary
             if (FathomlessMissionController.instance)
             {
                 int phaseNumber = FathomlessMissionController.instance.GetCurrentPhase();
-                Debug.LogWarning("FIREVOIDRAIN PHASENUMBER: " + phaseNumber);
                 if (phaseNumber != -1)
                 {
                     switch (phaseNumber)
@@ -118,9 +117,8 @@ namespace FathomlessVoidling.EntityStates.Secondary
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.PrioritySkill;
+            return InterruptPriority.Frozen;
         }
-
         protected void CalcBeamPathPredictive(Ray aimRay, out Vector3 direction, out Vector3 beamEndPoint)
         {
             BullseyeSearch search = new BullseyeSearch();

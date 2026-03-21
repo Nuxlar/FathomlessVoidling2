@@ -73,7 +73,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                     this.eyeEffectInstance.transform.parent = transform;
                     ScaleParticleSystemDuration component = this.eyeEffectInstance.GetComponent<ScaleParticleSystemDuration>();
                     if (component)
-                        component.newDuration = this.duration / 2f;
+                        component.newDuration = this.duration;
                 }
             }
 
@@ -107,7 +107,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                 this.delayStopwatch = 0f;
                 foreach (GameObject instance in this.chargeEffectInstances)
                 {
-                    Debug.LogWarning(instance.transform.parent);
+                    Debug.LogWarning("SPAWNING AT ANCHOR: " + instance.transform.parent);
                     Util.PlaySound(MazeAttack.fireSoundString, instance.transform.parent.gameObject);
                     GameObject beamVfxInstance = this.CreateBeamVFXInstance(MazeAttack.beamVfxPrefab, instance.transform.parent);
                     this.loopPtrs.Add(LoopSoundManager.PlaySoundLoopLocal(beamVfxInstance, MazeAttack.loopSound));
@@ -222,7 +222,6 @@ namespace FathomlessVoidling.EntityStates.Utility
 
             foreach (int position in spawnPositions)
             {
-                Debug.LogWarning("SPAWN POSITION: " + position);
                 Transform child = MazeSpawnPointController.instance.transform.Find("MazeAnchor" + position);
                 if (child)
                 {
@@ -237,7 +236,6 @@ namespace FathomlessVoidling.EntityStates.Utility
                     this.chargeEffectInstances.Add(chargeUpEffect);
                 }
             }
-            Debug.LogWarning("~~~~~~END SELECTION~~~~~~~~");
         }
 
         private void FireBeamBulletAuthority()

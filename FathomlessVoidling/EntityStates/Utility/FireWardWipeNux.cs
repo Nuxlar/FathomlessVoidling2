@@ -35,9 +35,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                 EffectManager.SimpleMuzzleFlash(this.muzzleFlashPrefab, this.gameObject, this.muzzleName, false);
             if (this.nextSkillDef)
             {
-                GenericSkill skillByDef = this.skillLocator.FindSkillByDef(this.skillDefToReplaceAtStocksEmpty);
-                if (skillByDef && skillByDef.stock == 0)
-                    skillByDef.SetSkillOverride(this.outer, this.nextSkillDef, GenericSkill.SkillOverridePriority.Contextual);
+                this.skillLocator.special.SetSkillOverride(this.outer, this.nextSkillDef, GenericSkill.SkillOverridePriority.Contextual);
             }
             if (!this.fogDamageController)
                 return;
@@ -113,7 +111,6 @@ namespace FathomlessVoidling.EntityStates.Utility
             TeleportHelper.TeleportBody(this.characterBody, crabSpawnPos, false);
             if (FathomlessMissionController.instance && FathomlessMissionController.instance.hauntBody)
             {
-                Debug.LogWarning("teleporting john haunt");
                 TeleportHelper.TeleportBody(FathomlessMissionController.instance.hauntBody, crabSpawnPos, false);
             }
 
@@ -163,6 +160,8 @@ namespace FathomlessVoidling.EntityStates.Utility
                     mc.mazeDriver.enabled = phase >= 2;
                 if (mc.fireMissileDriver)
                     mc.fireMissileDriver.enabled = true;
+                if (mc.multibeamDriver)
+                    mc.multibeamDriver.enabled = true;
             }
         }
 

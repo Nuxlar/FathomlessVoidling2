@@ -99,6 +99,8 @@ namespace FathomlessVoidling
     // Wandering Singularity Variables
     public static GameObject wSingularityProjectile;
 
+    public static SpawnCard locusPortalCard = Addressables.LoadAssetAsync<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_PortalVoid.iscVoidPortal_asset).WaitForCompletion();
+
     private static Material voidCylinderMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_GameModes_InfiniteTowerRun_ITAssets.matITSafeWardAreaIndicator1_mat).WaitForCompletion();
 
     public void Awake()
@@ -557,6 +559,9 @@ namespace FathomlessVoidling
 
     private static void LoadAssets()
     {
+      SceneDef voidRaid = Addressables.LoadAssetAsync<SceneDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_voidraid.voidraid_asset).WaitForCompletion();
+      voidRaid.blockOrbitalSkills = false;
+
       raidTeleportEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_gauntlets.VoidRaidCrabGauntletTeleportEffect_prefab).WaitForCompletion();
       raidTeleportEffect.GetComponent<EffectComponent>().soundName = "Play_voidRaid_fog_explode";
       ParticleSystem.MinMaxGradient omniSparksColor = raidTeleportEffect.transform.Find("OmniSparks").GetComponent<ParticleSystem>().main.startColor;
@@ -717,6 +722,7 @@ x -0.44 0.44
 
       sdWardWipe = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabWardWipe_asset).WaitForCompletion();
       sdWardWipe.activationState = new SerializableEntityStateType(typeof(ChargeWardWipeNux));
+      //sdWardWipe.interruptPriority = InterruptPriority.Death;
 
       sdSingularity = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabVacuumAttack_asset).WaitForCompletion();
       sdSingularity.activationState = new SerializableEntityStateType(typeof(WanderingSingularity));
@@ -822,18 +828,6 @@ x -0.44 0.44
       mazeController.transform.parent = parent;
       mazeController.transform.position = Vector3.zero;
       mazeController.AddComponent<MazeSpawnPointController>();
-    }
-
-    private void TweakEntityState(string path, string fieldName, string value)
-    {
-      EntityStateConfiguration esc = Addressables.LoadAssetAsync<EntityStateConfiguration>(path).WaitForCompletion();
-      for (int i = 0; i < esc.serializedFieldsCollection.serializedFields.Length; i++)
-      {
-        if (esc.serializedFieldsCollection.serializedFields[i].fieldName == fieldName)
-        {
-          esc.serializedFieldsCollection.serializedFields[i].fieldValue.stringValue = value;
-        }
-      }
     }
   }
 }

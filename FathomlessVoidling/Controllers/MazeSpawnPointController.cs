@@ -12,13 +12,13 @@ namespace FathomlessVoidling.Controllers
         List<Vector3> mazePositions = new List<Vector3>()
           {
              // Top Left, Top Right
-            new Vector3(-258.2f, 12f, 25.5f), new Vector3(83.8f, 12f, 223f), // new Vector3(83.8f, 21.1f, 223f) 21.3f, 19, 20
+            new Vector3(-258.2f, 15f, 25.5f), new Vector3(83.8f, 15f, 223f), // new Vector3(83.8f, 21.1f, 223f) 21.3f, 19, 20
             // Bottom Left, Bottom Right
-            new Vector3(-201f, 12f, -195f), new Vector3(205f, 12f, -101f),
+            new Vector3(-201f, 15f, -195f), new Vector3(205f, 15f, -101f),
             // Bottom Up Left, Top Down Left
-            new Vector3(-141.3f, 12f, -261.7f), new Vector3(-232.2f, 12f, 93.4f),
+            new Vector3(-141.3f, 15f, -261.7f), new Vector3(-232.2f, 15f, 93.4f),
             // Bottom Up Right, Top Down Right
-            new Vector3(204.3f, 12f, -130.1f), new Vector3(73f,  12f, 217.3f)
+            new Vector3(204.3f, 15f, -130.1f), new Vector3(73f,  15f, 217.3f)
           };
 
         // 0, 2, 3, 4, 5, 7 are good
@@ -39,7 +39,7 @@ namespace FathomlessVoidling.Controllers
                         angle = 230f;
                         break;
                     case 2:
-                        angle = 60f; //70
+                        angle = 70f; //70
                         break;
                     case 3:
                         angle = 260f;

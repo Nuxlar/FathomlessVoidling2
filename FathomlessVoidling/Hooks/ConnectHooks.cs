@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using RoR2;
 using RoR2.VoidRaidCrab;
 using UnityEngine.SceneManagement;
@@ -10,6 +11,7 @@ using EntityStates.VoidBarnacle.Weapon;
 using R2API;
 using System.Linq;
 using System.Collections.Generic;
+using RoR2.EntityLogic;
 
 namespace FathomlessVoidling.Hooks
 {
@@ -29,6 +31,11 @@ namespace FathomlessVoidling.Hooks
             On.EntityStates.VoidBarnacle.Weapon.ChargeFire.OnEnter += LazyMf;
             On.EntityStates.VoidRaidCrab.DeathState.OnEnter += FixDeathState;
             On.EntityStates.VoidRaidCrab.DeathState.OnExit += KillJointsOnDeath;
+
+            // Void Moon Stuff, thanks viliger 
+            On.RoR2.VoidStageMissionController.RequestFog += PreventFog;
+            RoR2.Stage.onServerStageBegin += SpawnCauldrons;
+            On.RoR2.TeleporterInteraction.AttemptToSpawnAllEligiblePortals += SpawnVoidMoonPortal;
             /*
                 PhaseControllerStateMachine (GameObject)
                 has NetworkIdentity, EntityStateMachine, and NetworkStateMachine
@@ -110,6 +117,12 @@ namespace FathomlessVoidling.Hooks
                 printController.maxPrintBias = self.maxPrintBias;
                 printController.disableWhenFinished = false;
                 printController.printCurve = AnimationCurve.EaseInOut(0.0f, 0.0f, 1f, 1f);
+                Transform wallHolder = self.characterBody.transform.Find("WallHolder");
+                if (wallHolder)
+                    GameObject.Destroy(wallHolder.gameObject);
+                CharacterBody hauntBody = FathomlessMissionController.instance?.hauntBody;
+                if (hauntBody)
+                    hauntBody.healthComponent.Suicide();
             }
             else orig(self);
         }
@@ -180,7 +193,10 @@ namespace FathomlessVoidling.Hooks
 
             SkillLocator skillLocator = bossBody.GetComponent<SkillLocator>();
             if (skillLocator && Main.sdWardWipe)
+            {
                 skillLocator.special.SetSkillOverride(bossBody.gameObject.GetComponent<EntityStateMachine>(), Main.sdWardWipe, GenericSkill.SkillOverridePriority.Contextual);
+                skillLocator.special.AddOneStock();
+            }
 
             if (mc.wardWipeDriver)
                 mc.wardWipeDriver.enabled = true;
@@ -190,6 +206,8 @@ namespace FathomlessVoidling.Hooks
                 mc.mazeDriver.enabled = false;
             if (mc.fireMissileDriver)
                 mc.fireMissileDriver.enabled = false;
+            if (mc.multibeamDriver)
+                mc.multibeamDriver.enabled = false;
         }
 
         private void OnJointThreshold(DamageReport damageReport, HealthComponent hc, CharacterBody body, JointThresholdController jtc)
@@ -245,6 +263,10 @@ namespace FathomlessVoidling.Hooks
                 GameObject phase1Obj = missionObj.transform.GetChild(0).gameObject;
                 if (missionObj && phase1Obj)
                 {
+                    DelayedEvent delayedEvent = phase1Obj.GetComponent<DelayedEvent>();
+                    if (delayedEvent)
+                        GameObject.Destroy(delayedEvent);
+
                     phase1Obj.AddComponent<FathomlessMissionController>();
                     missionObj.transform.GetChild(1).gameObject.SetActive(false);
                     missionObj.transform.GetChild(2).gameObject.SetActive(false);
@@ -268,6 +290,107 @@ namespace FathomlessVoidling.Hooks
                 }
             }
             orig(self);
+        }
+
+        private static VoidStageMissionController.FogRequest PreventFog(On.RoR2.VoidStageMissionController.orig_RequestFog orig, VoidStageMissionController self, IZone zone)
+        {
+            return null;
+        }
+
+        private static void SpawnVoidMoonPortal(On.RoR2.TeleporterInteraction.orig_AttemptToSpawnAllEligiblePortals orig, TeleporterInteraction self)
+        {
+            if (self.beginContextString.Contains("LUNAR"))
+            {
+                List<PortalSpawner> list = self.portalSpawners.ToList<PortalSpawner>();
+                PortalSpawner portalSpawner = list.Find((PortalSpawner x) => x.portalSpawnCard == Main.locusPortalCard);
+                if (portalSpawner != null)
+                {
+                    list.Remove(portalSpawner);
+                    self.portalSpawners = list.ToArray();
+                }
+                if (!NetworkServer.active)
+                {
+                    return;
+                }
+
+                DirectorCore instance = DirectorCore.instance;
+                DirectorPlacementRule directorPlacementRule = new DirectorPlacementRule
+                {
+                    minDistance = 10f,
+                    maxDistance = 40f,
+                    placementMode = DirectorPlacementRule.PlacementMode.Approximate,
+                    position = self.transform.position,
+                    spawnOnTarget = self.transform
+                };
+                DirectorSpawnRequest directorSpawnRequest = new DirectorSpawnRequest(Main.locusPortalCard, directorPlacementRule, self.rng);
+                GameObject gameObject = instance.TrySpawnObject(directorSpawnRequest);
+                if (gameObject)
+                {
+                    NetworkServer.Spawn(gameObject);
+                    Chat.SendBroadcastChat(new Chat.SimpleChatMessage
+                    {
+                        baseToken = "PORTAL_VOID_OPEN"
+                    });
+                }
+            }
+            orig.Invoke(self);
+        }
+
+        private static void SpawnCauldrons(Stage stage)
+        {
+            if (stage.sceneDef.cachedName == "voidstage")
+            {
+                var handle1 = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_LunarCauldrons.LunarCauldron__RedToWhite_Variant_prefab);
+                if (handle1.IsValid())
+                {
+                    handle1.Completed += (result) =>
+                    {
+                        if (result.IsDone && result.Result)
+                        {
+                            GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(result.Result, new Vector3(-142.67f, 29.94f, 242.74f), Quaternion.identity);
+                            gameObject.transform.eulerAngles = new Vector3(0f, 66f, 0f);
+                            NetworkServer.Spawn(gameObject);
+                        }
+                        Addressables.Release(handle1);
+                    };
+                }
+
+                var handle2 = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_LunarCauldrons.LunarCauldron__GreenToRed_Variant_prefab);
+                if (handle2.IsValid())
+                {
+                    handle2.Completed += (result) =>
+                    {
+                        if (result.IsDone && result.Result)
+                        {
+                            GameObject gameObject2 = UnityEngine.Object.Instantiate<GameObject>(result.Result, new Vector3(-136.76f, 29.94f, 246.51f), Quaternion.identity);
+                            gameObject2.transform.eulerAngles = new Vector3(0f, 66f, 0f);
+                            NetworkServer.Spawn(gameObject2);
+                            GameObject gameObject3 = UnityEngine.Object.Instantiate<GameObject>(result.Result, new Vector3(-149.74f, 29.93f, 239.7f), Quaternion.identity);
+                            gameObject3.transform.eulerAngles = new Vector3(0f, 66f, 0f);
+                            NetworkServer.Spawn(gameObject3);
+                        }
+                        Addressables.Release(handle2);
+                    };
+                }
+
+                var handle3 = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_LunarCauldrons.LunarCauldron__WhiteToGreen_prefab);
+                if (handle3.IsValid())
+                {
+                    handle3.Completed += (result) =>
+                    {
+                        if (result.IsDone && result.Result)
+                        {
+                            GameObject gameObject4 = UnityEngine.Object.Instantiate<GameObject>(result.Result, new Vector3(-157.41f, 29.97f, 237.12f), Quaternion.identity);
+                            gameObject4.transform.eulerAngles = new Vector3(0f, 66f, 0f);
+                            NetworkServer.Spawn(gameObject4);
+                            GameObject gameObject5 = UnityEngine.Object.Instantiate<GameObject>(result.Result, new Vector3(-126.63f, 29.93f, 249.1f), Quaternion.identity);
+                            gameObject5.transform.eulerAngles = new Vector3(0f, 66f, 0f);
+                            NetworkServer.Spawn(gameObject5);
+                        }
+                        Addressables.Release(handle2);
+                    };
+                }
+            }
         }
 
         private void ApplyGravityDamageType(DamageReport obj)
