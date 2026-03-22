@@ -711,12 +711,12 @@ x -0.44 0.44
         if (i < 2)
         {
           float zVector = i == 0 ? 0.46f : -0.66f;
-          newAttachment.transform.localPosition = new Vector3(0f, 0.15f, zVector);
+          newAttachment.transform.localPosition = new Vector3(0f, 0.25f, zVector);
         }
         else
         {
-          float xVector = i == 2 ? 0.46f : -0.66f;
-          newAttachment.transform.localPosition = new Vector3(xVector, 0.15f, 0f);
+          float xVector = i == 2 ? 0.66f : -0.66f;
+          newAttachment.transform.localPosition = new Vector3(xVector, 0.25f, 0f);
         }
         childLocator.AddChild(attachName, newAttachment.transform);
         spawnSlot.spawnCard = attachableBarnacleCard;

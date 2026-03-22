@@ -174,7 +174,7 @@ namespace FathomlessVoidling.Hooks
             foreach (CharacterBody joint in otherJoints)
                 joint.healthComponent.Suicide();
         }
-
+        // #e100e3 pink #5923bd purple
         private void OnJointDeathBlow(DamageReport damageReport, HealthComponent hc, CharacterBody body)
         {
             foreach (CharacterBody joint in GetOtherJoints(body))
@@ -182,11 +182,9 @@ namespace FathomlessVoidling.Hooks
                 joint.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 10f);
                 joint.healthComponent.Heal(hc.fullHealth, new ProcChainMask());
             }
-
             FathomlessMissionController mc = FathomlessMissionController.instance;
             if (!mc || !mc.voidlingBody)
                 return;
-
             CharacterBody bossBody = mc.voidlingBody;
             bossBody.RemoveBuff(RoR2Content.Buffs.HiddenInvincibility);
             bossBody.healthComponent.TakeDamage(new DamageInfo() { damage = 9999999f });
@@ -194,7 +192,6 @@ namespace FathomlessVoidling.Hooks
             EntityStateMachine esm = bossBody.gameObject.GetComponents<EntityStateMachine>().First((esm) => esm.customName == "Body");
             bossBody.skillLocator.special.SetSkillOverride(esm, Main.sdWardWipe, GenericSkill.SkillOverridePriority.Contextual);
             bossBody.skillLocator.special.AddOneStock();
-
             if (mc.wardWipeDriver)
                 mc.wardWipeDriver.enabled = true;
             if (mc.singularityDriver)

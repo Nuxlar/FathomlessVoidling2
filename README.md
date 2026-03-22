@@ -24,6 +24,10 @@ NOTE: If it says `Log file does not exist` then you should double check in the `
 If you are using **Gale Mod Manager**
 You can copy your log by either pressing the `File` tab then pressing either `Open game log` and use `Ctrl+A` then `Ctrl+C` and use `Ctrl+V` to paste it or `Open profile folder` then go to `BepInEx` and select `LogOutput.log` and use `Ctrl+V` to paste it
 
+## Credits
+
+[DTEE](https://thunderstore.io/package/DTEE/) for the icon art (I added effects to the base art)
+
 ## Attack Details and Phase Flow
 
 ***SPOILERS!** Use for reference when reporting bugs*

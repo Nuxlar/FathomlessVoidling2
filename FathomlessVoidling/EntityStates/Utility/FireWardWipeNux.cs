@@ -34,10 +34,7 @@ namespace FathomlessVoidling.EntityStates.Utility
             if (this.muzzleFlashPrefab)
                 EffectManager.SimpleMuzzleFlash(this.muzzleFlashPrefab, this.gameObject, this.muzzleName, false);
             if (this.nextSkillDef)
-            {
                 this.skillLocator.special.SetSkillOverride(this.outer, this.nextSkillDef, GenericSkill.SkillOverridePriority.Contextual);
-                this.skillLocator.special.AddOneStock();
-            }
             if (!this.fogDamageController)
                 return;
             if (NetworkServer.active)
@@ -145,6 +142,7 @@ namespace FathomlessVoidling.EntityStates.Utility
         public override void OnExit()
         {
             base.OnExit();
+            this.skillLocator.special.UnsetSkillOverride(this.outer, Main.sdWardWipe, GenericSkill.SkillOverridePriority.Contextual);
             if (NetworkServer.active)
             {
                 PhasedInventorySetter phasedInventorySetter = this.characterBody.GetComponent<PhasedInventorySetter>();
@@ -155,6 +153,8 @@ namespace FathomlessVoidling.EntityStates.Utility
             if (mc)
             {
                 int phase = mc.GetCurrentPhase();
+                if (mc.wardWipeDriver)
+                    mc.wardWipeDriver.enabled = false;
                 if (mc.singularityDriver)
                     mc.singularityDriver.enabled = true;
                 if (mc.mazeDriver)
