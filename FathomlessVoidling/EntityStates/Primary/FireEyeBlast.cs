@@ -18,7 +18,7 @@ namespace FathomlessVoidling.EntityStates.Primary
         public string muzzleName = "EyeProjectileCenter";
         public GameObject muzzleFlashPrefab = Main.eyeBlastMuzzleFlash;
         public GameObject projectilePrefab = Main.eyeMissileProjectile;
-        public float damageCoefficient = 2f;
+        public float damageCoefficient = 1f;
         public float force = 1000f;
         public float minSpreadDegrees = 0f;
         public float rangeSpreadDegrees = 5f;

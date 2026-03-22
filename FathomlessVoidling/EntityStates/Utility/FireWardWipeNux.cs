@@ -149,6 +149,12 @@ namespace FathomlessVoidling.EntityStates.Utility
                 if (phasedInventorySetter)
                     phasedInventorySetter.AdvancePhase();
             }
+            foreach (TeamComponent tc in TeamComponent.GetTeamMembers(TeamIndex.Void).ToList())
+            {
+                CharacterBody cb = tc.GetComponent<CharacterBody>();
+                if (cb && cb.name == "VoidRaidCrabJointBody(Clone)")
+                    cb.SetBuffCount(RoR2Content.Buffs.HiddenInvincibility.buffIndex, 0);
+            }
             FathomlessMissionController mc = FathomlessMissionController.instance;
             if (mc)
             {

@@ -117,7 +117,7 @@ namespace FathomlessVoidling.EntityStates.Secondary
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Frozen;
+            return InterruptPriority.PrioritySkill;
         }
         protected void CalcBeamPathPredictive(Ray aimRay, out Vector3 direction, out Vector3 beamEndPoint)
         {

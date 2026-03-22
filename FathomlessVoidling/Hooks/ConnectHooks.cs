@@ -174,17 +174,19 @@ namespace FathomlessVoidling.Hooks
             foreach (CharacterBody joint in otherJoints)
                 joint.healthComponent.Suicide();
         }
-        // #e100e3 pink #5923bd purple
+
         private void OnJointDeathBlow(DamageReport damageReport, HealthComponent hc, CharacterBody body)
         {
-            foreach (CharacterBody joint in GetOtherJoints(body))
-            {
-                joint.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 10f);
-                joint.healthComponent.Heal(hc.fullHealth, new ProcChainMask());
-            }
             FathomlessMissionController mc = FathomlessMissionController.instance;
             if (!mc || !mc.voidlingBody)
                 return;
+
+            foreach (CharacterBody joint in GetOtherJoints(body))
+            {
+                joint.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
+                joint.healthComponent.Heal(hc.fullHealth, new ProcChainMask());
+                joint.GetComponent<JointThresholdController>()?.ResetThreshold();
+            }
             CharacterBody bossBody = mc.voidlingBody;
             bossBody.RemoveBuff(RoR2Content.Buffs.HiddenInvincibility);
             bossBody.healthComponent.TakeDamage(new DamageInfo() { damage = 9999999f });

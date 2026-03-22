@@ -77,7 +77,7 @@ namespace FathomlessVoidling.EntityStates.Utility
 
         public override InterruptPriority GetMinimumInterruptPriority()
         {
-            return InterruptPriority.Death;
+            return InterruptPriority.Frozen;
         }
     }
 }
