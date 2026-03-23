@@ -47,7 +47,7 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "0.9.12";
+    public const string PluginVersion = "0.9.13";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
@@ -93,6 +93,7 @@ namespace FathomlessVoidling
     public static GameObject mazePortalEffect;
     public static GameObject mazeMuzzleEffect;
     public static GameObject mazeLaserPrefab;
+    public static GameObject mazeWarningPrefab;
     public static GameObject mazeChargeUpPrefab;
     public static GameObject mazeImpactEffect;
 
@@ -618,6 +619,34 @@ namespace FathomlessVoidling
           ParticleSystem.MainModule main = item.main;
           main.startSizeMultiplier *= 3f;
         }
+      }
+
+      mazeWarningPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamVFX_prefab).WaitForCompletion(), "MazeWarningVFXNux");
+      for (int i = mazeWarningPrefab.transform.childCount - 1; i >= 0; i--)
+      {
+        Transform child = mazeWarningPrefab.transform.GetChild(i);
+        if (child.name != "Mesh, Additive" && child.name != "Mesh, Transparent")
+          GameObject.Destroy(child.gameObject);
+      }
+      VfxKillBehavior warningVfxKill = mazeWarningPrefab.GetComponent<VfxKillBehavior>();
+      if (warningVfxKill)
+        GameObject.Destroy(warningVfxKill);
+      DestroyOnTimer warningTimer = mazeWarningPrefab.GetComponent<DestroyOnTimer>();
+      if (warningTimer)
+        warningTimer.duration = 2f;
+      Material matInnerWarning = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matWarningBeamOuterCylinder_mat).WaitForCompletion();
+      Material matWarning = Object.Instantiate(Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matWarningBeamOuterCylinder_mat).WaitForCompletion());
+      Color warningColor = matWarning.color;
+      matWarning.color = new Color(warningColor.r, warningColor.g, warningColor.b, 0.3f);
+      Transform warningMeshTransform = mazeWarningPrefab.transform.Find("Mesh, Additive");
+      if (warningMeshTransform)
+      {
+        warningMeshTransform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial = matInnerWarning;
+        warningMeshTransform.localScale *= 3f;
+        warningMeshTransform.localPosition = new Vector3(0f, 0f, 50.16f);
+        MeshRenderer warningMeshRenderer = warningMeshTransform.GetComponent<MeshRenderer>();
+        if (warningMeshRenderer)
+          warningMeshRenderer.sharedMaterial = matWarning;
       }
 
       GameObject newMuzzlePrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamChargeUp_prefab).WaitForCompletion(), "MazeMuzzleEffectNux", false);

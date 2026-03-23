@@ -13,6 +13,7 @@ namespace FathomlessVoidling.EntityStates
         public override void OnEnter()
         {
             base.OnEnter();
+            this.characterBody.master.isBoss = true;
             this.characterModel = this.GetModelTransform().GetComponent<CharacterModel>();
             if ((bool)this.characterModel)
                 ++this.characterModel.invisibilityCount;

@@ -134,11 +134,9 @@ namespace FathomlessVoidling.Controllers
 
         public void ResetThreshold()
         {
-            if (!this.defeatedServer)
-                return;
             this.defeatedServer = false;
-            if (this.jointBody.HasBuff(RoR2Content.Buffs.Immune))
-                this.jointBody.SetBuffCount(RoR2Content.Buffs.Immune.buffIndex, 0);
+            this.membersList?.Clear();
+            this.jointBody.SetBuffCount(RoR2Content.Buffs.Immune.buffIndex, 0);
         }
 
     }

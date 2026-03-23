@@ -117,19 +117,23 @@ namespace FathomlessVoidling.EntityStates.Utility
             {
                 foreach (CharacterBody playerBody in playerBodies)
                 {
-
                     Vector3? teleportPos = TeleportHelper.FindSafeTeleportDestination(VoidRaidGauntletController.instance.currentDonut.returnPoint.position, playerBody, Run.instance.runRNG);
                     if (!teleportPos.HasValue)
                         continue;
-                    //  TeleportHelper.TeleportBody(playerBody, (Vector3)teleportPos, false);
-                    TeleportHelper.TeleportBody(new TeleportHelper.TeleportBodyArgs()
+
+                    TeleportHelper.TeleportBodyArgs teleportArgs = new()
                     {
                         body = playerBody,
                         targetPosition = teleportPos.Value,
                         forceOutOfVehicle = true,
                         teleportMinions = true,
                         resetStateMachines = true
-                    });
+                    };
+                    if (Util.HasEffectiveAuthority(playerBody.gameObject))
+                        TeleportHelper.TeleportBody(teleportArgs);
+                    else
+                        playerBody.CallRpcTeleportWithLocalAuthority(teleportArgs);
+
                     GameObject effectPrefab = Run.instance.GetTeleportEffectPrefab(playerBody.gameObject);
                     effectPrefab = Main.raidTeleportEffect;
                     if (effectPrefab)

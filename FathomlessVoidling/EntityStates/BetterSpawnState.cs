@@ -108,6 +108,8 @@ namespace FathomlessVoidling.EntityStates
             if (characterMaster.GetBodyObject() != null)
             {
                 GameObject bodyObj = characterMaster.GetBodyObject();
+                //   characterMaster.isBoss = true;
+                characterMaster.inventory.GiveItemPermanent(RoR2Content.Items.AdaptiveArmor);
 
                 if (bodyObj.TryGetComponent(out LegControllerNetworkHelper lcnh))
                 {

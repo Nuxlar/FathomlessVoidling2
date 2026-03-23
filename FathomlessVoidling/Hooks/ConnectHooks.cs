@@ -189,7 +189,7 @@ namespace FathomlessVoidling.Hooks
             }
             CharacterBody bossBody = mc.voidlingBody;
             bossBody.RemoveBuff(RoR2Content.Buffs.HiddenInvincibility);
-            bossBody.healthComponent.TakeDamage(new DamageInfo() { damage = 9999999f });
+            bossBody.healthComponent.TakeDamage(new DamageInfo() { damage = 9999999f, position = bossBody.corePosition });
             bossBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
             EntityStateMachine esm = bossBody.gameObject.GetComponents<EntityStateMachine>().First((esm) => esm.customName == "Body");
             bossBody.skillLocator.special.SetSkillOverride(esm, Main.sdWardWipe, GenericSkill.SkillOverridePriority.Contextual);
@@ -225,24 +225,30 @@ namespace FathomlessVoidling.Hooks
 
         private void ThresholdCheck(On.RoR2.HealthComponent.orig_SendDamageDealt orig, DamageReport damageReport)
         {
-            HealthComponent hc = damageReport.victim.gameObject.GetComponent<HealthComponent>();
-            CharacterBody body = hc.body;
-
-            if (body && body.name == "VoidRaidCrabJointBody(Clone)")
+            if (damageReport.victim)
             {
-                JointThresholdController jtc = body.GetComponent<JointThresholdController>();
-                bool isDeath = hc.health - damageReport.damageDealt <= 0f;
-
-                if (isDeath && jtc && jtc.defeatedServer)
+                HealthComponent hc = damageReport.victim.gameObject.GetComponent<HealthComponent>();
+                if (hc)
                 {
-                    int phase = FathomlessMissionController.instance?.GetCurrentPhase() ?? -1;
-                    if (phase == 2)
-                        OnFinalJointDeathBlow(damageReport, hc, body);
-                    else
-                        OnJointDeathBlow(damageReport, hc, body);
+                    CharacterBody body = hc.body;
+                    if (body && body.name == "VoidRaidCrabJointBody(Clone)")
+                    {
+                        JointThresholdController jtc = body.GetComponent<JointThresholdController>();
+                        bool isDeath = hc.health - damageReport.damageDealt <= 0f;
+
+                        if (isDeath && jtc && jtc.defeatedServer)
+                        {
+                            int phase = FathomlessMissionController.instance?.GetCurrentPhase() ?? -1;
+                            if (phase == 2)
+                                OnFinalJointDeathBlow(damageReport, hc, body);
+                            else
+                                OnJointDeathBlow(damageReport, hc, body);
+                        }
+                        else if (jtc && !jtc.defeatedServer && hc.health - damageReport.damageDealt <= hc.fullHealth * 0.8f)
+
+                            OnJointThreshold(damageReport, hc, body, jtc);
+                    }
                 }
-                else if (jtc && !jtc.defeatedServer && hc.health - damageReport.damageDealt <= hc.fullHealth * 0.8f)
-                    OnJointThreshold(damageReport, hc, body, jtc);
             }
             orig(damageReport);
         }

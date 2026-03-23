@@ -22,6 +22,7 @@ namespace FathomlessVoidling.EntityStates.Utility
         public static GameObject portalEffectPrefab = Main.mazePortalEffect;
         public static GameObject chargeEffectPrefab = Main.mazeChargeUpPrefab;
         public static GameObject muzzleEffectPrefab = Main.mazeMuzzleEffect;
+        public static GameObject warningBeamVfxPrefab = Main.mazeWarningPrefab;
         public static LoopSoundDef loopSound = SpinBeamAttack.loopSound;
         public static string chargeSoundString = "Play_voidRaid_superLaser_chargeUp";
         public static string fireSoundString = "Play_voidRaid_superLaser_start";
@@ -36,6 +37,7 @@ namespace FathomlessVoidling.EntityStates.Utility
         private int wavesFired = 0;
         private List<LoopSoundManager.SoundLoopPtr> loopPtrs = new List<LoopSoundManager.SoundLoopPtr>();
         private List<GameObject> chargeEffectInstances = new List<GameObject>();
+        private List<GameObject> warningVfxInstances = new List<GameObject>();
         private GameObject eyeEffectInstance;
         private List<List<int>> positionMatrix = new List<List<int>>()
         {
@@ -105,9 +107,11 @@ namespace FathomlessVoidling.EntityStates.Utility
             if (this.delayStopwatch >= this.beamDelay)
             {
                 this.delayStopwatch = 0f;
+                foreach (GameObject warning in this.warningVfxInstances)
+                    EntityState.Destroy(warning);
+                this.warningVfxInstances.Clear();
                 foreach (GameObject instance in this.chargeEffectInstances)
                 {
-                    Debug.LogWarning("SPAWNING AT ANCHOR: " + instance.transform.parent);
                     Util.PlaySound(MazeAttack.fireSoundString, instance.transform.parent.gameObject);
                     GameObject beamVfxInstance = this.CreateBeamVFXInstance(MazeAttack.beamVfxPrefab, instance.transform.parent);
                     this.loopPtrs.Add(LoopSoundManager.PlaySoundLoopLocal(beamVfxInstance, MazeAttack.loopSound));
@@ -234,13 +238,15 @@ namespace FathomlessVoidling.EntityStates.Utility
                     GameObject chargeUpEffect = this.CreateBeamVFXInstance(MazeAttack.chargeEffectPrefab, child);
                     Util.PlaySound(MazeAttack.chargeSoundString, chargeUpEffect);
                     this.chargeEffectInstances.Add(chargeUpEffect);
+                    if (MazeAttack.warningBeamVfxPrefab)
+                        this.warningVfxInstances.Add(this.CreateBeamVFXInstance(MazeAttack.warningBeamVfxPrefab, child));
                 }
             }
         }
 
         private void FireBeamBulletAuthority()
         {
-            if (this.beamVfxInstances.Count == 0)
+            if (this.beamVfxInstances.Count == 0 || !this.isAuthority)
                 return;
 
             foreach (GameObject beamInstance in this.beamVfxInstances)

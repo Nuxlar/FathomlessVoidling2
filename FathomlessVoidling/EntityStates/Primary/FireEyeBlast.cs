@@ -44,6 +44,7 @@ namespace FathomlessVoidling.EntityStates.Primary
                 {
                     case 0:
                         FireEyeBlast.numMissilesPerWave = 6;
+                        FireEyeBlast.baseDelayBetweenWaves = 0.5f;
                         break;
                     case 1:
                         FireEyeBlast.numMissilesPerWave = 8;
