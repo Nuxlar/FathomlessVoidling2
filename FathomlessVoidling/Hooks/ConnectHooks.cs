@@ -12,6 +12,7 @@ using R2API;
 using System.Linq;
 using System.Collections.Generic;
 using RoR2.EntityLogic;
+using UnityEngine.Rendering.PostProcessing;
 
 namespace FathomlessVoidling.Hooks
 {
@@ -47,7 +48,6 @@ namespace FathomlessVoidling.Hooks
             orig(self, donutIndex);
             Transform root = self.currentDonut?.root?.transform;
             if (!root) return;
-
             if (root.name == "RaidDC")
             {
                 Transform roof = root.Find("HOLDER: ROOF");
@@ -147,80 +147,62 @@ namespace FathomlessVoidling.Hooks
             }
         }
 
-        private List<CharacterBody> GetOtherJoints(CharacterBody exclude)
-        {
-            List<CharacterBody> result = new List<CharacterBody>();
-            foreach (TeamComponent tc in TeamComponent.GetTeamMembers(TeamIndex.Void).ToList())
-            {
-                CharacterBody cb = tc.GetComponent<CharacterBody>();
-                if (cb && cb.name == "VoidRaidCrabJointBody(Clone)" && cb.netId != exclude.netId)
-                    result.Add(cb);
-            }
-            return result;
-        }
-
-        private void OnFinalJointDeathBlow(DamageReport damageReport, HealthComponent hc, CharacterBody body)
-        {
-            damageReport.damageDealt = 0f;
-            hc.health = 1f;
-            body.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 5f);
-
-            List<CharacterBody> otherJoints = GetOtherJoints(body);
-            foreach (CharacterBody joint in otherJoints)
-                joint.AddTimedBuff(RoR2Content.Buffs.HiddenInvincibility, 5f);
-
-            FathomlessMissionController.instance?.voidlingBody?.healthComponent.Suicide();
-
-            foreach (CharacterBody joint in otherJoints)
-                joint.healthComponent.Suicide();
-        }
-
-        private void OnJointDeathBlow(DamageReport damageReport, HealthComponent hc, CharacterBody body)
+        private void TriggerWardWipe()
         {
             FathomlessMissionController mc = FathomlessMissionController.instance;
-            if (!mc || !mc.voidlingBody)
-                return;
+            if (!mc || !mc.voidlingBody) return;
 
-            foreach (CharacterBody joint in GetOtherJoints(body))
-            {
-                joint.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
-                joint.healthComponent.Heal(hc.fullHealth, new ProcChainMask());
-                joint.GetComponent<JointThresholdController>()?.ResetThreshold();
-            }
             CharacterBody bossBody = mc.voidlingBody;
             bossBody.RemoveBuff(RoR2Content.Buffs.HiddenInvincibility);
-            bossBody.healthComponent.TakeDamage(new DamageInfo() { damage = 9999999f, position = bossBody.corePosition });
+            bossBody.healthComponent.TakeDamage(new DamageInfo() { damage = 99999999f, position = bossBody.corePosition });
             bossBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
+
             EntityStateMachine esm = bossBody.gameObject.GetComponents<EntityStateMachine>().First((esm) => esm.customName == "Body");
             bossBody.skillLocator.special.SetSkillOverride(esm, Main.sdWardWipe, GenericSkill.SkillOverridePriority.Contextual);
             bossBody.skillLocator.special.AddOneStock();
-            if (mc.wardWipeDriver)
-                mc.wardWipeDriver.enabled = true;
-            if (mc.singularityDriver)
-                mc.singularityDriver.enabled = false;
-            if (mc.mazeDriver)
-                mc.mazeDriver.enabled = false;
-            if (mc.fireMissileDriver)
-                mc.fireMissileDriver.enabled = false;
-            if (mc.multibeamDriver)
-                mc.multibeamDriver.enabled = false;
+
+            if (mc.wardWipeDriver) mc.wardWipeDriver.enabled = true;
+            if (mc.singularityDriver) mc.singularityDriver.enabled = false;
+            if (mc.mazeDriver) mc.mazeDriver.enabled = false;
+            if (mc.fireMissileDriver) mc.fireMissileDriver.enabled = false;
+            if (mc.multibeamDriver) mc.multibeamDriver.enabled = false;
         }
 
-        private void OnJointThreshold(DamageReport damageReport, HealthComponent hc, CharacterBody body, JointThresholdController jtc)
+        private void OnJointThreshold(HealthComponent hc, CharacterBody body, JointThresholdController jtc, float thresholdFraction, int phase)
         {
             body.AddBuff(RoR2Content.Buffs.Immune);
-            jtc.TriggerThresholdEvent();
-            hc.health = hc.fullHealth * 0.8f;
-            damageReport.damageDealt = 1f;
+            hc.health = hc.fullHealth * thresholdFraction;
+            jtc.reachedThreshold = true;
+
+            if (JointThresholdController.AllJointsReachedThreshold())
+                TriggerWardWipe();
 
             FathomlessMissionController mc = FathomlessMissionController.instance;
-            if (!mc)
-                return;
-            int phase = mc.GetCurrentPhase();
+            if (!mc) return;
             if (phase == 0 && mc.singularityDriver)
                 mc.singularityDriver.enabled = true;
-            else if (phase == 1 && mc.mazeDriver)
-                mc.mazeDriver.enabled = true;
+        }
+
+        private void OnJointFinalThreshold(DamageReport damageReport, HealthComponent hc, CharacterBody body, JointThresholdController jtc)
+        {
+            damageReport.damageDealt = 0f;
+            hc.health = 1f;
+            body.AddBuff(RoR2Content.Buffs.Immune);
+            jtc.reachedThreshold = true;
+
+            if (JointThresholdController.AllJointsReachedThreshold())
+            {
+                FathomlessMissionController.instance?.voidlingBody?.healthComponent.Suicide();
+                foreach (TeamComponent tc in TeamComponent.GetTeamMembers(TeamIndex.Void).ToList())
+                {
+                    CharacterBody cb = tc.GetComponent<CharacterBody>();
+                    if (cb && cb.name == "VoidRaidCrabJointBody(Clone)")
+                    {
+                        cb.SetBuffCount(RoR2Content.Buffs.Immune.buffIndex, 0);
+                        cb.healthComponent.Suicide();
+                    }
+                }
+            }
         }
 
         private void ThresholdCheck(On.RoR2.HealthComponent.orig_SendDamageDealt orig, DamageReport damageReport)
@@ -234,19 +216,28 @@ namespace FathomlessVoidling.Hooks
                     if (body && body.name == "VoidRaidCrabJointBody(Clone)")
                     {
                         JointThresholdController jtc = body.GetComponent<JointThresholdController>();
-                        bool isDeath = hc.health - damageReport.damageDealt <= 0f;
-
-                        if (isDeath && jtc && jtc.defeatedServer)
+                        if (jtc && !jtc.reachedThreshold)
                         {
                             int phase = FathomlessMissionController.instance?.GetCurrentPhase() ?? -1;
-                            if (phase == 2)
-                                OnFinalJointDeathBlow(damageReport, hc, body);
-                            else
-                                OnJointDeathBlow(damageReport, hc, body);
-                        }
-                        else if (jtc && !jtc.defeatedServer && hc.health - damageReport.damageDealt <= hc.fullHealth * 0.8f)
 
-                            OnJointThreshold(damageReport, hc, body, jtc);
+                            if (jtc.nextCleansePercent > 0f && hc.health <= hc.fullHealth * jtc.nextCleansePercent)
+                            {
+                                jtc.CleanseDebuffs();
+                                jtc.nextCleansePercent -= 0.1f;
+                            }
+
+                            if (phase >= 0 && phase <= 1)
+                            {
+                                float threshold = jtc.GetThresholdForPhase(phase);
+                                if (threshold > 0f && hc.health <= hc.fullHealth * threshold)
+                                    OnJointThreshold(hc, body, jtc, threshold, phase);
+                            }
+                            else if (phase == 2)
+                            {
+                                if (hc.health <= 0f)
+                                    OnJointFinalThreshold(damageReport, hc, body, jtc);
+                            }
+                        }
                     }
                 }
             }
@@ -259,8 +250,10 @@ namespace FathomlessVoidling.Hooks
             {
                 // Weather, Void Raid Starry Night Variant PP + Amb postprocessvolume rampfog setting fogcolorstart 0.1887 0.1629 0.1629 0
                 // Weather Tweaks
-                //   PostProcessVolume ppv = GameObject.Find("Weather, Void Raid Starry Night Variant").transform.Find("PP + Amb").GetComponent<PostProcessVolume>();
-                //   ppv.profile.GetSetting<RampFog>().fogColorStart.value = new Color(0.1887f, 0.1629f, 0.1629f, 0.2f);
+                GameObject weather = GameObject.Find("Weather, Void Raid Starry Night Variant");
+                //  weather.transform.Find("Directional Light").GetComponent<Light>().intensity = 1.4f;
+                //   PostProcessVolume ppv = weather.transform.Find("PP + Amb").GetComponent<PostProcessVolume>();
+                //  ppv.profile.GetSetting<RampFog>().fogColorStart.value = new Color(0.1887f, 0.1629f, 0.1629f, 0.2f);
                 GameObject missionObj = GameObject.Find("EncounterPhases");
                 GameObject phase1Obj = missionObj.transform.GetChild(0).gameObject;
                 if (missionObj && phase1Obj)
@@ -403,8 +396,8 @@ namespace FathomlessVoidling.Hooks
                 CharacterMotor motor = obj.victimBody.GetComponent<CharacterMotor>();
                 if (direction && motor)
                 {
-                    float airborneForce = 3000f;
-                    float groundedForce = 3000f; // 7000 orig
+                    float airborneForce = 3500f;
+                    float groundedForce = 5000f; // 7000 orig
                     Vector3 airborneForceVector;
                     Vector3 groundedForceVector;
                     bool preventAirControl = false;

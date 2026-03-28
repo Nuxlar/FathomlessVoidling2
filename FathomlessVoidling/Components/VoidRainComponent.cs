@@ -16,6 +16,7 @@ namespace FathomlessVoidling.Components
         private float blastDamageCoefficient = 1f;
         private float blastForceMagnitude = 3000f;
         private float blastRadius = 6f;
+        private float beamMaxDistance = 1000f;
         private GameObject explosionEffectPrefab = Main.voidRainExplosion;
         private GameObject warningLaserVfxInstance;
         private GameObject warningLaserVfxPrefab = Main.voidRainWarning;
@@ -79,12 +80,31 @@ namespace FathomlessVoidling.Components
             }
         }
 
+        protected void CalcBeamPath(out Ray beamRay, out Vector3 beamEndPos)
+        {
+            float a = float.PositiveInfinity;
+            RaycastHit[] raycastHitArray = Physics.RaycastAll(this.aimRay, this.beamMaxDistance, (int)LayerIndex.CommonMasks.bullet, QueryTriggerInteraction.Ignore);
+            Transform root = this.transform.root;
+            for (int index = 0; index < raycastHitArray.Length; ++index)
+            {
+                ref RaycastHit local = ref raycastHitArray[index];
+                float distance = local.distance;
+                if ((double)distance < (double)a && local.collider.transform.root != root)
+                    a = distance;
+            }
+            float distance1 = Mathf.Min(a, this.beamMaxDistance);
+            beamEndPos = this.aimRay.GetPoint(distance1);
+            Vector3 position = this.aimRay.origin;
+            beamRay = new Ray(position, beamEndPos - position);
+        }
+
         private void UpdateWarningLaser()
         {
             if (!(bool)this.warningLaserVfxInstanceRayAttackIndicator)
                 return;
-            this.warningLaserVfxInstanceRayAttackIndicator.attackRange = 1000f;
-            this.warningLaserVfxInstanceRayAttackIndicator.attackRay = this.aimRay;
+            this.warningLaserVfxInstanceRayAttackIndicator.attackRange = this.beamMaxDistance;
+            this.CalcBeamPath(out Ray beamRay, out Vector3 _);
+            this.warningLaserVfxInstanceRayAttackIndicator.attackRay = beamRay;
         }
     }
 }

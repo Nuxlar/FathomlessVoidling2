@@ -13,7 +13,7 @@ namespace FathomlessVoidling.EntityStates.Primary
         public float baseInitialDelay = 0f;
         public static float baseDelayBetweenWaves = 0.5f;
         public float baseEndDelay = 0f;
-        public int numWaves = 5;
+        public static int numWaves = 5;
         public static int numMissilesPerWave = 6; // 6 orig
         public string muzzleName = "EyeProjectileCenter";
         public GameObject muzzleFlashPrefab = Main.eyeBlastMuzzleFlash;
@@ -44,17 +44,14 @@ namespace FathomlessVoidling.EntityStates.Primary
                 {
                     case 0:
                         FireEyeBlast.numMissilesPerWave = 6;
-                        FireEyeBlast.baseDelayBetweenWaves = 0.5f;
+                        FireEyeBlast.numWaves = 3;
                         break;
                     case 1:
-                        FireEyeBlast.numMissilesPerWave = 8;
-                        break;
-                    case 2:
-                        FireEyeBlast.baseDelayBetweenWaves = 0.25f;
+                        FireEyeBlast.numWaves = 5;
                         break;
                 }
             }
-            this.duration = (this.baseInitialDelay + Mathf.Max(0.0f, FireEyeBlast.baseDelayBetweenWaves * (this.numWaves - 1)) + this.baseEndDelay) / this.attackSpeedStat;
+            this.duration = (this.baseInitialDelay + Mathf.Max(0.0f, FireEyeBlast.baseDelayBetweenWaves * (FireEyeBlast.numWaves - 1)) + this.baseEndDelay) / this.attackSpeedStat;
             this.characterBody.SetAimTimer(this.duration + 3f);
             this.timeUntilNextWave = this.baseInitialDelay / this.attackSpeedStat;
             this.delayBetweenWaves = FireEyeBlast.baseDelayBetweenWaves / this.attackSpeedStat;

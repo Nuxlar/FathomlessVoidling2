@@ -61,7 +61,9 @@ You can copy your log by either pressing the `File` tab then pressing either `Op
 
 ### Joints
 
-- **80% HP threshold:** go immune and spawn barnacles on the leg, immunity lifts once barnacles are killed
+- **P1/P2 threshold (75%/50% HP):** damage all joints to their threshold to trigger the ward wipe and advance the phase, joints become immune at the threshold
+- **10% HP intervals:** joints cleanse their debuffs each time they lose 10% HP
+- **Phase 3:** joints become immune at 1 HP, bring all joints to 1 HP to end the fight
 </details>
 
 <details>
@@ -75,20 +77,20 @@ Voidling spawns at the center with the main body shielded.
 - **Primary:** Mortar Blast I
 - **Secondary:** Portal Beams I
 - **Utility:** none
-- **Special:** Wandering Singularity (active after 80% HP)
+- **Special:** Wandering Singularity (active after first joint reaches 75% HP)
 
 **Voidling Haunt:**
 - Intermittent Gravity Bombs
-- Gravity Barnacle director active after 80% HP
+- Gravity Barnacle director active after first joint reaches 75% HP
 
 ### Phase 2
 
-Joint break, 1 leg retracted, other joints heal.
+All joints reach 75% HP, triggering a ward wipe. Ward wipe forces gravity bombs and barnacle spawns.
 
 **Voidling:**
-- **Primary:** Mortar Blast II (missile count 6 -> 8)
+- **Primary:** Mortar Blast II (wave count 3 -> 5)
 - **Secondary:** Portal Beams II (increased beam frequency)
-- **Utility:** Maze I (active after 80% HP)
+- **Utility:** Maze I
 - **Special:** Wandering Singularity
 
 **Voidling Haunt:**
@@ -97,7 +99,7 @@ Joint break, 1 leg retracted, other joints heal.
 
 ### Phase 3
 
-Joint break, 2 legs retracted, other joints heal.
+All joints reach 50% HP, triggering a ward wipe. Ward wipe forces gravity bombs and barnacle spawns.
 
 **Voidling:**
 - **Primary:** Mortar Blast III (increased attack speed)

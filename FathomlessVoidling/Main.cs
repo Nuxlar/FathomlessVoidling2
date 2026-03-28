@@ -47,7 +47,7 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "0.9.13";
+    public const string PluginVersion = "0.9.14";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
@@ -84,7 +84,6 @@ namespace FathomlessVoidling
     public static GameObject gravityBulletProjectile;
     public static GameObject gravityBombProjectile;
     public static SpawnCard voidlingHauntCard = ScriptableObject.CreateInstance<CharacterSpawnCard>();
-    public static SpawnCard attachableBarnacleCard = ScriptableObject.CreateInstance<CharacterSpawnCard>();
     public static GameObject groundedGravityEffect;
     public static GameObject airborneGravityEffect;
     public static DirectorCardCategorySelection barnacleDccs = ScriptableObject.CreateInstance<DirectorCardCategorySelection>();
@@ -118,7 +117,6 @@ namespace FathomlessVoidling
       CreateSingularityProjectile();
       TweakBigVoidling();
       TweakBigVoidlingMaster();
-      //CreateAttachableBarnacle();
       // VoidRaidCrabAISkillDriverController
 
       new ConnectHooks();
@@ -141,7 +139,6 @@ namespace FathomlessVoidling
       ContentAddition.AddEntityState<VoidlingHauntManager>(out _);
       ContentAddition.AddEntityState<ChargeGravityBullet>(out _);
       ContentAddition.AddEntityState<FireGravityBullet>(out _);
-      ContentAddition.AddEntityState<FindSurfaceAccurate>(out _);
       ContentAddition.AddEntityState<ChargeWardWipeNux>(out _);
       ContentAddition.AddEntityState<FireWardWipeNux>(out _);
     }
@@ -267,7 +264,7 @@ namespace FathomlessVoidling
             driver.maxUserHealthFraction = float.PositiveInfinity;
             break;
           case "WardWipe":
-            driver.noRepeat = true;
+            //driver.noRepeat = true;
             driver.maxUserHealthFraction = 0.66f; // 0.67 orig
             break;
           case "LookAtTarget":
@@ -374,37 +371,6 @@ namespace FathomlessVoidling
       ContentAddition.AddProjectile(gravityBombProjectile);
     }
 
-    private static void CreateAttachableBarnacle()
-    {
-      GameObject barnacleMasterLocal = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleMaster_prefab).WaitForCompletion();
-      GameObject barnacleBody = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleBody_prefab).WaitForCompletion();
-
-      GameObject newBarnacleMaster = PrefabAPI.InstantiateClone(barnacleMasterLocal, "VoidBarnacleAttachableMasterNux");
-      GameObject newBarnacleBody = PrefabAPI.InstantiateClone(barnacleBody, "VoidBarnacleAttachableBodyNux");
-
-      CharacterBody body = newBarnacleBody.GetComponent<CharacterBody>();
-      body.baseMaxHealth = 275f; // 225 vanilla
-      body.levelMaxHealth = 85f; // 68 vanilla
-      newBarnacleBody.transform.localScale *= 1.15f;
-      newBarnacleBody.GetComponent<ModelLocator>().modelTransform.localScale *= 1.15f;
-      newBarnacleBody.AddComponent<NetworkedBodyAttachment>().shouldParentToAttachedBody = true;
-      EntityStateMachine esm = newBarnacleBody.GetComponent<EntityStateMachine>();
-      esm.initialStateType = new SerializableEntityStateType(typeof(FindSurfaceAccurate));
-
-      newBarnacleMaster.GetComponent<CharacterMaster>().bodyPrefab = newBarnacleBody;
-
-      ContentAddition.AddBody(newBarnacleBody);
-      ContentAddition.AddMaster(newBarnacleMaster);
-
-      attachableBarnacleCard.prefab = newBarnacleMaster;
-      attachableBarnacleCard.sendOverNetwork = true;
-      attachableBarnacleCard.hullSize = HullClassification.Human;
-      attachableBarnacleCard.nodeGraphType = RoR2.Navigation.MapNodeGroup.GraphType.Ground;
-      attachableBarnacleCard.requiredFlags = RoR2.Navigation.NodeFlags.None;
-      attachableBarnacleCard.forbiddenFlags = RoR2.Navigation.NodeFlags.NoCharacterSpawn | RoR2.Navigation.NodeFlags.NoChestSpawn | RoR2.Navigation.NodeFlags.NoShrineSpawn;
-      attachableBarnacleCard.directorCreditCost = 50;
-    }
-
     private static void CreateVoidlingHaunt()
     {
       barnacleMaster = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleMaster_prefab).WaitForCompletion();
@@ -432,8 +398,8 @@ namespace FathomlessVoidling
       combatDirector.expRewardCoefficient = 0.2f;
       combatDirector.minSeriesSpawnInterval = 0.1f;
       combatDirector.maxSeriesSpawnInterval = 1f;
-      combatDirector.minRerollSpawnInterval = 2.333333f;
-      combatDirector.maxRerollSpawnInterval = 4.333333f;
+      combatDirector.minRerollSpawnInterval = 4.333333f;
+      combatDirector.maxRerollSpawnInterval = 8.333333f;
       combatDirector.creditMultiplier = 0.3f;
       combatDirector.targetPlayers = true;
       combatDirector.monsterCards = barnacleDccs;
@@ -603,6 +569,9 @@ namespace FathomlessVoidling
 
       PostProcessProfile ppProfile = Addressables.LoadAssetAsync<PostProcessProfile>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_title_PostProcessing.ppLocalNullifier_asset).WaitForCompletion();
 
+      PostProcessProfile ppVoidRaidProfile = Addressables.LoadAssetAsync<PostProcessProfile>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_voidraid.ppSceneVoidRaidStageStarry_asset).WaitForCompletion();
+      ppVoidRaidProfile.GetSetting<RampFog>().fogColorStart.value = new Color(0.1887f, 0.1629f, 0.1629f, 0.3f);
+
       mazeLaserPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamVFX_prefab).WaitForCompletion(), "MazeLaserVFXNux");
       mazeLaserPrefab.AddComponent<NetworkIdentity>();
       Transform meshTransform = mazeLaserPrefab.transform.Find("Mesh, Additive");
@@ -634,14 +603,10 @@ namespace FathomlessVoidling
       DestroyOnTimer warningTimer = mazeWarningPrefab.GetComponent<DestroyOnTimer>();
       if (warningTimer)
         warningTimer.duration = 2f;
-      Material matInnerWarning = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matWarningBeamOuterCylinder_mat).WaitForCompletion();
-      Material matWarning = Object.Instantiate(Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matWarningBeamOuterCylinder_mat).WaitForCompletion());
-      Color warningColor = matWarning.color;
-      matWarning.color = new Color(warningColor.r, warningColor.g, warningColor.b, 0.3f);
+      Material matWarning = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matWarningBeamOuterCylinder_mat).WaitForCompletion();
       Transform warningMeshTransform = mazeWarningPrefab.transform.Find("Mesh, Additive");
       if (warningMeshTransform)
       {
-        warningMeshTransform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial = matInnerWarning;
         warningMeshTransform.localScale *= 3f;
         warningMeshTransform.localPosition = new Vector3(0f, 0f, 50.16f);
         MeshRenderer warningMeshRenderer = warningMeshTransform.GetComponent<MeshRenderer>();
@@ -682,6 +647,7 @@ namespace FathomlessVoidling
         ParticleSystem.MainModule main = item.main;
         main.startSizeMultiplier *= 2f;
       }
+
       // ContentAddition.AddEffect(eyeBlastChargeEffect);
 
       voidRainPortalEffect = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierSpawnEffect_prefab).WaitForCompletion(), "VoidRainPortalEffect", false);
@@ -689,6 +655,17 @@ namespace FathomlessVoidling
       ParticleSystemRenderer voidRainPsr = voidRainRing.GetChild(0).GetComponent<ParticleSystemRenderer>();
       voidRainPsr.sharedMaterial = voidRainPortalMat;
       ContentAddition.AddEffect(voidRainPortalEffect);
+
+      Transform hitIndicator = voidRainWarning.transform.Find("HitIndicator");
+      if (hitIndicator)
+      {
+        Transform furthestHitRecipient = voidRainWarning.transform.Find("FurthestHitRecipient");
+        if (furthestHitRecipient)
+        {
+          hitIndicator.SetParent(furthestHitRecipient);
+          hitIndicator.localPosition = Vector3.zero;
+        }
+      }
 
       chargeVoidRain = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabTripleBeamChargeUp_prefab).WaitForCompletion(), "ChargeVoidRainNuxEffect", false);
       foreach (ParticleSystem item in chargeVoidRain.transform.GetComponentsInChildren<ParticleSystem>())
@@ -711,48 +688,12 @@ namespace FathomlessVoidling
       }
       ContentAddition.AddEffect(spawnEffect);
 
-      CreateAttachableBarnacle();
-
       GameObject jointBodyPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabJointBody_prefab).WaitForCompletion();
       JointThresholdController thresholdController = jointBodyPrefab.AddComponent<JointThresholdController>();
       jointBodyPrefab.AddComponent<LegControllerNetworkHelper>();
       CharacterBody jointBody = jointBodyPrefab.GetComponent<CharacterBody>();
       jointBody.baseMaxHealth = 1250f; // 1000f mithrix
       jointBody.levelMaxHealth = 350f; // 325f mithrix
-      /*
-      Using the Xi Construct's implementation, there needs to be a NetworkedBodySpawnSlot for each spawn
-Needs: spawncard, owner body, owner child locator, owner attach child name, spawn effect prefab (can be null), and kill effect prefab
- BodyPrefab -> Model Base -> mockModel -> Toe -> ToeJoint
-0 -> 0 -> 2 -> 0
-z -0.44 0.44
-x -0.44 0.44
-      */
-      jointBodyPrefab.AddComponent<MasterSpawnSlotController>();
-      ChildLocator childLocator = jointBodyPrefab.GetComponent<ModelLocator>().modelChildLocator;
-
-      Transform toeJoint = jointBodyPrefab.transform.GetChild(0).GetChild(0).GetChild(2).GetChild(0);
-      for (int i = 0; i < 4; i++)
-      {
-        string attachName = "AttachPoint" + i;
-        NetworkedBodySpawnSlot spawnSlot = jointBodyPrefab.AddComponent<NetworkedBodySpawnSlot>();
-        GameObject newAttachment = new GameObject(attachName);
-        newAttachment.transform.parent = toeJoint;
-        if (i < 2)
-        {
-          float zVector = i == 0 ? 0.46f : -0.66f;
-          newAttachment.transform.localPosition = new Vector3(0f, 0.25f, zVector);
-        }
-        else
-        {
-          float xVector = i == 2 ? 0.66f : -0.66f;
-          newAttachment.transform.localPosition = new Vector3(xVector, 0.25f, 0f);
-        }
-        childLocator.AddChild(attachName, newAttachment.transform);
-        spawnSlot.spawnCard = attachableBarnacleCard;
-        spawnSlot.ownerBody = jointBody;
-        spawnSlot.ownerChildLocator = childLocator;
-        spawnSlot.ownerAttachChildName = attachName;
-      }
 
       jointBodyPrefab.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(JointSpawnState));
 
@@ -824,7 +765,7 @@ x -0.44 0.44
       projectileController.myColliders = new Collider[1] { sphereCollider };
       ProjectileSimple projectileSimple = projectile.GetComponent<ProjectileSimple>();
       projectileSimple.desiredForwardSpeed = 20f; // 10f orig
-      projectileSimple.lifetime = 20f; // 15 orig
+      projectileSimple.lifetime = 30f; // 15 orig
 
       projectileSimple.enableVelocityOverLifetime = true;
       projectileSimple.velocityOverLifetime = AnimationCurve.EaseInOut(0f, 1f, 1f, 0.2f);

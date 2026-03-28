@@ -1,9 +1,6 @@
 using RoR2;
-using RoR2.UI;
-using System;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
 
 namespace FathomlessVoidling.Controllers
@@ -11,133 +8,64 @@ namespace FathomlessVoidling.Controllers
     public class JointThresholdController : NetworkBehaviour
     {
         private CharacterBody jointBody;
-        private List<CharacterMaster> membersList = new List<CharacterMaster>();
-        private List<OnDestroyCallback> onDestroyCallbacksServer;
-        public bool defeatedServer;
-
-        private void OnDestroy()
-        {
-            if (NetworkServer.active)
-            {
-                GlobalEventManager.onCharacterDeathGlobal -= new Action<DamageReport>(this.OnCharacterDeathCallback);
-            }
-            for (int memberIndex = this.membersList.Count - 1; memberIndex >= 0; --memberIndex)
-                this.RemoveMemberAt(memberIndex);
-            this.onDestroyCallbacksServer = null;
-        }
-
-        private void Awake()
-        {
-            if (NetworkServer.active)
-            {
-                this.onDestroyCallbacksServer = new List<OnDestroyCallback>();
-                GlobalEventManager.onCharacterDeathGlobal += new Action<DamageReport>(this.OnCharacterDeathCallback);
-            }
-        }
+        public bool reachedThreshold;
+        public float nextCleansePercent = 0.9f;
+        public static readonly float[] thresholds = { 0.75f, 0.5f };
 
         private void Start()
         {
             this.jointBody = this.GetComponent<CharacterBody>();
         }
 
-        public void TriggerThresholdEvent()
+        public float GetThresholdForPhase(int phase)
         {
-            MasterSpawnSlotController slotController = this.GetComponent<MasterSpawnSlotController>();
-            if (NetworkServer.active && (bool)slotController)
-                slotController.SpawnRandomOpen(4, Run.instance.stageRng, this.gameObject, SpawnedBarnacle);
+            if (phase < 0 || phase >= thresholds.Length) return -1f;
+            return thresholds[phase];
         }
 
-        private void SpawnedBarnacle(MasterSpawnSlotController.ISlot slot, SpawnCard.SpawnResult result)
+        public void CleanseDebuffs()
         {
-            CharacterMaster master = result.spawnedInstance.GetComponent<CharacterMaster>();
-            if (master)
-                AddMember(master);
+            if (NetworkServer.active)
+                CleanseSystem.CleanseBodyServer(this.jointBody, true, false, false, false, false, false);
         }
 
-        [Server]
-        public void AddMember(CharacterMaster memberMaster)
+        public void ResetForPhase()
         {
-            if (!NetworkServer.active)
-                Debug.LogWarning("FathomlessVoidling: [Server] function 'JointThresholdController::AddMember(RoR2.CharacterMaster)' called on client");
-            else if (this.membersList.Count >= byte.MaxValue)
-            {
-                Debug.LogFormat("FathomlessVoidling: Cannot add character {0} to CombatGroup! Limit of {1} members already reached.", memberMaster, byte.MaxValue);
-            }
-            else
-            {
-                this.membersList.Add(memberMaster);
-                this.onDestroyCallbacksServer.Add(OnDestroyCallback.AddCallback(memberMaster.gameObject, new Action<OnDestroyCallback>(this.OnMemberDestroyedServer)));
-            }
+            this.reachedThreshold = false;
+            this.jointBody.SetBuffCount(RoR2Content.Buffs.Immune.buffIndex, 0);
+            float currentPercent = this.jointBody.healthComponent.health / this.jointBody.healthComponent.fullHealth;
+            this.nextCleansePercent = Mathf.Floor(currentPercent * 10f) / 10f;
+            if (this.nextCleansePercent >= currentPercent)
+                this.nextCleansePercent -= 0.1f;
         }
 
-        [Server]
-        private void OnCharacterDeathCallback(DamageReport damageReport)
+        public static bool AllJointsReachedThreshold()
         {
-            if (!NetworkServer.active)
+            foreach (TeamComponent tc in TeamComponent.GetTeamMembers(TeamIndex.Void))
             {
-                Debug.LogWarning("FathomlessVoidling: [Server] function 'JointThresholdController::OnCharacterDeathCallback(RoR2.DamageReport)' called on client");
-            }
-            else
-            {
-                CharacterMaster victimMaster = damageReport.victimMaster;
-                if (!(bool)victimMaster)
-                    return;
-                int memberIndex = this.membersList.IndexOf(victimMaster);
-                if (memberIndex < 0)
-                    return;
-                if (!victimMaster.IsDeadAndOutOfLivesServer())
-                    return;
-                this.RemoveMemberAt(memberIndex);
-                if (this.defeatedServer || this.membersList.Count != 0)
-                    return;
-                this.TriggerDefeat();
-            }
-        }
-
-        [Server]
-        public void OnMemberDestroyedServer(OnDestroyCallback onDestroyCallback)
-        {
-            if (!NetworkServer.active)
-            {
-                Debug.LogWarning("FathomlessVoidling: [Server] function 'System.Void RoR2.CombatSquad::OnMemberDestroyedServer(RoR2.OnDestroyCallback)' called on client");
-            }
-            else
-            {
-                if (!(bool)onDestroyCallback)
-                    return;
-                GameObject gameObject = onDestroyCallback.gameObject;
-                CharacterMaster component = (bool)gameObject ? gameObject.GetComponent<CharacterMaster>() : null;
-                for (int index = 0; index < this.membersList.Count; ++index)
+                CharacterBody cb = tc.GetComponent<CharacterBody>();
+                if (cb && cb.name == "VoidRaidCrabJointBody(Clone)")
                 {
-                    if (this.membersList[index] == component)
-                    {
-                        this.membersList.RemoveAt(index);
-                        break;
-                    }
+                    JointThresholdController jtc = cb.GetComponent<JointThresholdController>();
+                    if (jtc && !jtc.reachedThreshold)
+                        return false;
+                }
+            }
+            return true;
+        }
+
+        public static void RemoveImmunityFromAllJoints()
+        {
+            foreach (TeamComponent tc in TeamComponent.GetTeamMembers(TeamIndex.Void).ToList())
+            {
+                CharacterBody cb = tc.GetComponent<CharacterBody>();
+                if (cb && cb.name == "VoidRaidCrabJointBody(Clone)")
+                {
+                    JointThresholdController jtc = cb.GetComponent<JointThresholdController>();
+                    if (jtc)
+                        jtc.ResetForPhase();
                 }
             }
         }
-
-        private void RemoveMemberAt(int memberIndex)
-        {
-            this.membersList.RemoveAt(memberIndex);
-            if (this.onDestroyCallbacksServer != null)
-                this.onDestroyCallbacksServer.RemoveAt(memberIndex);
-        }
-
-        private void TriggerDefeat()
-        {
-            this.defeatedServer = true;
-            this.membersList?.Clear();
-            this.jointBody.SetBuffCount(RoR2Content.Buffs.Immune.buffIndex, 0);
-        }
-
-        public void ResetThreshold()
-        {
-            this.defeatedServer = false;
-            this.membersList?.Clear();
-            this.jointBody.SetBuffCount(RoR2Content.Buffs.Immune.buffIndex, 0);
-        }
-
     }
 }

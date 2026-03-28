@@ -68,6 +68,19 @@ public class VoidlingHauntManager : BaseState
         this.cooldownTimer = cooldown;
     }
 
+    public void WardWipeOverride()
+    {
+        CheckCurrentPhase();
+        this.chargeTimer = duration;
+        this.cooldownTimer = cooldown;
+        if (barnacleDirector)
+        {
+            CombatDirector cd = barnacleDirector.GetComponent<CombatDirector>();
+            if (cd)
+                cd.monsterCredit += 150f;
+        }
+    }
+
     private void CheckCurrentPhase()
     {
         if (FathomlessMissionController.instance && NetworkServer.active)

@@ -1,6 +1,7 @@
 using EntityStates;
 using EntityStates.VoidRaidCrab;
 using FathomlessVoidling.Controllers;
+using FathomlessVoidling.EntityStates.Haunt;
 using RoR2;
 using RoR2.Audio;
 using System.Collections.Generic;
@@ -37,6 +38,15 @@ namespace FathomlessVoidling.EntityStates.Utility
         public override void OnEnter()
         {
             base.OnEnter();
+            if (FathomlessMissionController.instance && NetworkServer.active)
+            {
+                if (FathomlessMissionController.instance.hauntBody)
+                {
+                    VoidlingHauntManager manager = (VoidlingHauntManager)FathomlessMissionController.instance.hauntBody.GetComponent<EntityStateMachine>().state;
+                    manager.WardWipeOverride();
+                }
+                else Debug.LogWarning("FathomlessVoidling.ChargeWardWipeNux: FathomlessMissionController does not have a HauntBody!");
+            }
             this.PlayAnimation(this.animationLayerName, this.animationStateName, this.animationPlaybackRateParam, this.duration);
             Util.PlaySound(this.enterSoundString, this.gameObject);
             ChildLocator modelChildLocator = this.GetModelChildLocator();
