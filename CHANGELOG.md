@@ -1,3 +1,8 @@
+**0.9.15**
+
+- Makes Voidling and Joints immune to executes, void death, and ignore breaching fin's knockup
+- Increases joint base and level HP (1250 -> 1500 | 350 | 425)
+
 **0.9.14**
 
 - Improves arena lighting/visibility

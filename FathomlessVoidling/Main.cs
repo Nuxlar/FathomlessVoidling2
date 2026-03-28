@@ -47,7 +47,7 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "0.9.14";
+    public const string PluginVersion = "0.9.15";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
@@ -102,6 +102,8 @@ namespace FathomlessVoidling
     public static SpawnCard locusPortalCard = Addressables.LoadAssetAsync<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_PortalVoid.iscVoidPortal_asset).WaitForCompletion();
 
     private static Material voidCylinderMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_GameModes_InfiniteTowerRun_ITAssets.matITSafeWardAreaIndicator1_mat).WaitForCompletion();
+    private static CharacterBody jointBody;
+    private static CharacterBody bossBody;
 
     public void Awake()
     {
@@ -118,8 +120,18 @@ namespace FathomlessVoidling
       TweakBigVoidling();
       TweakBigVoidlingMaster();
       // VoidRaidCrabAISkillDriverController
-
+      RoR2Application.onLoad += TweaksAfterLoad;
       new ConnectHooks();
+    }
+
+    private void TweaksAfterLoad()
+    {
+      //  hasBackstabImmunity, ungrabbable, void original flags
+      Main.jointBody.bodyFlags |= CharacterBody.BodyFlags.ImmuneToExecutes | CharacterBody.BodyFlags.ImmuneToVoidDeath | CharacterBody.BodyFlags.IgnoreKnockup;
+      Main.bossBody.bodyFlags |= CharacterBody.BodyFlags.ImmuneToExecutes | CharacterBody.BodyFlags.ImmuneToVoidDeath | CharacterBody.BodyFlags.IgnoreKnockup;
+
+      Main.jointBody = null;
+      Main.bossBody = null;
     }
 
     private void AddContent()
@@ -476,7 +488,10 @@ namespace FathomlessVoidling
       GameObject body = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabBody_prefab).WaitForCompletion();
       ModelLocator modelLocator = body.GetComponent<ModelLocator>();
 
-      body.GetComponent<CharacterBody>().baseMaxHealth = 2000f;
+      CharacterBody characterBody = body.GetComponent<CharacterBody>();
+      characterBody.baseMaxHealth = 1000f;
+      Main.bossBody = characterBody;
+
       FogDamageController fogDamageController = body.GetComponent<FogDamageController>();
       if (fogDamageController)
       {
@@ -692,8 +707,9 @@ namespace FathomlessVoidling
       JointThresholdController thresholdController = jointBodyPrefab.AddComponent<JointThresholdController>();
       jointBodyPrefab.AddComponent<LegControllerNetworkHelper>();
       CharacterBody jointBody = jointBodyPrefab.GetComponent<CharacterBody>();
-      jointBody.baseMaxHealth = 1250f; // 1000f mithrix
-      jointBody.levelMaxHealth = 350f; // 325f mithrix
+      jointBody.baseMaxHealth = 1500f; // 1000f mithrix
+      jointBody.levelMaxHealth = 425f; // 325f mithrix
+      Main.jointBody = jointBody;
 
       jointBodyPrefab.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(JointSpawnState));
 
