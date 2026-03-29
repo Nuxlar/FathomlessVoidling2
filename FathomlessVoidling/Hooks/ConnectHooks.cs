@@ -12,7 +12,6 @@ using R2API;
 using System.Linq;
 using System.Collections.Generic;
 using RoR2.EntityLogic;
-using UnityEngine.Rendering.PostProcessing;
 
 namespace FathomlessVoidling.Hooks
 {
@@ -28,6 +27,7 @@ namespace FathomlessVoidling.Hooks
             On.RoR2.VoidRaidCrab.LegController.RegenerateServer += PreventJointRegen;
             On.RoR2.VoidRaidGauntletController.RpcActivateDonut += DeactivateDonutRoof;
             On.RoR2.VoidRaidGauntletController.TryOpenGauntlet += BlockGauntletInPhase3;
+            On.RoR2.Projectile.ProjectileDirectionalTargetFinder.SearchForTarget += TweakSingularitySearch;
 
             On.EntityStates.VoidBarnacle.Weapon.ChargeFire.OnEnter += LazyMf;
             On.EntityStates.VoidRaidCrab.DeathState.OnEnter += FixDeathState;
@@ -385,6 +385,32 @@ namespace FathomlessVoidling.Hooks
                         Addressables.Release(handle2);
                     };
                 }
+            }
+        }
+
+        private void TweakSingularitySearch(On.RoR2.Projectile.ProjectileDirectionalTargetFinder.orig_SearchForTarget orig, RoR2.Projectile.ProjectileDirectionalTargetFinder self)
+        {
+            if (self.gameObject.name != "WSingularityProjectile(Clone)")
+                orig(self);
+            else
+            {
+                self.bullseyeSearch.teamMaskFilter = TeamMask.allButNeutral;
+                self.bullseyeSearch.teamMaskFilter.RemoveTeam(self.GetComponent<TeamFilter>().teamIndex);
+                self.bullseyeSearch.filterByLoS = self.testLoS;
+                self.bullseyeSearch.searchOrigin = self.transform.position;
+                self.bullseyeSearch.searchDirection = self.transform.forward;
+                self.bullseyeSearch.maxDistanceFilter = self.lookRange;
+                self.bullseyeSearch.sortMode = self.sortMode;
+                self.bullseyeSearch.maxAngleFilter = self.lookCone;
+                self.bullseyeSearch.RefreshCandidates();
+
+                HurtBox targetHurtBox = self.bullseyeSearch.GetResults()
+                    .Where(hurtBox => hurtBox.healthComponent && hurtBox.healthComponent.body && hurtBox.healthComponent.body.isPlayerControlled)
+                    .FirstOrDefault();
+                if (targetHurtBox)
+                    self.SetTarget(targetHurtBox);
+                else
+                    orig(self);
             }
         }
 

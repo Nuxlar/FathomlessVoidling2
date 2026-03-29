@@ -18,7 +18,7 @@ namespace FathomlessVoidling.EntityStates.Primary
         public string muzzleName = "EyeProjectileCenter";
         public GameObject muzzleFlashPrefab = Main.eyeBlastMuzzleFlash;
         public GameObject projectilePrefab = Main.eyeMissileProjectile;
-        public float damageCoefficient = 1f;
+        public float damageCoefficient = 0.75f;
         public float force = 1000f;
         public float minSpreadDegrees = 0f;
         public float rangeSpreadDegrees = 5f;
@@ -43,7 +43,6 @@ namespace FathomlessVoidling.EntityStates.Primary
                 switch (inventorySetter.phaseIndex)
                 {
                     case 0:
-                        FireEyeBlast.numMissilesPerWave = 6;
                         FireEyeBlast.numWaves = 3;
                         break;
                     case 1:

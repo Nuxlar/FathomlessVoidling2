@@ -47,14 +47,12 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "0.9.15";
+    public const string PluginVersion = "1.0.0";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
 
     public static DamageAPI.ModdedDamageType gravityDamageType = DamageAPI.ReserveDamageType();
-    public static GameObject barnacleMaster;
-    public static SpawnCard barnacleSpawnCard;
     public static GameObject spawnEffect;
     public static CharacterSpawnCard jointCard = Addressables.LoadAssetAsync<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrabJoint_asset).WaitForCompletion();
     public static SpawnCard bigVoidlingCard = Addressables.LoadAssetAsync<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrab_asset).WaitForCompletion();
@@ -75,8 +73,8 @@ namespace FathomlessVoidling
     public static InteractableSpawnCard iscSafeWard = Addressables.LoadAssetAsync<InteractableSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.iscVoidRaidSafeWard_asset).WaitForCompletion();
     public static SkillDef sdWardWipe;
     public static SkillDef sdSingularity;
-    public static SkillDef sdMaze;
-    public static SkillDef sdMultiBeam;
+    private static SkillDef sdMaze;
+    private static SkillDef sdMultiBeam;
 
     // Voidling Haunt Variables
     public static GameObject barnacleMuzzleFlash = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleMuzzleflash_prefab).WaitForCompletion();
@@ -86,7 +84,6 @@ namespace FathomlessVoidling
     public static SpawnCard voidlingHauntCard = ScriptableObject.CreateInstance<CharacterSpawnCard>();
     public static GameObject groundedGravityEffect;
     public static GameObject airborneGravityEffect;
-    public static DirectorCardCategorySelection barnacleDccs = ScriptableObject.CreateInstance<DirectorCardCategorySelection>();
 
     // Maze Variables
     public static GameObject mazePortalEffect;
@@ -101,7 +98,6 @@ namespace FathomlessVoidling
 
     public static SpawnCard locusPortalCard = Addressables.LoadAssetAsync<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_PortalVoid.iscVoidPortal_asset).WaitForCompletion();
 
-    private static Material voidCylinderMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_GameModes_InfiniteTowerRun_ITAssets.matITSafeWardAreaIndicator1_mat).WaitForCompletion();
     private static CharacterBody jointBody;
     private static CharacterBody bossBody;
 
@@ -132,6 +128,12 @@ namespace FathomlessVoidling
 
       Main.jointBody = null;
       Main.bossBody = null;
+
+      GameObject frog = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_moon.FrogInteractable_prefab).WaitForCompletion();
+      PurchaseInteraction purchaseInteraction = frog.GetComponent<PurchaseInteraction>();
+      purchaseInteraction.costType = CostTypeIndex.None;
+      purchaseInteraction.cost = 0;
+      frog.GetComponent<FrogController>().maxPets = 1;
     }
 
     private void AddContent()
@@ -267,17 +269,17 @@ namespace FathomlessVoidling
             driver.noRepeat = true;
             break;
           case "SpinBeam":
-            driver.noRepeat = true;
+            // driver.noRepeat = true;
             driver.skillSlot = SkillSlot.Utility;
             driver.maxUserHealthFraction = float.PositiveInfinity;
             break;
           case "Vacuum Attack":
-            driver.noRepeat = true;
+            //  driver.noRepeat = true;
             driver.maxUserHealthFraction = float.PositiveInfinity;
             break;
           case "WardWipe":
             //driver.noRepeat = true;
-            driver.maxUserHealthFraction = 0.66f; // 0.67 orig
+            driver.maxUserHealthFraction = float.PositiveInfinity; // 0.67 orig
             break;
           case "LookAtTarget":
             driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
@@ -385,9 +387,7 @@ namespace FathomlessVoidling
 
     private static void CreateVoidlingHaunt()
     {
-      barnacleMaster = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleMaster_prefab).WaitForCompletion();
-      GameObject barnacleBody = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleBody_prefab).WaitForCompletion();
-      barnacleSpawnCard = Addressables.LoadAssetAsync<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.cscVoidBarnacle_asset).WaitForCompletion();
+      SpawnCard barnacleSpawnCard = Addressables.LoadAssetAsync<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.cscVoidBarnacle_asset).WaitForCompletion();
       DirectorCard barnacleDirectorCard = new DirectorCard
       {
         selectionWeight = 1,
@@ -403,7 +403,7 @@ namespace FathomlessVoidling
       director.SetActive(false);
       director.transform.parent = voidlingHaunt.transform;
       CombatDirector combatDirector = director.AddComponent<CombatDirector>();
-      barnacleDccs.Clear();
+      DirectorCardCategorySelection barnacleDccs = ScriptableObject.CreateInstance<DirectorCardCategorySelection>();
       barnacleDccs.AddCategory("BarnacleMania", 4f);
       barnacleDccs.AddCard(0, barnacleDirectorCard);
       combatDirector.customName = "Barnacle Director";
@@ -412,7 +412,7 @@ namespace FathomlessVoidling
       combatDirector.maxSeriesSpawnInterval = 1f;
       combatDirector.minRerollSpawnInterval = 4.333333f;
       combatDirector.maxRerollSpawnInterval = 8.333333f;
-      combatDirector.creditMultiplier = 0.3f;
+      combatDirector.creditMultiplier = 0.6f;
       combatDirector.targetPlayers = true;
       combatDirector.monsterCards = barnacleDccs;
       combatDirector.teamIndex = TeamIndex.Void;
@@ -427,54 +427,54 @@ namespace FathomlessVoidling
       body.baseNameToken = "Voidling Haunt";
 
       voidlingHauntMaster.GetComponent<CharacterMaster>().bodyPrefab = voidlingHaunt;
+      /*
+            SkillDef skillDef = ScriptableObject.CreateInstance<SkillDef>();
 
-      SkillDef skillDef = ScriptableObject.CreateInstance<SkillDef>();
+            skillDef.skillName = "Gravity Well Nux";
+            (skillDef as ScriptableObject).name = "Gravity Well Nux";
+            skillDef.skillNameToken = "Gravity Well Nux";
 
-      skillDef.skillName = "Gravity Well Nux";
-      (skillDef as ScriptableObject).name = "Gravity Well Nux";
-      skillDef.skillNameToken = "Gravity Well Nux";
+            skillDef.activationState = new SerializableEntityStateType(typeof(VoidlingHauntManager));
+            skillDef.activationStateMachineName = "Weapon";
+            skillDef.interruptPriority = InterruptPriority.Death;
 
-      skillDef.activationState = new SerializableEntityStateType(typeof(VoidlingHauntManager));
-      skillDef.activationStateMachineName = "Weapon";
-      skillDef.interruptPriority = InterruptPriority.Death;
+            skillDef.baseMaxStock = 1;
+            skillDef.baseRechargeInterval = 60f;
 
-      skillDef.baseMaxStock = 1;
-      skillDef.baseRechargeInterval = 60f;
+            skillDef.rechargeStock = 1;
+            skillDef.requiredStock = 1;
+            skillDef.stockToConsume = 1;
 
-      skillDef.rechargeStock = 1;
-      skillDef.requiredStock = 1;
-      skillDef.stockToConsume = 1;
+            skillDef.dontAllowPastMaxStocks = true;
+            skillDef.beginSkillCooldownOnSkillEnd = true;
+            skillDef.canceledFromSprinting = false;
+            skillDef.forceSprintDuringState = false;
+            skillDef.fullRestockOnAssign = false;
+            skillDef.resetCooldownTimerOnUse = false;
+            skillDef.isCombatSkill = true;
+            skillDef.mustKeyPress = false;
+            skillDef.cancelSprintingOnActivation = false;
 
-      skillDef.dontAllowPastMaxStocks = true;
-      skillDef.beginSkillCooldownOnSkillEnd = true;
-      skillDef.canceledFromSprinting = false;
-      skillDef.forceSprintDuringState = false;
-      skillDef.fullRestockOnAssign = false;
-      skillDef.resetCooldownTimerOnUse = false;
-      skillDef.isCombatSkill = true;
-      skillDef.mustKeyPress = false;
-      skillDef.cancelSprintingOnActivation = false;
+            ContentAddition.AddSkillDef(skillDef);
 
-      ContentAddition.AddSkillDef(skillDef);
+            GameObject.Destroy(voidlingHaunt.GetComponent<GenericSkill>());
+            EntityStateMachine esm = voidlingHaunt.GetComponent<EntityStateMachine>();
+            esm.initialStateType = new SerializableEntityStateType(typeof(VoidlingHauntManager));
+            esm.mainStateType = new SerializableEntityStateType(typeof(VoidlingHauntManager));
 
-      GameObject.Destroy(voidlingHaunt.GetComponent<GenericSkill>());
-      EntityStateMachine esm = voidlingHaunt.GetComponent<EntityStateMachine>();
-      esm.initialStateType = new SerializableEntityStateType(typeof(VoidlingHauntManager));
-      esm.mainStateType = new SerializableEntityStateType(typeof(VoidlingHauntManager));
+            SkillLocator skillLocator = voidlingHaunt.GetComponent<SkillLocator>();
 
-      SkillLocator skillLocator = voidlingHaunt.GetComponent<SkillLocator>();
+            GenericSkill primarySkill = voidlingHaunt.AddComponent<GenericSkill>();
+            primarySkill.skillName = "VHauntNuxPrimary";
 
-      GenericSkill primarySkill = voidlingHaunt.AddComponent<GenericSkill>();
-      primarySkill.skillName = "VHauntNuxPrimary";
+            SkillFamily newFamily = ScriptableObject.CreateInstance<SkillFamily>();
+            (newFamily as ScriptableObject).name = "VHauntNuxPrimaryFamily";
+            newFamily.variants = new SkillFamily.Variant[] { new SkillFamily.Variant() { skillDef = skillDef } };
 
-      SkillFamily newFamily = ScriptableObject.CreateInstance<SkillFamily>();
-      (newFamily as ScriptableObject).name = "VHauntNuxPrimaryFamily";
-      newFamily.variants = new SkillFamily.Variant[] { new SkillFamily.Variant() { skillDef = skillDef } };
-
-      primarySkill._skillFamily = newFamily;
-      ContentAddition.AddSkillFamily(newFamily);
-      skillLocator.primary = primarySkill;
-
+            primarySkill._skillFamily = newFamily;
+            ContentAddition.AddSkillFamily(newFamily);
+            skillLocator.primary = primarySkill;
+      */
       ContentAddition.AddBody(voidlingHaunt);
       ContentAddition.AddMaster(voidlingHauntMaster);
 
@@ -784,7 +784,7 @@ namespace FathomlessVoidling
       projectileSimple.lifetime = 30f; // 15 orig
 
       projectileSimple.enableVelocityOverLifetime = true;
-      projectileSimple.velocityOverLifetime = AnimationCurve.EaseInOut(0f, 1f, 1f, 0.2f);
+      projectileSimple.velocityOverLifetime = AnimationCurve.EaseInOut(0f, 1f, 1f, 0.5f);
 
       projectile.transform.localScale = Vector3.one;
 
@@ -799,10 +799,9 @@ namespace FathomlessVoidling
       gameObject.transform.position = Vector3.zero;
       gameObject.transform.localPosition = new Vector3(-2.5f, 0.0f, 0.0f);
       GameObject primitive = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-      primitive.GetComponent<MeshRenderer>().material = voidCylinderMat;
+      primitive.GetComponent<MeshRenderer>().material = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_GameModes_InfiniteTowerRun_ITAssets.matITSafeWardAreaIndicator1_mat).WaitForCompletion();
       UnityEngine.Object.Destroy(primitive.GetComponent<CapsuleCollider>());
       MeshCollider collider = primitive.AddComponent<MeshCollider>();
-      // primitive.AddComponent<ReverseNormals>();
       primitive.transform.localScale = new Vector3(115f, 1250f, 115f); // 110 orig
       primitive.name = "Cheese Deterrent";
       primitive.transform.SetParent(gameObject.transform);

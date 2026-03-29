@@ -44,9 +44,6 @@ namespace FathomlessVoidling.EntityStates.Secondary
                         case 1:
                             FireVoidRain.missileSpawnFrequency = 5f;
                             break;
-                        case 2:
-                            FireVoidRain.missileSpawnFrequency = 7f;
-                            break;
                     }
                 }
             }

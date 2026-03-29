@@ -49,9 +49,17 @@ public class VoidlingHauntManager : BaseState
                 CheckCurrentPhase();
                 this.chargeTimer = duration;
                 this.cooldownTimer = cooldown;
-
-                if (!barnacleDirector.activeSelf)
-                    barnacleDirector.SetActive(true);
+                if (barnacleDirector)
+                {
+                    if (!barnacleDirector.activeSelf)
+                        barnacleDirector.SetActive(true);
+                    else
+                    {
+                        CombatDirector cd = barnacleDirector.GetComponent<CombatDirector>();
+                        if (cd)
+                            cd.monsterCredit += 150f;
+                    }
+                }
             }
         }
         else
@@ -92,14 +100,10 @@ public class VoidlingHauntManager : BaseState
                 switch (this.phaseNumber)
                 {
                     case 0:
-                        this.cooldown = 40f;
-                        this.chanceToFirePerSecond = 0.15f;
-                        break;
-                    case 1:
                         this.cooldown = 30f;
                         break;
-                    case 2:
-                        this.chanceToFirePerSecond = 0.2f;
+                    case 1:
+                        this.cooldown = 20f;
                         break;
                 }
             }

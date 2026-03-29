@@ -8,9 +8,21 @@ Releasing a short beta to catch any bugs/incompats before doing a full 1.0 relea
 
 Spawns a void locus portal on stage 5 and go to the locus as an alt moon, currently no void fog during void pillars but there are cauldrons. 
 
-## Known Issues
+TODO
+- Add configs for everything
+- Master tweaks
+- Tweak Maze to track players
+- Add music switch on phase change
 
-- (Multiplayer) Joint break VFX doesn't show up for clients
+Stuff from feedback forms
+attacks feel disembodied from voidling
+weird ward wipe delay sometimes
+change music between phases
+add vfx for singularity end
+Configs
+void pillar count
+specific ability tweaks (idk if all this is in there already) such as cooldown, damage, activation speed, etc.
+Body stats (health, damage, attack speed, etc) as well as individual attack numbers (cooldown, damage, hopefully even projectile count?). Also configuration for the Locus changes.
 
 ## Bug Reports
 
@@ -30,8 +42,8 @@ You can copy your log by either pressing the `File` tab then pressing either `Op
 
 ## Credits
 
-[DTEE](https://thunderstore.io/package/DTEE/) for the icon art (I added effects to the base art)
-[viliger](https://thunderstore.io/package/viliger/) for the void locus cauldron and portal code
+- [DTEE](https://thunderstore.io/package/DTEE/) for the icon art (I added effects to the base art)
+- [viliger](https://thunderstore.io/package/viliger/) for the void locus cauldron and stage 5 locus portal code
 
 ## Attack Details and Phase Flow
 

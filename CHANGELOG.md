@@ -1,7 +1,22 @@
+**1.0.0**
+
+- 1.0 RELEASE (no major changes/additions for the forseeable future)
+- Fixes potential softlocks if level up occurs right before Ward Wipe fires
+- Barnacle director now gains credits whenever Gravity Bombs start firing
+- Barnacle director credit multiplier increase (0.3 -> 0.6)
+- Voidling Haunt's cooldown reduced (P1 40 -> 30 | P2/P3 30 -> 20)
+- Tweaks Wandering Singularity projectile to only follow players
+- Increases lowest speed of Wandering Singularity from 20% of initial speed to 50%
+- Reduces max frog pets (10 -> 1)
+- Reduces damage from Eye Blast mortars by 25%
+- Removes lunar coin cost for petting the frog
+- Removes Voidling Haunt's gravity bomb spawn increase after P2 
+- Removes Portal Beam fire frequency increase in P3
+
 **0.9.15**
 
 - Makes Voidling and Joints immune to executes, void death, and ignore breaching fin's knockup
-- Increases joint base and level HP (1250 -> 1500 | 350 | 425)
+- Increases joint base and level HP (1250 -> 1500 | 350 -> 425)
 
 **0.9.14**
 
