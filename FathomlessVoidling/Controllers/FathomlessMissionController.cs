@@ -41,11 +41,21 @@ public class FathomlessMissionController : NetworkBehaviour
         {
             switch (driver.customName)
             {
-                case "WardWipe": this.wardWipeDriver = driver; break;
-                case "Vacuum Attack": this.singularityDriver = driver; break;
-                case "SpinBeam": this.mazeDriver = driver; break;
-                case "FireMissiles": this.fireMissileDriver = driver; break;
-                case "FireMultiBeam": this.multibeamDriver = driver; break;
+                case "WardWipe":
+                    this.wardWipeDriver = driver;
+                    break;
+                case "Vacuum Attack":
+                    this.singularityDriver = driver;
+                    break;
+                case "SpinBeam":
+                    this.mazeDriver = driver;
+                    break;
+                case "FireMissiles":
+                    this.fireMissileDriver = driver;
+                    break;
+                case "FireMultiBeam":
+                    this.multibeamDriver = driver;
+                    break;
             }
         }
         this.voidlingBody = characterMaster.GetBody();

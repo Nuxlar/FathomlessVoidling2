@@ -176,11 +176,6 @@ namespace FathomlessVoidling.Hooks
 
             if (JointThresholdController.AllJointsReachedThreshold())
                 TriggerWardWipe();
-
-            FathomlessMissionController mc = FathomlessMissionController.instance;
-            if (!mc) return;
-            if (phase == 0 && mc.singularityDriver)
-                mc.singularityDriver.enabled = true;
         }
 
         private void OnJointFinalThreshold(DamageReport damageReport, HealthComponent hc, CharacterBody body, JointThresholdController jtc)
@@ -256,6 +251,7 @@ namespace FathomlessVoidling.Hooks
                 //  ppv.profile.GetSetting<RampFog>().fogColorStart.value = new Color(0.1887f, 0.1629f, 0.1629f, 0.2f);
                 GameObject missionObj = GameObject.Find("EncounterPhases");
                 GameObject phase1Obj = missionObj.transform.GetChild(0).gameObject;
+
                 if (missionObj && phase1Obj)
                 {
                     DelayedEvent delayedEvent = phase1Obj.GetComponent<DelayedEvent>();
@@ -263,6 +259,13 @@ namespace FathomlessVoidling.Hooks
                         GameObject.Destroy(delayedEvent);
 
                     phase1Obj.AddComponent<FathomlessMissionController>();
+                    Transform phase2Music = missionObj.transform.GetChild(1).Find("Music");
+                    if (phase2Music)
+                    {
+                        phase2Music.name = "Phase2Music";
+                        phase2Music.SetParent(phase1Obj.transform);
+                    }
+
                     missionObj.transform.GetChild(1).gameObject.SetActive(false);
                     missionObj.transform.GetChild(2).gameObject.SetActive(false);
 

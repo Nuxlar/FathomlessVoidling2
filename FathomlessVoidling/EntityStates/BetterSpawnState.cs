@@ -152,7 +152,7 @@ namespace FathomlessVoidling.EntityStates
         public override void OnExit()
         {
             base.OnExit();
-            // this.characterBody.skillLocator.secondary.RemoveAllStocks();
+            this.characterBody.skillLocator.special.RemoveAllStocks();
         }
 
         public override InterruptPriority GetMinimumInterruptPriority() => InterruptPriority.Death;

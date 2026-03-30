@@ -125,7 +125,8 @@ namespace FathomlessVoidling
       //  hasBackstabImmunity, ungrabbable, void original flags
       Main.jointBody.bodyFlags |= CharacterBody.BodyFlags.ImmuneToExecutes | CharacterBody.BodyFlags.ImmuneToVoidDeath | CharacterBody.BodyFlags.IgnoreKnockup;
       Main.bossBody.bodyFlags |= CharacterBody.BodyFlags.ImmuneToExecutes | CharacterBody.BodyFlags.ImmuneToVoidDeath | CharacterBody.BodyFlags.IgnoreKnockup;
-
+      Main.bossBody.baseNameToken = "[ Voidling ]";
+      Main.bossBody.subtitleNameToken = "Augur of the Abyss";
       Main.jointBody = null;
       Main.bossBody = null;
 
@@ -258,6 +259,9 @@ namespace FathomlessVoidling
             driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
             driver.enabled = true;
             driver.noRepeat = true;
+            driver.buttonPressType = AISkillDriver.ButtonPressType.Hold;
+            driver.activationRequiresAimConfirmation = false;
+            driver.nextHighPriorityOverride = null;
             break;
           case "FireMultiBeam":
             driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
@@ -267,19 +271,33 @@ namespace FathomlessVoidling
             driver.maxUserHealthFraction = float.PositiveInfinity;
             driver.activationRequiresAimConfirmation = false;
             driver.noRepeat = true;
+            driver.buttonPressType = AISkillDriver.ButtonPressType.Hold;
+            driver.nextHighPriorityOverride = null;
             break;
           case "SpinBeam":
             // driver.noRepeat = true;
             driver.skillSlot = SkillSlot.Utility;
             driver.maxUserHealthFraction = float.PositiveInfinity;
+            driver.buttonPressType = AISkillDriver.ButtonPressType.Hold;
+            driver.driverUpdateTimerOverride = 1f;
+            driver.nextHighPriorityOverride = null;
+            driver.activationRequiresAimConfirmation = false;
             break;
           case "Vacuum Attack":
             //  driver.noRepeat = true;
+            driver.enabled = true;
             driver.maxUserHealthFraction = float.PositiveInfinity;
+            driver.buttonPressType = AISkillDriver.ButtonPressType.Hold;
+            driver.driverUpdateTimerOverride = 1f;
+            driver.nextHighPriorityOverride = null;
             break;
           case "WardWipe":
             //driver.noRepeat = true;
             driver.maxUserHealthFraction = float.PositiveInfinity; // 0.67 orig
+            driver.buttonPressType = AISkillDriver.ButtonPressType.Hold;
+            driver.driverUpdateTimerOverride = 1f;
+            driver.nextHighPriorityOverride = null;
+            driver.requiredSkill = null;
             break;
           case "LookAtTarget":
             driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
@@ -292,9 +310,9 @@ namespace FathomlessVoidling
     private static void CreateGravityProjectiles()
     {
       groundedGravityEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabGravityBumpExplosionGround_prefab).WaitForCompletion();
-      groundedGravityEffect.GetComponent<EffectComponent>().soundName = "Play_voidRaid_fog_explode";
+      groundedGravityEffect.GetComponent<EffectComponent>().soundName = "Play_voidDevastator_death";
       airborneGravityEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabGravityBumpExplosionAir_prefab).WaitForCompletion();
-      airborneGravityEffect.GetComponent<EffectComponent>().soundName = "Play_voidRaid_fog_explode";
+      airborneGravityEffect.GetComponent<EffectComponent>().soundName = "Play_voidDevastator_death";
 
       Material matGravitySphere = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabGravityBumpSphere_mat).WaitForCompletion();
       Material matGravitySphere2 = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabGravityBumpGem_mat).WaitForCompletion();
@@ -412,7 +430,7 @@ namespace FathomlessVoidling
       combatDirector.maxSeriesSpawnInterval = 1f;
       combatDirector.minRerollSpawnInterval = 4.333333f;
       combatDirector.maxRerollSpawnInterval = 8.333333f;
-      combatDirector.creditMultiplier = 0.6f;
+      combatDirector.creditMultiplier = 0.3f;
       combatDirector.targetPlayers = true;
       combatDirector.monsterCards = barnacleDccs;
       combatDirector.teamIndex = TeamIndex.Void;
@@ -427,54 +445,53 @@ namespace FathomlessVoidling
       body.baseNameToken = "Voidling Haunt";
 
       voidlingHauntMaster.GetComponent<CharacterMaster>().bodyPrefab = voidlingHaunt;
-      /*
-            SkillDef skillDef = ScriptableObject.CreateInstance<SkillDef>();
+      SkillDef skillDef = ScriptableObject.CreateInstance<SkillDef>();
 
-            skillDef.skillName = "Gravity Well Nux";
-            (skillDef as ScriptableObject).name = "Gravity Well Nux";
-            skillDef.skillNameToken = "Gravity Well Nux";
+      skillDef.skillName = "Gravity Well Nux";
+      (skillDef as ScriptableObject).name = "Gravity Well Nux";
+      skillDef.skillNameToken = "Gravity Well Nux";
 
-            skillDef.activationState = new SerializableEntityStateType(typeof(VoidlingHauntManager));
-            skillDef.activationStateMachineName = "Weapon";
-            skillDef.interruptPriority = InterruptPriority.Death;
+      skillDef.activationState = new SerializableEntityStateType(typeof(VoidlingHauntManager));
+      skillDef.activationStateMachineName = "Weapon";
+      skillDef.interruptPriority = InterruptPriority.Death;
 
-            skillDef.baseMaxStock = 1;
-            skillDef.baseRechargeInterval = 60f;
+      skillDef.baseMaxStock = 1;
+      skillDef.baseRechargeInterval = 60f;
 
-            skillDef.rechargeStock = 1;
-            skillDef.requiredStock = 1;
-            skillDef.stockToConsume = 1;
+      skillDef.rechargeStock = 1;
+      skillDef.requiredStock = 1;
+      skillDef.stockToConsume = 1;
 
-            skillDef.dontAllowPastMaxStocks = true;
-            skillDef.beginSkillCooldownOnSkillEnd = true;
-            skillDef.canceledFromSprinting = false;
-            skillDef.forceSprintDuringState = false;
-            skillDef.fullRestockOnAssign = false;
-            skillDef.resetCooldownTimerOnUse = false;
-            skillDef.isCombatSkill = true;
-            skillDef.mustKeyPress = false;
-            skillDef.cancelSprintingOnActivation = false;
+      skillDef.dontAllowPastMaxStocks = true;
+      skillDef.beginSkillCooldownOnSkillEnd = true;
+      skillDef.canceledFromSprinting = false;
+      skillDef.forceSprintDuringState = false;
+      skillDef.fullRestockOnAssign = false;
+      skillDef.resetCooldownTimerOnUse = false;
+      skillDef.isCombatSkill = true;
+      skillDef.mustKeyPress = false;
+      skillDef.cancelSprintingOnActivation = false;
 
-            ContentAddition.AddSkillDef(skillDef);
+      ContentAddition.AddSkillDef(skillDef);
 
-            GameObject.Destroy(voidlingHaunt.GetComponent<GenericSkill>());
-            EntityStateMachine esm = voidlingHaunt.GetComponent<EntityStateMachine>();
-            esm.initialStateType = new SerializableEntityStateType(typeof(VoidlingHauntManager));
-            esm.mainStateType = new SerializableEntityStateType(typeof(VoidlingHauntManager));
+      GameObject.Destroy(voidlingHaunt.GetComponent<GenericSkill>());
+      EntityStateMachine esm = voidlingHaunt.GetComponent<EntityStateMachine>();
+      esm.initialStateType = new SerializableEntityStateType(typeof(VoidlingHauntManager));
+      esm.mainStateType = new SerializableEntityStateType(typeof(VoidlingHauntManager));
 
-            SkillLocator skillLocator = voidlingHaunt.GetComponent<SkillLocator>();
+      SkillLocator skillLocator = voidlingHaunt.GetComponent<SkillLocator>();
 
-            GenericSkill primarySkill = voidlingHaunt.AddComponent<GenericSkill>();
-            primarySkill.skillName = "VHauntNuxPrimary";
+      GenericSkill primarySkill = voidlingHaunt.AddComponent<GenericSkill>();
+      primarySkill.skillName = "VHauntNuxPrimary";
 
-            SkillFamily newFamily = ScriptableObject.CreateInstance<SkillFamily>();
-            (newFamily as ScriptableObject).name = "VHauntNuxPrimaryFamily";
-            newFamily.variants = new SkillFamily.Variant[] { new SkillFamily.Variant() { skillDef = skillDef } };
+      SkillFamily newFamily = ScriptableObject.CreateInstance<SkillFamily>();
+      (newFamily as ScriptableObject).name = "VHauntNuxPrimaryFamily";
+      newFamily.variants = new SkillFamily.Variant[] { new SkillFamily.Variant() { skillDef = skillDef } };
 
-            primarySkill._skillFamily = newFamily;
-            ContentAddition.AddSkillFamily(newFamily);
-            skillLocator.primary = primarySkill;
-      */
+      primarySkill._skillFamily = newFamily;
+      ContentAddition.AddSkillFamily(newFamily);
+      skillLocator.primary = primarySkill;
+
       ContentAddition.AddBody(voidlingHaunt);
       ContentAddition.AddMaster(voidlingHauntMaster);
 
@@ -627,6 +644,7 @@ namespace FathomlessVoidling
         MeshRenderer warningMeshRenderer = warningMeshTransform.GetComponent<MeshRenderer>();
         if (warningMeshRenderer)
           warningMeshRenderer.sharedMaterial = matWarning;
+
       }
 
       GameObject newMuzzlePrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamChargeUp_prefab).WaitForCompletion(), "MazeMuzzleEffectNux", false);
@@ -709,6 +727,8 @@ namespace FathomlessVoidling
       CharacterBody jointBody = jointBodyPrefab.GetComponent<CharacterBody>();
       jointBody.baseMaxHealth = 1500f; // 1000f mithrix
       jointBody.levelMaxHealth = 425f; // 325f mithrix
+      jointBody.baseRegen = 0f;
+      jointBody.levelRegen = 0f;
       Main.jointBody = jointBody;
 
       jointBodyPrefab.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(JointSpawnState));
@@ -780,11 +800,11 @@ namespace FathomlessVoidling
       projectileController.flightSoundLoop = singularityLSD;
       projectileController.myColliders = new Collider[1] { sphereCollider };
       ProjectileSimple projectileSimple = projectile.GetComponent<ProjectileSimple>();
-      projectileSimple.desiredForwardSpeed = 20f; // 10f orig
+      projectileSimple.desiredForwardSpeed = 15f; // 10f orig
       projectileSimple.lifetime = 30f; // 15 orig
 
       projectileSimple.enableVelocityOverLifetime = true;
-      projectileSimple.velocityOverLifetime = AnimationCurve.EaseInOut(0f, 1f, 1f, 0.5f);
+      projectileSimple.velocityOverLifetime = AnimationCurve.Linear(0f, 1f, 1f, 0.5f);
 
       projectile.transform.localScale = Vector3.one;
 

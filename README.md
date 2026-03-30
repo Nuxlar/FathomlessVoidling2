@@ -1,24 +1,11 @@
 # Fathomless Voidling
 
-Releasing a short beta to catch any bugs/incompats before doing a full 1.0 release.
-
-**CONFIGS WILL BE ADDED WITH 1.0, USE THE FORM BELOW TO ASK FOR SPECIFIC CONFIGS, ALSO INTENDED AS A STAGE 6 BOSS FIGHT SO THE BASE HP WILL REFLECT THAT**
-
-### Feedback form! [Link](https://forms.gle/ACmqSCYwPHCnDvv48)
-
 Spawns a void locus portal on stage 5 and go to the locus as an alt moon, currently no void fog during void pillars but there are cauldrons. 
 
 TODO
 - Add configs for everything
-- Master tweaks
-- Tweak Maze to track players
 - Add music switch on phase change
 
-Stuff from feedback forms
-attacks feel disembodied from voidling
-weird ward wipe delay sometimes
-change music between phases
-add vfx for singularity end
 Configs
 void pillar count
 specific ability tweaks (idk if all this is in there already) such as cooldown, damage, activation speed, etc.
@@ -27,18 +14,6 @@ Body stats (health, damage, attack speed, etc) as well as individual attack numb
 ## Bug Reports
 
 Report bugs using the GitHub link above or in the **RoR2 Modding Discord**. Please include a detailed description and a log file. For multiplayer bugs, provide logs from **both the host and a client**.
-
-**SUBMIT A LOG WITH ALL BUG REPORTS PLEASE**
-
-### How to get a log
-
-If you are using **r2modman** or **Thunderstore Mod Manager**:
-You can copy your log by going to the `Settings` screen, selecting the `Debugging` tab.  Click the `Copy LogOutput.log file contents to clipboard` and use `Ctrl+V` to paste it
-
-NOTE: If it says `Log file does not exist` then you should double check in the `Locations tab` that your `Risk of Rain 2` and `Steam` folder paths are correct!
-
-If you are using **Gale Mod Manager**
-You can copy your log by either pressing the `File` tab then pressing either `Open game log` and use `Ctrl+A` then `Ctrl+C` and use `Ctrl+V` to paste it or `Open profile folder` then go to `BepInEx` and select `LogOutput.log` and use `Ctrl+V` to paste it
 
 ## Credits
 

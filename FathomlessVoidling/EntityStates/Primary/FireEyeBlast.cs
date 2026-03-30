@@ -38,18 +38,6 @@ namespace FathomlessVoidling.EntityStates.Primary
         {
             base.OnEnter();
             PhasedInventorySetter inventorySetter = this.GetComponent<PhasedInventorySetter>();
-            if ((bool)inventorySetter && NetworkServer.active)
-            {
-                switch (inventorySetter.phaseIndex)
-                {
-                    case 0:
-                        FireEyeBlast.numWaves = 3;
-                        break;
-                    case 1:
-                        FireEyeBlast.numWaves = 5;
-                        break;
-                }
-            }
             this.duration = (this.baseInitialDelay + Mathf.Max(0.0f, FireEyeBlast.baseDelayBetweenWaves * (FireEyeBlast.numWaves - 1)) + this.baseEndDelay) / this.attackSpeedStat;
             this.characterBody.SetAimTimer(this.duration + 3f);
             this.timeUntilNextWave = this.baseInitialDelay / this.attackSpeedStat;

@@ -57,7 +57,7 @@ public class VoidlingHauntManager : BaseState
                     {
                         CombatDirector cd = barnacleDirector.GetComponent<CombatDirector>();
                         if (cd)
-                            cd.monsterCredit += 150f;
+                            cd.monsterCredit += 50f;
                     }
                 }
             }

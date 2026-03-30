@@ -18,7 +18,7 @@ namespace FathomlessVoidling.EntityStates.Secondary
         private float missileStopwatch;
         public static float baseDuration = 6f;
         public static string muzzleString = BaseMultiBeamState.muzzleName;
-        public static float missileSpawnFrequency = 6f;
+        public static float missileSpawnFrequency = 5f;
         public static float missileSpawnDelay = 0.0f;
         public static float damageCoefficient;
         public static float maxSpread = 1f;
@@ -31,22 +31,6 @@ namespace FathomlessVoidling.EntityStates.Secondary
         public override void OnEnter()
         {
             base.OnEnter();
-            if (FathomlessMissionController.instance)
-            {
-                int phaseNumber = FathomlessMissionController.instance.GetCurrentPhase();
-                if (phaseNumber != -1)
-                {
-                    switch (phaseNumber)
-                    {
-                        case 0:
-                            FireVoidRain.missileSpawnFrequency = 3f;
-                            break;
-                        case 1:
-                            FireVoidRain.missileSpawnFrequency = 5f;
-                            break;
-                    }
-                }
-            }
             this.missileStopwatch -= FireVoidRain.missileSpawnDelay;
             this.muzzleTransform = this.FindModelChild(BaseMultiBeamState.muzzleName);
             Transform modelTransform = this.GetModelTransform();

@@ -14,6 +14,7 @@ namespace FathomlessVoidling.EntityStates
         {
             base.OnEnter();
             this.characterBody.master.isBoss = true;
+            this.characterBody.SetBuffCount(RoR2Content.Buffs.HiddenInvincibility.buffIndex, 1);
             this.characterModel = this.GetModelTransform().GetComponent<CharacterModel>();
             if ((bool)this.characterModel)
                 ++this.characterModel.invisibilityCount;
@@ -29,6 +30,7 @@ namespace FathomlessVoidling.EntityStates
             }
             if ((double)this.fixedAge < (double)this.duration || !this.isAuthority)
                 return;
+            this.characterBody.SetBuffCount(RoR2Content.Buffs.HiddenInvincibility.buffIndex, 0);
             this.outer.SetNextStateToMain();
         }
     }

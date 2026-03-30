@@ -2,13 +2,24 @@
 
 - 1.0 RELEASE (no major changes/additions for the forseeable future)
 - Fixes potential softlocks if level up occurs right before Ward Wipe fires
+- Fixes Voidling's name cutting into the subtitle
+- Maze II (P3's Maze), now has 1 of its 2 lasers point towards a targeted player
+- Joints are immune during spawn cutscene
 - Barnacle director now gains credits whenever Gravity Bombs start firing
-- Barnacle director credit multiplier increase (0.3 -> 0.6)
 - Voidling Haunt's cooldown reduced (P1 40 -> 30 | P2/P3 30 -> 20)
+- Phase 2 music now plays after the first Ward Wipe
+- Changes Voidling's subtitle
+- Changes Gravity Bomb/Projectile hit SFX
+- Tweaks AI to choose and use skills better
+- Tweaks wandering singularity speed to decrease linearly instead of the previous curve
 - Tweaks Wandering Singularity projectile to only follow players
 - Increases lowest speed of Wandering Singularity from 20% of initial speed to 50%
 - Reduces max frog pets (10 -> 1)
 - Reduces damage from Eye Blast mortars by 25%
+- Reduces Singularity starting speed (20 -> 15)
+- Removes Singularity activation after joint threshold in P1 (now just goes into cooldown on spawn)
+- Removes Eye Blast phase changes (waves and projectile count remain constant)
+- Removes Portal Beam phase changes (frequency is now constant)
 - Removes lunar coin cost for petting the frog
 - Removes Voidling Haunt's gravity bomb spawn increase after P2 
 - Removes Portal Beam fire frequency increase in P3

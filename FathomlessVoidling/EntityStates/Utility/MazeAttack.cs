@@ -39,6 +39,8 @@ namespace FathomlessVoidling.EntityStates.Utility
         private List<GameObject> chargeEffectInstances = new List<GameObject>();
         private List<GameObject> warningVfxInstances = new List<GameObject>();
         private GameObject eyeEffectInstance;
+        private Transform targetedAnchor;
+        private Quaternion originalAnchorRotation;
         private List<List<int>> positionMatrix = new List<List<int>>()
         {
             // Top Left, Top Right
@@ -135,6 +137,11 @@ namespace FathomlessVoidling.EntityStates.Utility
 
         public override void OnExit()
         {
+            if (this.targetedAnchor)
+            {
+                this.targetedAnchor.rotation = this.originalAnchorRotation;
+                this.targetedAnchor = null;
+            }
             EntityState.Destroy(this.eyeEffectInstance);
             base.OnExit();
         }
@@ -199,6 +206,12 @@ namespace FathomlessVoidling.EntityStates.Utility
 
         private void ResetMaze()
         {
+            if (this.targetedAnchor)
+            {
+                this.targetedAnchor.rotation = this.originalAnchorRotation;
+                this.targetedAnchor = null;
+            }
+
             foreach (GameObject instance in this.chargeEffectInstances)
             {
                 EntityState.Destroy(instance);
@@ -222,13 +235,29 @@ namespace FathomlessVoidling.EntityStates.Utility
         private void BeginMaze()
         {
             this.wavesFired++;
+            this.targetedAnchor = null;
             List<int> spawnPositions = SelectBeamPositions(this.randomBeams);
 
+            bool targetAssigned = false;
             foreach (int position in spawnPositions)
             {
                 Transform child = MazeSpawnPointController.instance.transform.Find("MazeAnchor" + position);
                 if (child)
                 {
+                    if (this.randomBeams && !targetAssigned)
+                    {
+                        targetAssigned = true;
+                        Vector3 targetPos = GetTargetPlayerPosition(child.position);
+                        if (targetPos != Vector3.zero)
+                        {
+                            this.targetedAnchor = child;
+                            this.originalAnchorRotation = child.rotation;
+                            Vector3 direction = targetPos - child.position;
+                            if (direction.sqrMagnitude > 0.01f)
+                                child.rotation = Quaternion.LookRotation(direction);
+                        }
+                    }
+
                     EffectManager.SpawnEffect(MazeAttack.portalEffectPrefab, new EffectData()
                     {
                         origin = child.position,
@@ -242,6 +271,28 @@ namespace FathomlessVoidling.EntityStates.Utility
                         this.warningVfxInstances.Add(this.CreateBeamVFXInstance(MazeAttack.warningBeamVfxPrefab, child));
                 }
             }
+        }
+
+        private Vector3 GetTargetPlayerPosition(Vector3 origin)
+        {
+            BullseyeSearch search = new BullseyeSearch();
+            search.teamMaskFilter = TeamMask.GetEnemyTeams(this.GetTeam());
+            search.filterByDistinctEntity = true;
+            search.viewer = null;
+            search.filterByLoS = false;
+            search.searchOrigin = origin;
+            search.sortMode = BullseyeSearch.SortMode.DistanceAndAngle;
+            search.maxDistanceFilter = 1000f;
+            search.minAngleFilter = 0f;
+            search.maxAngleFilter = 360f;
+            search.RefreshCandidates();
+
+            HurtBox targetHurtBox = search.GetResults()
+                .FirstOrDefault(hurtBox => hurtBox.healthComponent && hurtBox.healthComponent.body && hurtBox.healthComponent.body.isPlayerControlled);
+
+            if (targetHurtBox)
+                return targetHurtBox.transform.position;
+            return Vector3.zero;
         }
 
         private void FireBeamBulletAuthority()

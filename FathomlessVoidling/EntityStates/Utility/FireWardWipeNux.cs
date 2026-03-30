@@ -168,6 +168,16 @@ namespace FathomlessVoidling.EntityStates.Utility
                     mc.fireMissileDriver.enabled = true;
                 if (mc.multibeamDriver)
                     mc.multibeamDriver.enabled = true;
+                if (phase == 1)
+                {
+                    GameObject phases = GameObject.Find("EncounterPhases");
+                    if (phases)
+                    {
+                        Transform music = phases.transform.GetChild(0).Find("Phase2Music");
+                        if (music)
+                            music.gameObject.SetActive(true);
+                    }
+                }
             }
         }
 
