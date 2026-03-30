@@ -1,15 +1,6 @@
 # Fathomless Voidling
 
-Spawns a void locus portal on stage 5 and go to the locus as an alt moon, currently no void fog during void pillars but there are cauldrons. 
-
-TODO
-- Add configs for everything
-- Add music switch on phase change
-
-Configs
-void pillar count
-specific ability tweaks (idk if all this is in there already) such as cooldown, damage, activation speed, etc.
-Body stats (health, damage, attack speed, etc) as well as individual attack numbers (cooldown, damage, hopefully even projectile count?). Also configuration for the Locus changes.
+Reworked Voidling fight that uses the unused large voidling model. Spawns a void locus portal on stage 5, locus acts as an alternative moon. No void fog during void pillars by default, configurable. Locus has moon cauldrons. Risk of Options support for in-game configs
 
 ## Bug Reports
 
@@ -21,11 +12,6 @@ Report bugs using the GitHub link above or in the **RoR2 Modding Discord**. Plea
 - [viliger](https://thunderstore.io/package/viliger/) for the void locus cauldron and stage 5 locus portal code
 
 ## Attack Details and Phase Flow
-
-***SPOILERS!** Use for reference when reporting bugs*
-
-<details>
-<summary>Expand</summary>
 
 <details>
 <summary>Attack Details</summary>
@@ -61,10 +47,10 @@ Report bugs using the GitHub link above or in the **RoR2 Modding Discord**. Plea
 Voidling spawns at the center with the main body shielded.
 
 **Voidling:**
-- **Primary:** Mortar Blast I
-- **Secondary:** Portal Beams I
+- **Primary:** Mortar Blast
+- **Secondary:** Portal Beams
 - **Utility:** none
-- **Special:** Wandering Singularity (active after first joint reaches 75% HP)
+- **Special:** Wandering Singularity
 
 **Voidling Haunt:**
 - Intermittent Gravity Bombs
@@ -72,16 +58,16 @@ Voidling spawns at the center with the main body shielded.
 
 ### Phase 2
 
-All joints reach 75% HP, triggering a ward wipe. Ward wipe forces gravity bombs and barnacle spawns.
+All joints reach 75% HP, triggering a ward wipe. Ward wipe forces gravity bombs and barnacle spawns. Phase 2 music begins.
 
 **Voidling:**
-- **Primary:** Mortar Blast II (wave count 3 -> 5)
-- **Secondary:** Portal Beams II (increased beam frequency)
+- **Primary:** Mortar Blast
+- **Secondary:** Portal Beams
 - **Utility:** Maze I
 - **Special:** Wandering Singularity
 
 **Voidling Haunt:**
-- Intermittent Gravity Bombs (increased bomb quantity)
+- Intermittent Gravity Bombs
 - Gravity Barnacle director still active
 
 ### Phase 3
@@ -89,13 +75,12 @@ All joints reach 75% HP, triggering a ward wipe. Ward wipe forces gravity bombs 
 All joints reach 50% HP, triggering a ward wipe. Ward wipe forces gravity bombs and barnacle spawns.
 
 **Voidling:**
-- **Primary:** Mortar Blast III (increased attack speed)
-- **Secondary:** Portal Beams III (increased beam frequency)
-- **Utility:** Maze II (full line randomness)
+- **Primary:** Mortar Blast
+- **Secondary:** Portal Beams
+- **Utility:** Maze II (one laser targets a player)
 - **Special:** Wandering Singularity
 
 **Voidling Haunt:**
 - Intermittent Gravity Bombs (forced active during Maze)
 - Gravity Barnacle director still active
-</details>
 </details>

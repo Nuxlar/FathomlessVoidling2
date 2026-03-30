@@ -17,7 +17,7 @@ public class VoidlingHauntManager : BaseState
     public static float damageCoefficient = 1f;
     public float duration = 20f;
     public float cooldown = 40f;
-    public float chanceToFirePerSecond = 0.15f;
+    public float chanceToFirePerSecond = ModConfig.gravityBombChance.Value;
     private float chargeTimer;
     private float cooldownTimer;
     private GameObject barnacleDirector;
@@ -100,10 +100,10 @@ public class VoidlingHauntManager : BaseState
                 switch (this.phaseNumber)
                 {
                     case 0:
-                        this.cooldown = 30f;
+                        this.cooldown = ModConfig.hauntP1Cooldown.Value;
                         break;
                     case 1:
-                        this.cooldown = 20f;
+                        this.cooldown = ModConfig.hauntP2Cooldown.Value;
                         break;
                 }
             }

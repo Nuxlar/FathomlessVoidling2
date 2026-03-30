@@ -61,6 +61,7 @@
     <Copy SourceFiles="$(SolutionDir)manifest.json;$(SolutionDir)README.md;$(SolutionDir)CHANGELOG.md" DestinationFolder="$(TSPackageDir)" />
 
     <Copy SourceFiles="$(BuildDir)icon.png" DestinationFolder="$(TSPackageDir)" ContinueOnError="true" />
+    <Copy SourceFiles="$(BuildDir)icon.png" DestinationFolder="$(TSPackagePluginDir)" ContinueOnError="true" />
 
     <Delete Files="$(TSPackagePluginDir)/$(AssemblyName).dll" />
     <Delete Files="$(TSPackagePluginDir)/$(AssemblyName).pdb" Condition="'$(Configuration)'=='Release'" ContinueOnError="true" />

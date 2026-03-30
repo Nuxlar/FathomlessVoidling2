@@ -41,6 +41,7 @@ using FathomlessVoidling.Hooks;
 */
 namespace FathomlessVoidling
 {
+  [BepInDependency("com.rune580.riskofoptions", BepInDependency.DependencyFlags.SoftDependency)]
   [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
   public class Main : BaseUnityPlugin
   {
@@ -51,6 +52,7 @@ namespace FathomlessVoidling
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
+    public static bool RooInstalled => BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.rune580.riskofoptions");
 
     public static DamageAPI.ModdedDamageType gravityDamageType = DamageAPI.ReserveDamageType();
     public static GameObject spawnEffect;
@@ -106,6 +108,7 @@ namespace FathomlessVoidling
       Instance = this;
 
       Log.Init(Logger);
+      ModConfig.Init();
 
       AddContent();
       LoadAssets();
@@ -725,8 +728,8 @@ namespace FathomlessVoidling
       JointThresholdController thresholdController = jointBodyPrefab.AddComponent<JointThresholdController>();
       jointBodyPrefab.AddComponent<LegControllerNetworkHelper>();
       CharacterBody jointBody = jointBodyPrefab.GetComponent<CharacterBody>();
-      jointBody.baseMaxHealth = 1500f; // 1000f mithrix
-      jointBody.levelMaxHealth = 425f; // 325f mithrix
+      jointBody.baseMaxHealth = ModConfig.jointBaseHealth.Value;
+      jointBody.levelMaxHealth = ModConfig.jointLevelHealth.Value;
       jointBody.baseRegen = 0f;
       jointBody.levelRegen = 0f;
       Main.jointBody = jointBody;
@@ -740,15 +743,17 @@ namespace FathomlessVoidling
       sdSingularity = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabVacuumAttack_asset).WaitForCompletion();
       sdSingularity.activationState = new SerializableEntityStateType(typeof(WanderingSingularity));
       sdSingularity.interruptPriority = InterruptPriority.PrioritySkill;
+      if (ModConfig.singularityCooldown.Value > 0f)
+        sdSingularity.baseRechargeInterval = ModConfig.singularityCooldown.Value;
 
       sdMaze = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabSpinBeam_asset).WaitForCompletion();
       sdMaze.activationState = new SerializableEntityStateType(typeof(EnterMaze));
-      sdMaze.baseRechargeInterval = 45f; // 40s orig
+      sdMaze.baseRechargeInterval = ModConfig.mazeCooldown.Value;
       sdMaze.interruptPriority = InterruptPriority.PrioritySkill;
 
       sdMultiBeam = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabMultiBeam_asset).WaitForCompletion();
       sdMultiBeam.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
-      sdMultiBeam.baseRechargeInterval = 15f; // 10s orig
+      sdMultiBeam.baseRechargeInterval = ModConfig.multiBeamCooldown.Value;
     }
 
     private static void CreateSingularityProjectile()

@@ -292,7 +292,10 @@ namespace FathomlessVoidling.Hooks
 
         private static VoidStageMissionController.FogRequest PreventFog(On.RoR2.VoidStageMissionController.orig_RequestFog orig, VoidStageMissionController self, IZone zone)
         {
-            return null;
+            if (ModConfig.enableFog.Value)
+                return orig(self, zone);
+            else
+                return null;
         }
 
         private static void SpawnVoidMoonPortal(On.RoR2.TeleporterInteraction.orig_AttemptToSpawnAllEligiblePortals orig, TeleporterInteraction self)

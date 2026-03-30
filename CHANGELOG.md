@@ -1,6 +1,7 @@
 **1.0.0**
 
 - 1.0 RELEASE (no major changes/additions for the forseeable future)
+- Adds configs
 - Fixes potential softlocks if level up occurs right before Ward Wipe fires
 - Fixes Voidling's name cutting into the subtitle
 - Maze II (P3's Maze), now has 1 of its 2 lasers point towards a targeted player
