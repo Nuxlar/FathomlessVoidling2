@@ -116,7 +116,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                 this.fireStopwatch += Time.fixedDeltaTime;
 
 
-            if (this.beamsFiring && this.isAuthority)
+            if (this.beamsFiring)
             {
                 if (this.beamTickTimer <= 0.0)
                 {
@@ -175,7 +175,7 @@ namespace FathomlessVoidling.EntityStates.Utility
             {
                 if (this.lastFiredAxis == -1)
                 {
-                    if (Random.value > 0.5f)
+                    if (this.rng.NextDouble() > 0.5f)
                     {
                         availableRows = horizontalRows;
                         this.lastFiredAxis = 0;
@@ -312,7 +312,7 @@ namespace FathomlessVoidling.EntityStates.Utility
 
         private void FireBeamBulletAuthority()
         {
-            if (this.beamVfxInstances.Count == 0 || !this.isAuthority)
+            if (this.beamVfxInstances.Count == 0)
                 return;
 
             foreach (GameObject beamInstance in this.beamVfxInstances)
