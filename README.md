@@ -1,5 +1,7 @@
 # Fathomless Voidling
 
+BASE STATS BALANCED AROUND A STAGE 6 BOSS, IF LOOPING INCREASE THE HP IN THE CONFIG.
+
 Reworked Voidling fight that uses the unused large voidling model. Spawns a void locus portal on stage 5, locus acts as an alternative moon. No void fog during void pillars by default, configurable. Locus has moon cauldrons. Risk of Options support for in-game configs
 
 ## Bug Reports

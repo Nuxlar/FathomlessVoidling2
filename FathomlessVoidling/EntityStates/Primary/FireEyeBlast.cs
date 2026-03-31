@@ -37,6 +37,7 @@ namespace FathomlessVoidling.EntityStates.Primary
         public override void OnEnter()
         {
             base.OnEnter();
+            FireEyeBlast.numMissilesPerWave = ModConfig.eyeBlastMissileCount.Value;
             PhasedInventorySetter inventorySetter = this.GetComponent<PhasedInventorySetter>();
             this.duration = (this.baseInitialDelay + Mathf.Max(0.0f, FireEyeBlast.baseDelayBetweenWaves * (FireEyeBlast.numWaves - 1)) + this.baseEndDelay) / this.attackSpeedStat;
             this.characterBody.SetAimTimer(this.duration + 3f);

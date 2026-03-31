@@ -48,7 +48,7 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "1.0.0";
+    public const string PluginVersion = "1.0.1";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
@@ -638,13 +638,25 @@ namespace FathomlessVoidling
       DestroyOnTimer warningTimer = mazeWarningPrefab.GetComponent<DestroyOnTimer>();
       if (warningTimer)
         warningTimer.duration = 2f;
-      Material matWarning = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matWarningBeamOuterCylinder_mat).WaitForCompletion();
+
+      Material matWarning = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_voidstage.matVoidBoostPath_mat).WaitForCompletion();
+      Material matWarningInner = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidJailer.matJailerTetherIndicator_mat).WaitForCompletion();
+
       Transform warningMeshTransform = mazeWarningPrefab.transform.Find("Mesh, Additive");
       if (warningMeshTransform)
       {
         warningMeshTransform.localScale *= 3f;
         warningMeshTransform.localPosition = new Vector3(0f, 0f, 50.16f);
         MeshRenderer warningMeshRenderer = warningMeshTransform.GetComponent<MeshRenderer>();
+        warningMeshTransform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial = matWarningInner;
+        ObjectScaleCurve scaleCurve = warningMeshTransform.gameObject.AddComponent<ObjectScaleCurve>();
+        scaleCurve.resetOnAwake = true;
+        scaleCurve.timeMax = 0.3f;
+        scaleCurve.curveX = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+        scaleCurve.curveY = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+        scaleCurve.curveZ = AnimationCurve.Linear(0f, 1f, 1f, 1f);
+        scaleCurve.overallCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+
         if (warningMeshRenderer)
           warningMeshRenderer.sharedMaterial = matWarning;
 
@@ -752,7 +764,7 @@ namespace FathomlessVoidling
       sdMaze.interruptPriority = InterruptPriority.PrioritySkill;
 
       sdMultiBeam = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabMultiBeam_asset).WaitForCompletion();
-      sdMultiBeam.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
+      sdMultiBeam.activationState = new SerializableEntityStateType(typeof(EnterMaze));
       sdMultiBeam.baseRechargeInterval = ModConfig.multiBeamCooldown.Value;
     }
 

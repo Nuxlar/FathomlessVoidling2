@@ -21,6 +21,7 @@ namespace FathomlessVoidling
         public static ConfigEntry<float> hauntP1Cooldown;
         public static ConfigEntry<float> hauntP2Cooldown;
         public static ConfigEntry<float> gravityBombChance;
+        public static ConfigEntry<int> eyeBlastMissileCount;
 
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         public static void Init()
@@ -50,6 +51,13 @@ namespace FathomlessVoidling
                 25f,
                 "Health gained per level for joints",
                 100f, 1000f);
+
+            eyeBlastMissileCount = FVConfig.BindOptionSlider(
+                "Skills",
+                "Eye Blast Missile Count",
+                6,
+                "Number of missiles fired per wave during Eye Blast",
+                1, 20);
 
             mazeCooldown = FVConfig.BindOptionSteppedSlider(
                 "Skills",

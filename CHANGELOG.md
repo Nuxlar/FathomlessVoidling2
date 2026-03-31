@@ -1,3 +1,8 @@
+**1.0.1**
+
+- Fixes Maze lasers occasionally firing in the wrong direction in multiplayer
+- Adds config value for eye blast missile count
+
 **1.0.0**
 
 - 1.0 RELEASE (no major changes/additions for the forseeable future)

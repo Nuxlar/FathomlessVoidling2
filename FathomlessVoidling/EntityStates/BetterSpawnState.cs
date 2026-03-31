@@ -40,8 +40,8 @@ namespace FathomlessVoidling.EntityStates
             this.PlayAnimation(this.animationLayerName, this.animationStateName, this.animationPlaybackRateParam, this.duration);
             ChildLocator modelChildLocator = this.GetModelChildLocator();
             this.modelLocator.modelTransform.Find("VoidRaidCrabArmature/ROOT/HeadBase/eyeballRoot").gameObject.SetActive(false);
-
-            this.characterBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
+            if (NetworkServer.active)
+                this.characterBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
 
             if (!NetworkServer.active)
                 return;

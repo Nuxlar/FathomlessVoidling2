@@ -18,6 +18,7 @@ namespace FathomlessVoidling.EntityStates.Utility
         public static float beamMaxDistance = 400f; // 400 orig
         public static float beamDpsCoefficient = 40f; // 40 orig
         public static float beamTickFrequency = 30f; // 30 orig
+        public static int waveCount = 3;
         public static GameObject beamImpactEffectPrefab = Main.mazeImpactEffect;
         public static GameObject portalEffectPrefab = Main.mazePortalEffect;
         public static GameObject chargeEffectPrefab = Main.mazeChargeUpPrefab;
@@ -52,12 +53,13 @@ namespace FathomlessVoidling.EntityStates.Utility
             // Bottom Up Right, Top Down Right
             new List<int>() { 1, 1 },
         };
+        private List<List<int>> selectedAnchors = new List<List<int>>();
 
         public override void OnEnter()
         {
             base.OnEnter();
-
-            this.duration = (this.waves * (this.beamDelay + this.beamDuration)) + 0.5f;
+            this.wavesFired = 0;
+            this.duration = (MazeAttack.waveCount * (this.beamDelay + this.beamDuration)) + 0.5f;
             if (FathomlessMissionController.instance && NetworkServer.active && this.randomBeams)
             {
                 if (FathomlessMissionController.instance.hauntBody)
@@ -83,12 +85,26 @@ namespace FathomlessVoidling.EntityStates.Utility
 
             if (!MazeSpawnPointController.instance)
                 return;
+            GetAnchorPoints();
             BeginMaze();
+        }
+
+        private void GetAnchorPoints()
+        {
+            selectedAnchors.Clear();
+            for (int i = 0; i < MazeAttack.waveCount; i++)
+            {
+                List<int> spawnPositions = SelectBeamPositions(this.randomBeams);
+                selectedAnchors.Add(spawnPositions);
+            }
         }
 
         public override void FixedUpdate()
         {
             base.FixedUpdate();
+
+            if (this.wavesFired >= MazeAttack.waveCount && this.fixedAge >= this.duration && this.isAuthority)
+                this.outer.SetNextState(new ExitMaze());
 
             if (!this.beamsFiring)
                 this.delayStopwatch += Time.fixedDeltaTime;
@@ -129,10 +145,6 @@ namespace FathomlessVoidling.EntityStates.Utility
                 this.beamTickTimer = 0f;
                 ResetMaze();
             }
-
-            if (this.wavesFired < this.waves || this.fixedAge < this.duration || !this.isAuthority)
-                return;
-            this.outer.SetNextState(new ExitMaze());
         }
 
         public override void OnExit()
@@ -228,16 +240,15 @@ namespace FathomlessVoidling.EntityStates.Utility
             {
                 LoopSoundManager.StopSoundLoopLocal(loopPtr);
             }
-            if (this.wavesFired < this.waves)
+            if (this.wavesFired < MazeAttack.waveCount)
                 BeginMaze();
         }
 
         private void BeginMaze()
         {
-            this.wavesFired++;
             this.targetedAnchor = null;
-            List<int> spawnPositions = SelectBeamPositions(this.randomBeams);
-
+            List<int> spawnPositions = selectedAnchors[this.wavesFired];
+            this.wavesFired++;
             bool targetAssigned = false;
             foreach (int position in spawnPositions)
             {
@@ -302,15 +313,10 @@ namespace FathomlessVoidling.EntityStates.Utility
 
             foreach (GameObject beamInstance in this.beamVfxInstances)
             {
-                Ray beamRay = new Ray();
-                beamRay.origin = beamInstance.transform.position;
-                beamRay.direction = beamInstance.transform.forward;
-
                 new BulletAttack()
                 {
-                    muzzleName = BaseMazeAttackState.muzzleTransformNameInChildLocator,
-                    origin = beamRay.origin,
-                    aimVector = beamRay.direction,
+                    origin = beamInstance.transform.position,
+                    aimVector = beamInstance.transform.forward,
                     minSpread = 0.0f,
                     maxSpread = 0.0f,
                     maxDistance = 400f,
@@ -326,7 +332,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                     weapon = this.gameObject,
                     damage = MazeAttack.beamDpsCoefficient * this.damageStat / MazeAttack.beamTickFrequency,
                     damageColorIndex = DamageColorIndex.Default,
-                    damageType = ((DamageTypeCombo)DamageType.Generic),
+                    damageType = (DamageTypeCombo)DamageType.Generic,
                     falloffModel = BulletAttack.FalloffModel.None,
                     force = 0.0f,
                     hitEffectPrefab = MazeAttack.beamImpactEffectPrefab,

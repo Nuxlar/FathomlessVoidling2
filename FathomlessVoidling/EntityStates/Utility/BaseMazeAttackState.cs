@@ -11,7 +11,6 @@ namespace FathomlessVoidling.EntityStates.Utility
     {
         public static string headTransformNameInChildLocator = "Head";
         public static string muzzleTransformNameInChildLocator = "EyeMuzzle";
-        public int waves = 3;
         public float beamDuration = 3f;
         public float beamDelay = 2f;
         public bool randomBeams = false;
@@ -34,7 +33,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                 this.modelAnimator.GetComponent<AimAnimator>().enabled = true;
 
             PhasedInventorySetter inventorySetter = this.GetComponent<PhasedInventorySetter>();
-            if ((bool)inventorySetter && NetworkServer.active)
+            if ((bool)inventorySetter)
             {
                 this.phaseIndex = inventorySetter.phaseIndex;
                 switch (this.phaseIndex)
