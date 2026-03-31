@@ -54,10 +54,14 @@ namespace FathomlessVoidling.EntityStates.Utility
             new List<int>() { 1, 1 },
         };
         private List<List<int>> selectedAnchors = new List<List<int>>();
+        private System.Random rng;
 
         public override void OnEnter()
         {
             base.OnEnter();
+            int seed = (int)(RoR2.Run.instance.GetStartTimeUtc().Ticks ^ (long)(RoR2.Run.instance.stageClearCount << 16));
+            rng = new System.Random(seed);
+
             this.wavesFired = 0;
             this.duration = (MazeAttack.waveCount * (this.beamDelay + this.beamDuration)) + 0.5f;
             if (FathomlessMissionController.instance && NetworkServer.active && this.randomBeams)
@@ -199,7 +203,7 @@ namespace FathomlessVoidling.EntityStates.Utility
             else
                 availableRows = new List<int> { 0, 1, 2, 3 };
 
-            availableRows = availableRows.OrderBy(_ => Random.value).ToList();
+            Util.ShuffleList(availableRows);
 
             int beamCount = 2;
             List<int> selected = new List<int>();
@@ -208,7 +212,7 @@ namespace FathomlessVoidling.EntityStates.Utility
             {
                 int rowIndex = availableRows[i];
                 List<int> row = positionMatrix[rowIndex];
-                int posIndex = Random.Range(0, row.Count);
+                int posIndex = this.rng.Next(row.Count);
                 int selectedIndex = rowIndex * 2 + posIndex;
                 selected.Add(selectedIndex);
             }

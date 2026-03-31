@@ -764,7 +764,7 @@ namespace FathomlessVoidling
       sdMaze.interruptPriority = InterruptPriority.PrioritySkill;
 
       sdMultiBeam = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabMultiBeam_asset).WaitForCompletion();
-      sdMultiBeam.activationState = new SerializableEntityStateType(typeof(EnterMaze));
+      sdMultiBeam.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
       sdMultiBeam.baseRechargeInterval = ModConfig.multiBeamCooldown.Value;
     }
 

@@ -1,6 +1,7 @@
 **1.0.1**
 
-- Fixes Maze lasers occasionally firing in the wrong direction in multiplayer
+- Maze doesn't work properly in multiplayer at the moment
+- Tweaks Maze warning VFX to be way less harsh on the eyes
 - Adds config value for eye blast missile count
 
 **1.0.0**
