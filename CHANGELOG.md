@@ -1,3 +1,11 @@
+**1.0.2**
+
+- Fixes Maze in multiplayer
+- Adds logic to force Singularity or Maze activation after an Eye Blast or Portal Beam if they are ready
+- Readds singularity becoming activated after the first threshold in Phase 1 instead of just putting it into cooldown on start
+- Readds maze becoming activated after the first threshold in Phase 2
+- Should cycle through abilities better
+
 **1.0.1**
 
 - Maze doesn't work properly in multiplayer at the moment

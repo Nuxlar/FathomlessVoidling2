@@ -5,6 +5,7 @@ using RoR2.Projectile;
 using UnityEngine;
 using System;
 using UnityEngine.Networking;
+using FathomlessVoidling.Controllers;
 
 namespace FathomlessVoidling.EntityStates.Primary
 {
@@ -106,6 +107,17 @@ namespace FathomlessVoidling.EntityStates.Primary
         {
             this.animatorDirectionOverrideRequest?.Dispose();
             base.OnExit();
+            if (this.isAuthority)
+            {
+                FathomlessMissionController mc = FathomlessMissionController.instance;
+                if (mc)
+                {
+                    if (mc.singularityDriver.enabled && this.skillLocator.special.IsReady())
+                        this.skillLocator.special.ExecuteIfReady();
+                    else if (mc.mazeDriver.enabled && this.skillLocator.utility.IsReady())
+                        this.skillLocator.utility.ExecuteIfReady();
+                }
+            }
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()

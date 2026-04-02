@@ -163,7 +163,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                 if (mc.singularityDriver)
                     mc.singularityDriver.enabled = true;
                 if (mc.mazeDriver)
-                    mc.mazeDriver.enabled = phase >= 1;
+                    mc.mazeDriver.enabled = phase >= 2;
                 if (mc.fireMissileDriver)
                     mc.fireMissileDriver.enabled = true;
                 if (mc.multibeamDriver)

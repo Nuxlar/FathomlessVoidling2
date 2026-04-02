@@ -1,14 +1,12 @@
 # Fathomless Voidling
 
-MAZE ATTACK INCONSISTENT IN MULTIPLAYER.
-
 BASE STATS BALANCED AROUND A STAGE 6 BOSS, IF LOOPING INCREASE THE HP IN THE CONFIG.
 
 Reworked Voidling fight that uses the unused large voidling model. Spawns a void locus portal on stage 5, locus acts as an alternative moon. No void fog during void pillars by default, configurable. Locus has moon cauldrons. Risk of Options support for in-game configs
 
 ## Bug Reports
 
-Report bugs using the GitHub link above or in the **RoR2 Modding Discord**. Please include a detailed description and a log file. For multiplayer bugs, provide logs from **both the host and a client**.
+Report bugs using the GitHub link above. Please include a detailed description and a log file. For multiplayer bugs, provide logs from **both the host and a client**.
 
 ## Credits
 
@@ -54,7 +52,7 @@ Voidling spawns at the center with the main body shielded.
 - **Primary:** Mortar Blast
 - **Secondary:** Portal Beams
 - **Utility:** none
-- **Special:** Wandering Singularity
+- **Special:** Wandering Singularity (at first threshold)
 
 **Voidling Haunt:**
 - Intermittent Gravity Bombs
@@ -67,7 +65,7 @@ All joints reach 75% HP, triggering a ward wipe. Ward wipe forces gravity bombs 
 **Voidling:**
 - **Primary:** Mortar Blast
 - **Secondary:** Portal Beams
-- **Utility:** Maze I
+- **Utility:** Maze I (at first threshold)
 - **Special:** Wandering Singularity
 
 **Voidling Haunt:**

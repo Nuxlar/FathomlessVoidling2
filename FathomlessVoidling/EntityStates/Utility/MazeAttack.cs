@@ -55,12 +55,14 @@ namespace FathomlessVoidling.EntityStates.Utility
         };
         private List<List<int>> selectedAnchors = new List<List<int>>();
         private System.Random rng;
+        private Xoroshiro128Plus rngRng;
 
         public override void OnEnter()
         {
             base.OnEnter();
             int seed = (int)(RoR2.Run.instance.GetStartTimeUtc().Ticks ^ (long)(RoR2.Run.instance.stageClearCount << 16));
             rng = new System.Random(seed);
+            rngRng = new Xoroshiro128Plus((ulong)seed);
 
             this.wavesFired = 0;
             this.duration = (MazeAttack.waveCount * (this.beamDelay + this.beamDuration)) + 0.5f;
@@ -203,7 +205,7 @@ namespace FathomlessVoidling.EntityStates.Utility
             else
                 availableRows = new List<int> { 0, 1, 2, 3 };
 
-            Util.ShuffleList(availableRows);
+            Util.ShuffleList(availableRows, this.rngRng);
 
             int beamCount = 2;
             List<int> selected = new List<int>();

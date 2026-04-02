@@ -174,6 +174,14 @@ namespace FathomlessVoidling.Hooks
             hc.health = hc.fullHealth * thresholdFraction;
             jtc.reachedThreshold = true;
 
+            FathomlessMissionController mc = FathomlessMissionController.instance;
+            if (mc)
+            {
+                if (phase == 0 && mc.singularityDriver && !mc.singularityDriver.enabled)
+                    mc.singularityDriver.enabled = true;
+                if (phase == 1 && mc.mazeDriver && !mc.mazeDriver.enabled)
+                    mc.mazeDriver.enabled = true;
+            }
             if (JointThresholdController.AllJointsReachedThreshold())
                 TriggerWardWipe();
         }

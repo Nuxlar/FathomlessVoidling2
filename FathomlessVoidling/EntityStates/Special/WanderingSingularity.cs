@@ -45,7 +45,7 @@ namespace FathomlessVoidling.EntityStates.Special
                 return;
             if (!this.hasFired)
             {
-                this.PlayAnimation(this.animLayerName, this.animLoopStateName, this.animPlaybackRateParamName, this.windDuration);
+                this.PlayAnimation(this.animLayerName, this.animLoopStateName, this.animPlaybackRateParamName, this.windDuration + 2);
                 this.hasFired = true;
                 if (this.isAuthority)
                 {

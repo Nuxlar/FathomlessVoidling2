@@ -48,7 +48,7 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "1.0.1";
+    public const string PluginVersion = "1.0.2";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
@@ -288,7 +288,7 @@ namespace FathomlessVoidling
             break;
           case "Vacuum Attack":
             //  driver.noRepeat = true;
-            driver.enabled = true;
+            driver.enabled = false;
             driver.maxUserHealthFraction = float.PositiveInfinity;
             driver.buttonPressType = AISkillDriver.ButtonPressType.Hold;
             driver.driverUpdateTimerOverride = 1f;
@@ -296,6 +296,7 @@ namespace FathomlessVoidling
             break;
           case "WardWipe":
             //driver.noRepeat = true;
+            driver.enabled = false;
             driver.maxUserHealthFraction = float.PositiveInfinity; // 0.67 orig
             driver.buttonPressType = AISkillDriver.ButtonPressType.Hold;
             driver.driverUpdateTimerOverride = 1f;
