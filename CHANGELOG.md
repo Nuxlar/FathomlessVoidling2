@@ -1,3 +1,8 @@
+**1.0.3**
+
+- Changes inner cylinder material for the Maze warning VFX
+- Brightens up arena so Ward Wipe is more obvious, also better visibility in general
+
 **1.0.2**
 
 - Fixes Maze in multiplayer

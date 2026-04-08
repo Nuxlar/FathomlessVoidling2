@@ -48,7 +48,7 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "1.0.2";
+    public const string PluginVersion = "1.0.3";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
@@ -606,7 +606,7 @@ namespace FathomlessVoidling
       PostProcessProfile ppProfile = Addressables.LoadAssetAsync<PostProcessProfile>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_title_PostProcessing.ppLocalNullifier_asset).WaitForCompletion();
 
       PostProcessProfile ppVoidRaidProfile = Addressables.LoadAssetAsync<PostProcessProfile>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_voidraid.ppSceneVoidRaidStageStarry_asset).WaitForCompletion();
-      ppVoidRaidProfile.GetSetting<RampFog>().fogColorStart.value = new Color(0.1887f, 0.1629f, 0.1629f, 0.3f);
+      ppVoidRaidProfile.GetSetting<RampFog>().fogColorStart.value = new Color(0.1887f, 0.1629f, 0.1629f, 0.5f);
 
       mazeLaserPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamVFX_prefab).WaitForCompletion(), "MazeLaserVFXNux");
       mazeLaserPrefab.AddComponent<NetworkIdentity>();
@@ -641,7 +641,7 @@ namespace FathomlessVoidling
         warningTimer.duration = 2f;
 
       Material matWarning = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_voidstage.matVoidBoostPath_mat).WaitForCompletion();
-      Material matWarningInner = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidJailer.matJailerTetherIndicator_mat).WaitForCompletion();
+      Material matWarningInner = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Common.matVoidDeathBombAreaIndicatorFront_mat).WaitForCompletion();
 
       Transform warningMeshTransform = mazeWarningPrefab.transform.Find("Mesh, Additive");
       if (warningMeshTransform)

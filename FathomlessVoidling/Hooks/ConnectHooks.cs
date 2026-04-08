@@ -254,7 +254,7 @@ namespace FathomlessVoidling.Hooks
                 // Weather, Void Raid Starry Night Variant PP + Amb postprocessvolume rampfog setting fogcolorstart 0.1887 0.1629 0.1629 0
                 // Weather Tweaks
                 GameObject weather = GameObject.Find("Weather, Void Raid Starry Night Variant");
-                //  weather.transform.Find("Directional Light").GetComponent<Light>().intensity = 1.4f;
+                weather.transform.Find("Directional Light").GetComponent<Light>().intensity = 1.5f;
                 //   PostProcessVolume ppv = weather.transform.Find("PP + Amb").GetComponent<PostProcessVolume>();
                 //  ppv.profile.GetSetting<RampFog>().fogColorStart.value = new Color(0.1887f, 0.1629f, 0.1629f, 0.2f);
                 GameObject missionObj = GameObject.Find("EncounterPhases");
