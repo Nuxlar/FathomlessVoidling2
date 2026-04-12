@@ -48,7 +48,7 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "1.0.3";
+    public const string PluginVersion = "1.0.4";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
@@ -208,7 +208,7 @@ namespace FathomlessVoidling
       GameObject.Destroy(missileProjectile.GetComponent<ProjectileSingleTargetImpact>());
 
       ProjectileSteerTowardTarget steer = missileProjectile.GetComponent<ProjectileSteerTowardTarget>();
-      steer.rotationSpeed = 20f;
+      steer.rotationSpeed = 10f;
       steer.enabled = false;
       ProjectileDirectionalTargetFinder targetFinder = missileProjectile.GetComponent<ProjectileDirectionalTargetFinder>();
       targetFinder.lookCone = 360f;
@@ -606,7 +606,7 @@ namespace FathomlessVoidling
       PostProcessProfile ppProfile = Addressables.LoadAssetAsync<PostProcessProfile>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_title_PostProcessing.ppLocalNullifier_asset).WaitForCompletion();
 
       PostProcessProfile ppVoidRaidProfile = Addressables.LoadAssetAsync<PostProcessProfile>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_voidraid.ppSceneVoidRaidStageStarry_asset).WaitForCompletion();
-      ppVoidRaidProfile.GetSetting<RampFog>().fogColorStart.value = new Color(0.1887f, 0.1629f, 0.1629f, 0.5f);
+      ppVoidRaidProfile.GetSetting<RampFog>().fogColorStart.value = new Color(0.2687f, 0.2429f, 0.2429f, 0.05f);
 
       mazeLaserPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamVFX_prefab).WaitForCompletion(), "MazeLaserVFXNux");
       mazeLaserPrefab.AddComponent<NetworkIdentity>();

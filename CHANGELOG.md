@@ -1,3 +1,12 @@
+**1.0.4**
+
+- Brightens arena post processing
+- Fixes P3 Maze desync in multiplayer
+- Reduces Eye Blast turn speed (homing) 20 -> 10
+- Reduces joint cleanse HP interval 10% -> 5%
+- Adds an ability charge for Singularity after the first P2 joint threshold
+- Adds an ability charge for Maze and Singularity after P2 Ward Wipe
+
 **1.0.3**
 
 - Changes inner cylinder material for the Maze warning VFX

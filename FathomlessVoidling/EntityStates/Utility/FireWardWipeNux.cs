@@ -178,6 +178,11 @@ namespace FathomlessVoidling.EntityStates.Utility
                             music.gameObject.SetActive(true);
                     }
                 }
+                if (phase == 2)
+                {
+                    this.skillLocator.special.AddOneStock();
+                    this.skillLocator.utility.AddOneStock();
+                }
             }
         }
 

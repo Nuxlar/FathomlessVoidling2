@@ -1,4 +1,5 @@
 using EntityStates;
+using FathomlessVoidling.Controllers;
 using RoR2;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,6 @@ namespace FathomlessVoidling.EntityStates.Utility
 
         public Transform headTransform;
         public Transform muzzleTransform;
-        private int phaseIndex;
         protected Animator modelAnimator { get; private set; }
         protected List<GameObject> beamVfxInstances { get; private set; }
 
@@ -32,23 +32,11 @@ namespace FathomlessVoidling.EntityStates.Utility
             if ((bool)this.modelAnimator)
                 this.modelAnimator.GetComponent<AimAnimator>().enabled = true;
 
-            PhasedInventorySetter inventorySetter = this.GetComponent<PhasedInventorySetter>();
-            if ((bool)inventorySetter)
-            {
-                this.phaseIndex = inventorySetter.phaseIndex;
-                switch (this.phaseIndex)
-                {
-                    case 0:
-                        this.randomBeams = false;
-                        break;
-                    case 1:
-                        this.randomBeams = false;
-                        break;
-                    case 2:
-                        this.randomBeams = true;
-                        break;
-                }
-            }
+            int phaseItemCount = this.characterBody.inventory.GetItemCountEffective(RoR2Content.Items.MinHealthPercentage);
+            if (phaseItemCount == 5)
+                this.randomBeams = true;
+            else
+                this.randomBeams = false;
         }
 
         public override void OnExit()

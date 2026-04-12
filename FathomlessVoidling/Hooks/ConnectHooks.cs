@@ -180,7 +180,10 @@ namespace FathomlessVoidling.Hooks
                 if (phase == 0 && mc.singularityDriver && !mc.singularityDriver.enabled)
                     mc.singularityDriver.enabled = true;
                 if (phase == 1 && mc.mazeDriver && !mc.mazeDriver.enabled)
+                {
                     mc.mazeDriver.enabled = true;
+                    body.skillLocator.special.AddOneStock();
+                }
             }
             if (JointThresholdController.AllJointsReachedThreshold())
                 TriggerWardWipe();
@@ -226,7 +229,7 @@ namespace FathomlessVoidling.Hooks
                             if (jtc.nextCleansePercent > 0f && hc.health <= hc.fullHealth * jtc.nextCleansePercent)
                             {
                                 jtc.CleanseDebuffs();
-                                jtc.nextCleansePercent -= 0.1f;
+                                jtc.nextCleansePercent -= 0.05f;
                             }
 
                             if (phase >= 0 && phase <= 1)
@@ -253,8 +256,8 @@ namespace FathomlessVoidling.Hooks
             {
                 // Weather, Void Raid Starry Night Variant PP + Amb postprocessvolume rampfog setting fogcolorstart 0.1887 0.1629 0.1629 0
                 // Weather Tweaks
-                GameObject weather = GameObject.Find("Weather, Void Raid Starry Night Variant");
-                weather.transform.Find("Directional Light").GetComponent<Light>().intensity = 1.5f;
+                //   GameObject weather = GameObject.Find("Weather, Void Raid Starry Night Variant");
+                //    weather.transform.Find("Directional Light").GetComponent<Light>().intensity = 1.4f;
                 //   PostProcessVolume ppv = weather.transform.Find("PP + Amb").GetComponent<PostProcessVolume>();
                 //  ppv.profile.GetSetting<RampFog>().fogColorStart.value = new Color(0.1887f, 0.1629f, 0.1629f, 0.2f);
                 GameObject missionObj = GameObject.Find("EncounterPhases");

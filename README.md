@@ -37,7 +37,7 @@ Report bugs using the GitHub link above. Please include a detailed description a
 ### Joints
 
 - **P1/P2 threshold (75%/50% HP):** damage all joints to their threshold to trigger the ward wipe and advance the phase, joints become immune at the threshold
-- **10% HP intervals:** joints cleanse their debuffs each time they lose 10% HP
+- **5% HP intervals:** joints cleanse their debuffs each time they lose 5% HP
 - **Phase 3:** joints become immune at 1 HP, bring all joints to 1 HP to end the fight
 </details>
 

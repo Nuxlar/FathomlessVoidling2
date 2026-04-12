@@ -9,7 +9,7 @@ namespace FathomlessVoidling.Controllers
     {
         private CharacterBody jointBody;
         public bool reachedThreshold;
-        public float nextCleansePercent = 0.9f;
+        public float nextCleansePercent = 0.95f;
         public static readonly float[] thresholds = { 0.75f, 0.5f };
 
         private void Start()
