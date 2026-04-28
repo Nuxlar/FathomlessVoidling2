@@ -12,7 +12,6 @@ using RoR2.Audio;
 using RoR2.Projectile;
 using EntityStates;
 using RoR2.CharacterAI;
-using EntityStates.VoidRaidCrab;
 using RoR2.Skills;
 using UnityEngine.Networking;
 using UnityEngine.Rendering.PostProcessing;
@@ -37,7 +36,6 @@ using FathomlessVoidling.Hooks;
     // Play_voidRaid_fog_chargeUp good starter for wardwipe
     // Play_voidRaid_fog_affectPlayer whispering loop
     // Play_item_void_slowOnHit weird sorta tp?
-
 */
 namespace FathomlessVoidling
 {
@@ -48,13 +46,21 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "1.0.4";
+    public const string PluginVersion = "1.0.5";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
     public static bool RooInstalled => BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.rune580.riskofoptions");
 
     public static DamageAPI.ModdedDamageType gravityDamageType = DamageAPI.ReserveDamageType();
+    public static Material abyssalTerrainMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matDCTerrainFloorInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalPillarMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matDCTerrainGiantColumnsInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalColumnMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matDCTerrainSmallColumnInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalBoulderMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matDCBoulderInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalBridgeMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matDCTerrainWallsInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalRuinMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matTrimSheetLemurianRuinsHeavyInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalChainMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matTrimSheetLemurianMetalLightInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalStalagmiteMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matDCStalagmiteInfiniteTower_mat).WaitForCompletion();
     public static GameObject spawnEffect;
     public static CharacterSpawnCard jointCard = Addressables.LoadAssetAsync<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrabJoint_asset).WaitForCompletion();
     public static SpawnCard bigVoidlingCard = Addressables.LoadAssetAsync<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrab_asset).WaitForCompletion();
@@ -279,6 +285,8 @@ namespace FathomlessVoidling
             break;
           case "SpinBeam":
             // driver.noRepeat = true;
+            driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
+            driver.aimType = AISkillDriver.AimType.AtMoveTarget;
             driver.skillSlot = SkillSlot.Utility;
             driver.maxUserHealthFraction = float.PositiveInfinity;
             driver.buttonPressType = AISkillDriver.ButtonPressType.Hold;
@@ -288,6 +296,8 @@ namespace FathomlessVoidling
             break;
           case "Vacuum Attack":
             //  driver.noRepeat = true;
+            driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
+            driver.aimType = AISkillDriver.AimType.AtMoveTarget;
             driver.enabled = false;
             driver.maxUserHealthFraction = float.PositiveInfinity;
             driver.buttonPressType = AISkillDriver.ButtonPressType.Hold;
@@ -296,6 +306,8 @@ namespace FathomlessVoidling
             break;
           case "WardWipe":
             //driver.noRepeat = true;
+            driver.movementType = AISkillDriver.MovementType.ChaseMoveTarget;
+            driver.aimType = AISkillDriver.AimType.AtMoveTarget;
             driver.enabled = false;
             driver.maxUserHealthFraction = float.PositiveInfinity; // 0.67 orig
             driver.buttonPressType = AISkillDriver.ButtonPressType.Hold;
@@ -606,7 +618,7 @@ namespace FathomlessVoidling
       PostProcessProfile ppProfile = Addressables.LoadAssetAsync<PostProcessProfile>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_title_PostProcessing.ppLocalNullifier_asset).WaitForCompletion();
 
       PostProcessProfile ppVoidRaidProfile = Addressables.LoadAssetAsync<PostProcessProfile>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_voidraid.ppSceneVoidRaidStageStarry_asset).WaitForCompletion();
-      ppVoidRaidProfile.GetSetting<RampFog>().fogColorStart.value = new Color(0.2687f, 0.2429f, 0.2429f, 0.05f);
+      ppVoidRaidProfile.GetSetting<RampFog>().fogColorStart.value = new Color(0.2687f, 0.2429f, 0.2429f, 0.075f);
 
       mazeLaserPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamVFX_prefab).WaitForCompletion(), "MazeLaserVFXNux");
       mazeLaserPrefab.AddComponent<NetworkIdentity>();
@@ -652,11 +664,11 @@ namespace FathomlessVoidling
         warningMeshTransform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial = matWarningInner;
         ObjectScaleCurve scaleCurve = warningMeshTransform.gameObject.AddComponent<ObjectScaleCurve>();
         scaleCurve.resetOnAwake = true;
-        scaleCurve.timeMax = 0.3f;
-        scaleCurve.curveX = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
-        scaleCurve.curveY = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+        scaleCurve.timeMax = 1f;
+        scaleCurve.curveX = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+        scaleCurve.curveY = AnimationCurve.Linear(0f, 0f, 1f, 1f);
         scaleCurve.curveZ = AnimationCurve.Linear(0f, 1f, 1f, 1f);
-        scaleCurve.overallCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+        scaleCurve.overallCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
 
         if (warningMeshRenderer)
           warningMeshRenderer.sharedMaterial = matWarning;

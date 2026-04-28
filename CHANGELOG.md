@@ -1,3 +1,12 @@
+**1.0.5**
+
+- Fixes Maze warning laser not growing (instead of instantly appearing, the warning laser grows over 1s)
+- Fixes configs that don't need a restart mentioning a restart being needed
+- Removes Roost donut since it was super dark even with the lighting changes (might add later if I decide to figure it out)
+- Increases general lighting and post processing slightly
+- Replaces abyssal donut materials with abyssal's simulacrum materials
+- Tweaks AI to hopefully stall less
+
 **1.0.4**
 
 - Brightens arena post processing

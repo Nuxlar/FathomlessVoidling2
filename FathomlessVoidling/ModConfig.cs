@@ -35,7 +35,7 @@ namespace FathomlessVoidling
                 "General",
                 "Enable Fog",
                 false,
-                "Enables void fog in Void Locus.");
+                "Enables void fog in Void Locus.", false);
 
             jointBaseHealth = FVConfig.BindOptionSteppedSlider(
                 "Stats",
@@ -57,7 +57,7 @@ namespace FathomlessVoidling
                 "Eye Blast Missile Count",
                 6,
                 "Number of missiles fired per wave during Eye Blast",
-                1, 20);
+                1, 20, false);
 
             mazeCooldown = FVConfig.BindOptionSteppedSlider(
                 "Skills",
@@ -87,7 +87,7 @@ namespace FathomlessVoidling
                 30f,
                 1f,
                 "Gravity bomb downtime in Phase 1",
-                5f, 120f);
+                5f, 120f, false);
             hauntP2Cooldown = FVConfig.BindOptionSteppedSlider(
                 "Haunt",
                 "P2/P3 Cooldown",
@@ -101,7 +101,7 @@ namespace FathomlessVoidling
                 0.15f,
                 0.01f,
                 "Chance per second to fire a gravity bomb during uptime (higher chance = much more bombs)",
-                0.01f, 1f);
+                0.01f, 1f, false);
 
             WipeConfig();
         }

@@ -25,6 +25,7 @@ namespace FathomlessVoidling.Hooks
             On.RoR2.HealthComponent.SendDamageDealt += ThresholdCheck;
             On.RoR2.CharacterMaster.OnBodyStart += FixPipReviveBug;
             On.RoR2.VoidRaidCrab.LegController.RegenerateServer += PreventJointRegen;
+            On.RoR2.VoidRaidGauntletController.Start += ArenaTweaks;
             On.RoR2.VoidRaidGauntletController.RpcActivateDonut += DeactivateDonutRoof;
             On.RoR2.VoidRaidGauntletController.TryOpenGauntlet += BlockGauntletInPhase3;
             On.RoR2.Projectile.ProjectileDirectionalTargetFinder.SearchForTarget += TweakSingularitySearch;
@@ -41,6 +42,67 @@ namespace FathomlessVoidling.Hooks
                 PhaseControllerStateMachine (GameObject)
                 has NetworkIdentity, EntityStateMachine, and NetworkStateMachine
             */
+        }
+
+        private void ArenaTweaks(On.RoR2.VoidRaidGauntletController.orig_Start orig, VoidRaidGauntletController self)
+        {
+            orig(self);
+            // Remove BB Donut
+            int abyssalDonutIdx = -1;
+            List<VoidRaidGauntletController.DonutInfo> donutList = self.followingDonuts.ToList();
+            for (int i = 0; i < donutList.Count; i++)
+            {
+                VoidRaidGauntletController.DonutInfo followingDonut = donutList[i];
+                if (followingDonut.root.name == "RaidBB")
+                    donutList.RemoveAt(i);
+                if (followingDonut.root.name == "RaidDC")
+                    abyssalDonutIdx = i;
+            }
+            self.followingDonuts = donutList.ToArray();
+
+            // Abyssal Styling
+            if (abyssalDonutIdx != -1)
+            {
+                if (self.followingDonuts[abyssalDonutIdx].root)
+                {
+                    MeshRenderer[] meshList = self.followingDonuts[abyssalDonutIdx].root.GetComponentsInChildren<MeshRenderer>();
+                    foreach (MeshRenderer renderer in meshList)
+                    {
+                        GameObject meshBase = renderer.gameObject;
+                        Transform meshParent = meshBase.transform.parent;
+                        if (meshBase != null)
+                        {
+                            if (meshParent != null)
+                            {
+                                if (meshBase.name.Contains("Mesh") && meshParent.name.Contains("Ruin") && renderer.sharedMaterial)
+                                    renderer.sharedMaterial = Main.abyssalRuinMat;
+                                if (meshBase.name.Contains("RuinBowl") && meshParent.name.Contains("RuinMarker") && renderer.sharedMaterial)
+                                    renderer.sharedMaterial = Main.abyssalRuinMat;
+                            }
+                            /*
+                            if (meshBase.name.Contains("Grass") && renderer.sharedMaterial)
+                            {
+                                GameObject.Destroy(meshBase);
+                            }
+                            */
+                            if ((meshBase.name.Contains("TerrainHG") || meshBase.name.Contains("GiantStoneSlab")) && renderer.sharedMaterial)
+                                renderer.sharedMaterial = Main.abyssalTerrainMat;
+                            if (meshBase.name.Contains("HeroPillar") && renderer.sharedMaterial)
+                                renderer.sharedMaterial = Main.abyssalPillarMat;
+                            if (meshBase.name.Contains("Bridge") && renderer.sharedMaterial)
+                                renderer.sharedMaterial = Main.abyssalBridgeMat;
+                            if (meshBase.name.Contains("Column") && renderer.sharedMaterial)
+                                renderer.sharedMaterial = Main.abyssalColumnMat;
+                            if ((meshBase.name.Contains("Boulder") || meshBase.name.Contains("mdlGeyser") || meshBase.name.Contains("Pebble") || (meshBase.name.Contains("GiantRock") && !meshBase.name.Contains("Slab"))) && renderer.sharedMaterial)
+                                renderer.sharedMaterial = Main.abyssalBoulderMat;
+                            if (meshBase.name.Contains("Stalagmite") && renderer.sharedMaterial)
+                                renderer.sharedMaterial = Main.abyssalStalagmiteMat;
+                            if ((meshBase.name.Contains("Ruin") || meshBase.name.Contains("Chain")) && renderer.sharedMaterial)
+                                renderer.sharedMaterial = Main.abyssalRuinMat;
+                        }
+                    }
+                }
+            }
         }
 
         private void DeactivateDonutRoof(On.RoR2.VoidRaidGauntletController.orig_RpcActivateDonut orig, VoidRaidGauntletController self, int donutIndex)
@@ -254,12 +316,11 @@ namespace FathomlessVoidling.Hooks
         {
             if (SceneManager.GetActiveScene().name == "voidraid")
             {
-                // Weather, Void Raid Starry Night Variant PP + Amb postprocessvolume rampfog setting fogcolorstart 0.1887 0.1629 0.1629 0
-                // Weather Tweaks
-                //   GameObject weather = GameObject.Find("Weather, Void Raid Starry Night Variant");
-                //    weather.transform.Find("Directional Light").GetComponent<Light>().intensity = 1.4f;
-                //   PostProcessVolume ppv = weather.transform.Find("PP + Amb").GetComponent<PostProcessVolume>();
-                //  ppv.profile.GetSetting<RampFog>().fogColorStart.value = new Color(0.1887f, 0.1629f, 0.1629f, 0.2f);
+                // Lighting Tweak
+                GameObject weather = GameObject.Find("Weather, Void Raid Starry Night Variant");
+                Debug.LogWarning("light intensity " + weather.transform.Find("Directional Light").GetComponent<Light>().intensity);
+                weather.transform.Find("Directional Light").GetComponent<Light>().intensity = 1.4f;
+
                 GameObject missionObj = GameObject.Find("EncounterPhases");
                 GameObject phase1Obj = missionObj.transform.GetChild(0).gameObject;
 
