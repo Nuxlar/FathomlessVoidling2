@@ -76,6 +76,14 @@ namespace FathomlessVoidling.EntityStates
             this.SpawnJointBodyForLegServer(this.leg4Name, modelChildLocator, placementRule);
             this.SpawnJointBodyForLegServer(this.leg5Name, modelChildLocator, placementRule);
             this.SpawnJointBodyForLegServer(this.leg6Name, modelChildLocator, placementRule);
+
+            // Inferno Compat
+            if (Main.infernoEnabled && Run.instance)
+            {
+                DifficultyDef difficultyDef = DifficultyCatalog.GetDifficultyDef(Run.instance.selectedDifficulty);
+                if (difficultyDef.nameToken == "INFERNO_NAME" && this.characterBody)
+                    this.characterDirection.turnSpeed = 0f;
+            }
         }
 
         private void SpawnJointBodyForLegServer(

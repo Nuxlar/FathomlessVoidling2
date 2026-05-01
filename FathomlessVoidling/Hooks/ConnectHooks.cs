@@ -318,7 +318,6 @@ namespace FathomlessVoidling.Hooks
             {
                 // Lighting Tweak
                 GameObject weather = GameObject.Find("Weather, Void Raid Starry Night Variant");
-                Debug.LogWarning("light intensity " + weather.transform.Find("Directional Light").GetComponent<Light>().intensity);
                 weather.transform.Find("Directional Light").GetComponent<Light>().intensity = 1.4f;
 
                 GameObject missionObj = GameObject.Find("EncounterPhases");

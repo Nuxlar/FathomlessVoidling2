@@ -46,7 +46,7 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "1.0.5";
+    public const string PluginVersion = "1.0.6";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
@@ -109,9 +109,13 @@ namespace FathomlessVoidling
     private static CharacterBody jointBody;
     private static CharacterBody bossBody;
 
+    public static bool infernoEnabled = false;
+
     public void Awake()
     {
       Instance = this;
+
+      infernoEnabled = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("HIFU.Inferno");
 
       Log.Init(Logger);
       ModConfig.Init();

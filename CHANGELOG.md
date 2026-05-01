@@ -1,3 +1,7 @@
+**1.0.6**
+
+- Adds Inferno compat (inferno turned big voidling into a beyblade)
+
 **1.0.5**
 
 - Fixes Maze warning laser not growing (instead of instantly appearing, the warning laser grows over 1s)
