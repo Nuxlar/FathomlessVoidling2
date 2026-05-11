@@ -242,10 +242,7 @@ namespace FathomlessVoidling.Hooks
                 if (phase == 0 && mc.singularityDriver && !mc.singularityDriver.enabled)
                     mc.singularityDriver.enabled = true;
                 if (phase == 1 && mc.mazeDriver && !mc.mazeDriver.enabled)
-                {
                     mc.mazeDriver.enabled = true;
-                    body.skillLocator.special.AddOneStock();
-                }
             }
             if (JointThresholdController.AllJointsReachedThreshold())
                 TriggerWardWipe();

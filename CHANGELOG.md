@@ -1,3 +1,7 @@
+**1.0.7**
+
+- Adds Inferno as a soft dependency internally to prevent compat from potentially not working
+
 **1.0.6**
 
 - Adds Inferno compat (inferno turned big voidling into a beyblade)

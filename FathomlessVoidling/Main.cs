@@ -40,6 +40,7 @@ using FathomlessVoidling.Hooks;
 namespace FathomlessVoidling
 {
   [BepInDependency("com.rune580.riskofoptions", BepInDependency.DependencyFlags.SoftDependency)]
+  [BepInDependency("HIFU.Inferno", BepInDependency.DependencyFlags.SoftDependency)]
   [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
   public class Main : BaseUnityPlugin
   {
@@ -523,6 +524,7 @@ namespace FathomlessVoidling
     private static void TweakBigVoidling()
     {
       GameObject body = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabBody_prefab).WaitForCompletion();
+      body.AddComponent<FathomlessSkillDriverController>();
       ModelLocator modelLocator = body.GetComponent<ModelLocator>();
 
       CharacterBody characterBody = body.GetComponent<CharacterBody>();
