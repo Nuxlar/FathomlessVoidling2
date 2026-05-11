@@ -65,11 +65,7 @@ namespace FathomlessVoidling.EntityStates.Utility
             this.fogDamageController = this.GetComponent<FogDamageController>();
             this.fogDamageController.enabled = true;
             this.safeWards = new List<GameObject>();
-            if (FathomlessMissionController.instance)
-            {
-                if (FathomlessMissionController.instance.wardWipeDriver)
-                    FathomlessMissionController.instance.wardWipeDriver.enabled = false;
-            }
+            this.characterBody.GetComponent<FathomlessSkillDriverController>()?.TriggerWardWipe();
         }
 
         public override void FixedUpdate()

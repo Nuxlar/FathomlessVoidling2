@@ -209,27 +209,6 @@ namespace FathomlessVoidling.Hooks
             }
         }
 
-        private void TriggerWardWipe()
-        {
-            FathomlessMissionController mc = FathomlessMissionController.instance;
-            if (!mc || !mc.voidlingBody) return;
-
-            CharacterBody bossBody = mc.voidlingBody;
-            bossBody.RemoveBuff(RoR2Content.Buffs.HiddenInvincibility);
-            bossBody.healthComponent.TakeDamage(new DamageInfo() { damage = 99999999f, position = bossBody.corePosition });
-            bossBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
-
-            EntityStateMachine esm = bossBody.gameObject.GetComponents<EntityStateMachine>().First((esm) => esm.customName == "Body");
-            bossBody.skillLocator.special.SetSkillOverride(esm, Main.sdWardWipe, GenericSkill.SkillOverridePriority.Contextual);
-            bossBody.skillLocator.special.AddOneStock();
-
-            if (mc.wardWipeDriver) mc.wardWipeDriver.enabled = true;
-            if (mc.singularityDriver) mc.singularityDriver.enabled = false;
-            if (mc.mazeDriver) mc.mazeDriver.enabled = false;
-            if (mc.fireMissileDriver) mc.fireMissileDriver.enabled = false;
-            if (mc.multibeamDriver) mc.multibeamDriver.enabled = false;
-        }
-
         private void OnJointThreshold(HealthComponent hc, CharacterBody body, JointThresholdController jtc, float thresholdFraction, int phase)
         {
             body.AddBuff(RoR2Content.Buffs.Immune);
@@ -237,15 +216,25 @@ namespace FathomlessVoidling.Hooks
             jtc.reachedThreshold = true;
 
             FathomlessMissionController mc = FathomlessMissionController.instance;
-            if (mc)
+            FathomlessSkillDriverController sdc = mc?.voidlingBody?.GetComponent<FathomlessSkillDriverController>();
+            if (sdc != null)
             {
-                if (phase == 0 && mc.singularityDriver && !mc.singularityDriver.enabled)
-                    mc.singularityDriver.enabled = true;
-                if (phase == 1 && mc.mazeDriver && !mc.mazeDriver.enabled)
-                    mc.mazeDriver.enabled = true;
+                if (phase == 0) sdc.EnableSingularity();
+                if (phase == 1) sdc.EnableMaze();
             }
+
             if (JointThresholdController.AllJointsReachedThreshold())
-                TriggerWardWipe();
+            {
+                if (mc == null || !mc.voidlingBody) return;
+                CharacterBody bossBody = mc.voidlingBody;
+                bossBody.RemoveBuff(RoR2Content.Buffs.HiddenInvincibility);
+                bossBody.healthComponent.TakeDamage(new DamageInfo() { damage = 99999999f, position = bossBody.corePosition });
+                bossBody.AddBuff(RoR2Content.Buffs.HiddenInvincibility);
+                EntityStateMachine esm = bossBody.gameObject.GetComponents<EntityStateMachine>().First((esm) => esm.customName == "Body");
+                bossBody.skillLocator.special.SetSkillOverride(esm, Main.sdWardWipe, GenericSkill.SkillOverridePriority.Contextual);
+                bossBody.skillLocator.special.AddOneStock();
+                sdc?.TriggerWardWipe();
+            }
         }
 
         private void OnJointFinalThreshold(DamageReport damageReport, HealthComponent hc, CharacterBody body, JointThresholdController jtc)

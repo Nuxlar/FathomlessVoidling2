@@ -109,12 +109,12 @@ namespace FathomlessVoidling.EntityStates.Primary
             base.OnExit();
             if (this.isAuthority)
             {
-                FathomlessMissionController mc = FathomlessMissionController.instance;
-                if (mc)
+                FathomlessSkillDriverController sdc = this.characterBody.GetComponent<FathomlessSkillDriverController>();
+                if (sdc)
                 {
-                    if (mc.singularityDriver.enabled && this.skillLocator.special.IsReady())
+                    if (sdc.IsSingularityEnabled() && this.skillLocator.special.IsReady())
                         this.skillLocator.special.ExecuteIfReady();
-                    else if (mc.mazeDriver.enabled && this.skillLocator.utility.IsReady())
+                    else if (sdc.IsMazeEnabled() && this.skillLocator.utility.IsReady())
                         this.skillLocator.utility.ExecuteIfReady();
                 }
             }

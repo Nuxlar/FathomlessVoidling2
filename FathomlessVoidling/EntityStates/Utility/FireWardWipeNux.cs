@@ -154,20 +154,11 @@ namespace FathomlessVoidling.EntityStates.Utility
                     phasedInventorySetter.AdvancePhase();
             }
             JointThresholdController.RemoveImmunityFromAllJoints();
+            this.characterBody.GetComponent<FathomlessSkillDriverController>()?.EndWardWipe();
             FathomlessMissionController mc = FathomlessMissionController.instance;
             if (mc)
             {
                 int phase = mc.GetCurrentPhase();
-                if (mc.wardWipeDriver)
-                    mc.wardWipeDriver.enabled = false;
-                if (mc.singularityDriver)
-                    mc.singularityDriver.enabled = true;
-                if (mc.mazeDriver)
-                    mc.mazeDriver.enabled = phase >= 2;
-                if (mc.fireMissileDriver)
-                    mc.fireMissileDriver.enabled = true;
-                if (mc.multibeamDriver)
-                    mc.multibeamDriver.enabled = true;
                 if (phase == 1)
                 {
                     GameObject phases = GameObject.Find("EncounterPhases");

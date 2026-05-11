@@ -1,6 +1,4 @@
-
 using RoR2;
-using RoR2.CharacterAI;
 using System;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -13,13 +11,7 @@ public class FathomlessMissionController : NetworkBehaviour
     public CombatSquad bossCombatSquad;
     public CharacterBody hauntBody;
     public CharacterMaster voidlingMaster;
-    public AISkillDriver wardWipeDriver;
-    public AISkillDriver singularityDriver;
-    public AISkillDriver mazeDriver;
-    public AISkillDriver fireMissileDriver;
-    public AISkillDriver multibeamDriver;
     public CharacterBody voidlingBody;
-    public PhasedInventorySetter inventorySetter;
 
     private void OnEnable()
     {
@@ -37,39 +29,16 @@ public class FathomlessMissionController : NetworkBehaviour
     private void BossCombatSquad_onMemberDiscovered(CharacterMaster characterMaster)
     {
         this.voidlingMaster = characterMaster;
-        foreach (AISkillDriver driver in characterMaster.GetComponents<AISkillDriver>())
-        {
-            switch (driver.customName)
-            {
-                case "WardWipe":
-                    this.wardWipeDriver = driver;
-                    break;
-                case "Vacuum Attack":
-                    this.singularityDriver = driver;
-                    break;
-                case "SpinBeam":
-                    this.mazeDriver = driver;
-                    break;
-                case "FireMissiles":
-                    this.fireMissileDriver = driver;
-                    break;
-                case "FireMultiBeam":
-                    this.multibeamDriver = driver;
-                    break;
-            }
-        }
         this.voidlingBody = characterMaster.GetBody();
-        PhasedInventorySetter setter = this.voidlingBody.GetComponent<PhasedInventorySetter>();
-        if (setter)
-            this.inventorySetter = setter;
     }
 
     public int GetCurrentPhase()
     {
-        if (this.inventorySetter)
-            return this.inventorySetter.phaseIndex;
-        else
-            return -1;
+        if (!this.voidlingBody) return -1;
+        int itemCount = this.voidlingBody.inventory.GetItemCountEffective(RoR2Content.Items.MinHealthPercentage);
+        if (itemCount == 5) return 2;
+        if (itemCount == 33) return 1;
+        if (itemCount == 66) return 0;
+        return -1;
     }
-
 }
