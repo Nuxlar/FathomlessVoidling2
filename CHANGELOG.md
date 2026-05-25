@@ -1,6 +1,25 @@
-**1.0.7**
+**1.1.0**
 
 - Adds Inferno as a soft dependency internally to prevent compat from potentially not working
+- Bunch of internal code refactors
+- Some multiplayer issues *might* be fixed with the refactors, report multiplayer bugs with logs from client and host in the Github or on Discord please!!!
+- Fixes multiplayer lag with Maze (removes the little hit VFX from the maze laser)
+- Fixes lack of space between "Abyss" and the cloud in the boss subtitle
+- Fixes Ward Wipe occasionally not firing and softlocking players
+- Tweaks barnacle director so more should spawn (no elite barnacles)
+- Eye Blast
+    - Completely reworked
+    - Now an oscillating ring of projectiles
+    - Spread increases with every shot
+    - Projectiles move slower
+    - Slight tracking
+    - You can now fight fathomless without needing an absurd amount of speed
+- Portal Beams
+    - No longer has "ghost" hits where the indicator doesn't match explosion
+    - Changed positioning to be more in-view of players (a wall in front of Voidling)
+    - Can hit mid-air now
+    - Can go through terrain/objects
+    - Reduced laser spawn frequency since they're more likely to hit now
 
 **1.0.6**
 

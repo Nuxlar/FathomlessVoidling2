@@ -1,14 +1,11 @@
 using EntityStates;
-using EntityStates.GrandParentBoss;
 using EntityStates.VoidRaidCrab.Weapon;
 using FathomlessVoidling.Components;
 using FathomlessVoidling.Controllers;
 using RoR2;
-using RoR2.Projectile;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Networking;
-using UnityEngine.Networking.Types;
 
 namespace FathomlessVoidling.EntityStates.Secondary
 {
@@ -18,19 +15,38 @@ namespace FathomlessVoidling.EntityStates.Secondary
         private float missileStopwatch;
         public static float baseDuration = 6f;
         public static string muzzleString = BaseMultiBeamState.muzzleName;
-        public static float missileSpawnFrequency = 5f;
+        public static float missileSpawnFrequency = 3.75f;
         public static float missileSpawnDelay = 0.0f;
-        public static float damageCoefficient;
-        public static float maxSpread = 1f;
-        public static GameObject projectilePrefab;
+        public static float shotDelay = 1f;
+        private static readonly Vector3 bonusBlastForce = new Vector3(0, 100, 0);
+        private static float blastDamageCoefficient = 1f;
+        private static float blastForceMagnitude = 3000f;
+        private static float blastRadius = 6f;
         public GameObject portalEffect = Main.voidRainPortalEffect;
-        public static GameObject muzzleflashPrefab;
+        private GameObject tracerEffectPrefab = Main.voidRainTracer;
+        private GameObject explosionEffectPrefab = Main.voidRainExplosion;
+        private GameObject warningLaserVfxPrefab = Main.voidRainWarning;
         private Transform muzzleTransform;
         private ChildLocator childLocator;
+        private List<PendingShot> pendingShots = new List<PendingShot>();
+        private System.Random rng;
+        private Vector3 lastSpawnPos;
+        private bool hasLastSpawnPos;
+        private class PendingShot
+        {
+            public Ray aimRay;
+            public Vector3 endPos;
+            public float damageStat;
+            public float timer;
+            public GameObject indicatorInstance;
+        }
 
         public override void OnEnter()
         {
             base.OnEnter();
+            int seed = (int)(RoR2.Run.instance.GetStartTimeUtc().Ticks ^ (long)(RoR2.Run.instance.stageClearCount << 16));
+            rng = new System.Random(seed);
+
             this.missileStopwatch -= FireVoidRain.missileSpawnDelay;
             this.muzzleTransform = this.FindModelChild(BaseMultiBeamState.muzzleName);
             Transform modelTransform = this.GetModelTransform();
@@ -39,7 +55,7 @@ namespace FathomlessVoidling.EntityStates.Secondary
             this.childLocator = modelTransform.GetComponent<ChildLocator>();
         }
 
-        private void FireBlob(Ray projectileRay, Vector3 beamEnd)
+        private void SpawnShot(Ray projectileRay, Vector3 beamEnd)
         {
             EffectManager.SpawnEffect(this.portalEffect, new EffectData()
             {
@@ -47,17 +63,53 @@ namespace FathomlessVoidling.EntityStates.Secondary
                 rotation = Util.QuaternionSafeLookRotation(projectileRay.direction)
             }, false);
 
-            GameObject projectile = new GameObject("VoidRainProjectile");
-            projectile.AddComponent<NetworkIdentity>();
-            projectile.transform.position = projectileRay.origin;
-            projectile.transform.rotation = Util.QuaternionSafeLookRotation(projectileRay.direction);
+            GameObject indicatorInstance = null;
+            if ((bool)this.warningLaserVfxPrefab)
+            {
+                indicatorInstance = Object.Instantiate<GameObject>(this.warningLaserVfxPrefab);
+                VoidRainComponent vrc = indicatorInstance.GetComponent<VoidRainComponent>();
+                if (vrc)
+                    vrc.UpdateBeamIndicator(projectileRay.origin, beamEnd);
+            }
 
-            VoidRainInfo info = projectile.AddComponent<VoidRainInfo>();
-            info.aimRay = projectileRay;
-            info.damageStat = this.damageStat;
-            info.endPos = beamEnd;
+            this.pendingShots.Add(new PendingShot()
+            {
+                aimRay = projectileRay,
+                endPos = beamEnd,
+                damageStat = this.damageStat,
+                timer = FireVoidRain.shotDelay,
+                indicatorInstance = indicatorInstance
+            });
+        }
 
-            projectile.AddComponent<VoidRainComponent>();
+        private void FireShot(PendingShot shot)
+        {
+            Util.PlaySound("Play_voidRaid_snipe_shoot", this.gameObject);
+            new BlastAttack()
+            {
+                attacker = this.gameObject,
+                inflictor = this.gameObject,
+                teamIndex = TeamComponent.GetObjectTeam(this.gameObject),
+                baseDamage = shot.damageStat * FireVoidRain.blastDamageCoefficient,
+                baseForce = FireVoidRain.blastForceMagnitude,
+                position = shot.endPos,
+                radius = FireVoidRain.blastRadius,
+                falloffModel = BlastAttack.FalloffModel.SweetSpot,
+                bonusForce = FireVoidRain.bonusBlastForce,
+                damageType = DamageType.Generic
+            }.Fire();
+
+            if ((bool)this.tracerEffectPrefab)
+            {
+                EffectData effectData = new EffectData()
+                {
+                    origin = shot.endPos,
+                    start = shot.aimRay.origin,
+                    scale = FireVoidRain.blastRadius
+                };
+                EffectManager.SpawnEffect(this.tracerEffectPrefab, effectData, true);
+                EffectManager.SpawnEffect(this.explosionEffectPrefab, effectData, true);
+            }
         }
 
         public override void FixedUpdate()
@@ -65,39 +117,79 @@ namespace FathomlessVoidling.EntityStates.Secondary
             base.FixedUpdate();
             this.stopwatch += Time.fixedDeltaTime;
             this.missileStopwatch += Time.fixedDeltaTime;
-            if ((double)this.missileStopwatch < 1.0 / (double)FireVoidRain.missileSpawnFrequency)
-                return;
-            this.missileStopwatch -= 1f / FireVoidRain.missileSpawnFrequency;
-            Transform child = this.childLocator.FindChild(FireVoidRain.muzzleString);
-            if ((bool)child)
-            {
-                Ray aimRay = this.GetAimRay();
-                Ray projectileRay = new Ray();
-                projectileRay.direction = aimRay.direction;
-                Vector3 vector3_1 = new Vector3(UnityEngine.Random.Range(-200f, 200f), UnityEngine.Random.Range(75f, 100f), UnityEngine.Random.Range(-200f, 200f));
-                Vector3 vector3_2 = child.position + vector3_1;
-                projectileRay.origin = vector3_2;
 
-                this.CalcBeamPathPredictive(projectileRay, out Vector3 direction, out Vector3 beamEndPos);
-                if (direction != Vector3.zero)
+            if ((double)this.stopwatch <= (double)FireVoidRain.baseDuration)
+            {
+                if ((double)this.missileStopwatch >= 1.0 / (double)FireVoidRain.missileSpawnFrequency)
                 {
-                    projectileRay.direction = direction;
-                    this.FireBlob(projectileRay, beamEndPos);
-                }
-                else
-                {
-                    this.CalcBeamPath(out Ray beamRay, out Vector3 beamEnd);
-                    projectileRay.direction = beamEnd - projectileRay.origin;
-                    this.FireBlob(projectileRay, beamEnd);
+                    this.missileStopwatch -= 1f / FireVoidRain.missileSpawnFrequency;
+                    Transform child = this.childLocator.FindChild(FireVoidRain.muzzleString);
+                    if ((bool)child)
+                    {
+                        Ray aimRay = this.GetAimRay();
+                        Ray projectileRay = new Ray();
+                        projectileRay.direction = aimRay.direction;
+
+                        Vector3 forward = new Vector3(aimRay.direction.x, 0f, aimRay.direction.z).normalized;
+                        Vector3 right = Vector3.Cross(Vector3.up, forward);
+                        float minSpacing = rng.Next(30, 60);
+                        float minSpacingSqr = minSpacing * minSpacing;
+                        Vector3 candidate = Vector3.zero;
+                        for (int attempt = 0; attempt < 20; attempt++)
+                        {
+                            candidate = this.characterBody.corePosition + forward * rng.Next(40, 60) + right * rng.Next(-75, 75) + Vector3.up * rng.Next(-30, 30);
+                            if (!this.hasLastSpawnPos || (candidate - this.lastSpawnPos).sqrMagnitude >= minSpacingSqr)
+                                break;
+                        }
+                        projectileRay.origin = candidate;
+                        this.lastSpawnPos = candidate;
+                        this.hasLastSpawnPos = true;
+
+                        this.CalcBeamPathPredictive(projectileRay, out Vector3 direction, out Vector3 beamEndPos);
+                        if (direction != Vector3.zero)
+                        {
+                            projectileRay.direction = direction;
+                            this.SpawnShot(projectileRay, beamEndPos);
+                        }
+                        else
+                        {
+                            this.CalcBeamPath(out Ray beamRay, out Vector3 beamEnd);
+                            projectileRay.direction = beamEnd - projectileRay.origin;
+                            this.SpawnShot(projectileRay, beamEnd);
+                        }
+                    }
                 }
             }
-            if ((double)this.stopwatch < (double)FireVoidRain.baseDuration || !this.isAuthority)
-                return;
-            this.outer.SetNextStateToMain();
+
+            if (this.pendingShots.Count > 0)
+            {
+                for (int i = this.pendingShots.Count - 1; i >= 0; i--)
+                {
+                    PendingShot shot = this.pendingShots[i];
+                    shot.timer -= Time.fixedDeltaTime;
+                    if (shot.timer <= 0f)
+                    {
+                        if ((bool)shot.indicatorInstance)
+                            Object.Destroy(shot.indicatorInstance);
+                        this.FireShot(shot);
+                        this.pendingShots.RemoveAt(i);
+                    }
+                }
+            }
+
+            if ((double)this.stopwatch >= (double)FireVoidRain.baseDuration && this.pendingShots.Count == 0 && this.isAuthority)
+                this.outer.SetNextStateToMain();
         }
 
         public override void OnExit()
         {
+            foreach (PendingShot shot in this.pendingShots)
+            {
+                if ((bool)shot.indicatorInstance)
+                    Object.Destroy(shot.indicatorInstance);
+            }
+            this.pendingShots.Clear();
+
             base.OnExit();
             if (this.isAuthority)
             {
@@ -116,6 +208,7 @@ namespace FathomlessVoidling.EntityStates.Secondary
         {
             return InterruptPriority.PrioritySkill;
         }
+
         protected void CalcBeamPathPredictive(Ray aimRay, out Vector3 direction, out Vector3 beamEndPoint)
         {
             BullseyeSearch search = new BullseyeSearch();
@@ -146,14 +239,13 @@ namespace FathomlessVoidling.EntityStates.Secondary
                 CharacterBody targetBody = targetHurtBox.healthComponent.body;
                 Vector3 targetPosition = targetHurtBox.transform.position;
                 Vector3 targetVelocity = targetBody.characterMotor.velocity;
-                if (targetVelocity.sqrMagnitude > 0f && !(targetBody && targetBody.hasCloakBuff))   //Dont bother predicting stationary targets
+                if (targetVelocity.sqrMagnitude > 0f && !(targetBody && targetBody.hasCloakBuff))
                 {
                     Vector3 lateralVelocity = new Vector3(targetVelocity.x, 0f, targetVelocity.z);
                     Vector3 futurePosition = targetPosition + lateralVelocity;
 
                     if (targetBody.characterMotor && !targetBody.characterMotor.isGrounded && targetVelocity.y > 0f)
                     {
-
                         Vector3 predictedPosition = targetPosition + targetVelocity * 0.5f;
                         direction = (predictedPosition - aimRay.origin).normalized;
                         beamEndPoint = predictedPosition;

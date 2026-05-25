@@ -341,7 +341,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                     damageType = (DamageTypeCombo)DamageType.Generic,
                     falloffModel = BulletAttack.FalloffModel.None,
                     force = 0.0f,
-                    hitEffectPrefab = MazeAttack.beamImpactEffectPrefab,
+                    hitEffectPrefab = null,
                     tracerEffectPrefab = null,
                     isCrit = false,
                     HitEffectNormal = false

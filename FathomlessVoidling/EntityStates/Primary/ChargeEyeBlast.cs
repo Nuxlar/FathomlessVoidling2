@@ -1,4 +1,3 @@
-using System;
 using EntityStates;
 using RoR2;
 using UnityEngine;
@@ -16,7 +15,6 @@ namespace FathomlessVoidling.EntityStates.Primary
         public string animationPlaybackRateParam = "Eyeblast.playbackRate";
         private float duration;
         private GameObject chargeEffectInstance;
-        private AimAnimator.DirectionOverrideRequest animatorDirectionOverrideRequest;
 
         public override void OnEnter()
         {
@@ -33,8 +31,6 @@ namespace FathomlessVoidling.EntityStates.Primary
                     this.chargeEffectInstance.transform.parent = transform;
                 }
             }
-            AimAnimator aimAnimator = this.GetAimAnimator();
-            this.animatorDirectionOverrideRequest = aimAnimator.RequestDirectionOverride(new Func<Vector3>(this.GetAimDirection));
             if (string.IsNullOrEmpty(this.enterSoundString))
                 return;
             Util.PlayAttackSpeedSound(this.enterSoundString, this.gameObject, this.attackSpeedStat);
@@ -42,7 +38,6 @@ namespace FathomlessVoidling.EntityStates.Primary
 
         public override void OnExit()
         {
-            this.animatorDirectionOverrideRequest?.Dispose();
             EntityState.Destroy(this.chargeEffectInstance);
             base.OnExit();
         }
@@ -53,16 +48,6 @@ namespace FathomlessVoidling.EntityStates.Primary
             if (!this.isAuthority || (double)this.fixedAge < this.duration)
                 return;
             this.outer.SetNextState(new FireEyeBlast());
-        }
-
-        private Vector3 GetAimDirection()
-        {
-            Ray aimRay = this.GetAimRay();
-            float degrees = 60f;
-            float angleFromForward = Vector3.SignedAngle(Vector3.forward, new Vector3(aimRay.direction.x, 0, aimRay.direction.z), Vector3.up); // we find how far are we from forward ignoring y axis, so it doesn't affect the angle from forward
-            Vector3 newRight = Quaternion.AngleAxis(angleFromForward, Vector3.up) * Vector3.right; // using the angle we find our new right to our aim direction
-            Vector3 newDirection = (Quaternion.AngleAxis(-degrees, newRight) * aimRay.direction).normalized; // here we angle aim direction 80 degrees towards the sky
-            return newDirection;
         }
 
         public override InterruptPriority GetMinimumInterruptPriority()

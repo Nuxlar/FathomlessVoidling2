@@ -113,13 +113,20 @@ namespace FathomlessVoidling.EntityStates.Utility
             }
 
             List<CharacterBody> playerBodies = Main.GetPlayerBodies();
+            Debug.Log($"WARD WIPE MP TEST NetworkServer.active={NetworkServer.active}, playerBodies.Count={playerBodies.Count}, returnPoint={VoidRaidGauntletController.instance.currentDonut.returnPoint?.position}");
             if (playerBodies.Count > 0)
             {
                 foreach (CharacterBody playerBody in playerBodies)
                 {
+                    bool hostHasAuthority = Util.HasEffectiveAuthority(playerBody.gameObject);
+                    Debug.Log($"WARD WIPE MP TEST playerBody='{playerBody.name}' netId={playerBody.netId} alive={playerBody.healthComponent?.alive} hostHasAuthority={hostHasAuthority}");
+
                     Vector3? teleportPos = TeleportHelper.FindSafeTeleportDestination(VoidRaidGauntletController.instance.currentDonut.returnPoint.position, playerBody, Run.instance.runRNG);
                     if (!teleportPos.HasValue)
+                    {
+                        Debug.LogWarning($"WARD WIPE MP TEST FindSafeTeleportDestination returned null for '{playerBody.name}' skipping teleport");
                         continue;
+                    }
 
                     TeleportHelper.TeleportBodyArgs teleportArgs = new()
                     {
@@ -127,18 +134,18 @@ namespace FathomlessVoidling.EntityStates.Utility
                         targetPosition = teleportPos.Value,
                         forceOutOfVehicle = true,
                         teleportMinions = true,
-                        resetStateMachines = true
                     };
-                    if (Util.HasEffectiveAuthority(playerBody.gameObject))
-                        TeleportHelper.TeleportBody(teleportArgs);
-                    else
-                        playerBody.CallRpcTeleportWithLocalAuthority(teleportArgs);
+                    Debug.Log($"WARD WIPE MP TEST Sending CallRpcTeleportWithLocalAuthority to '{playerBody.name}' targetPos={teleportPos.Value}");
+                    playerBody.CallRpcTeleportWithLocalAuthority(teleportArgs);
 
-                    GameObject effectPrefab = Run.instance.GetTeleportEffectPrefab(playerBody.gameObject);
-                    effectPrefab = Main.raidTeleportEffect;
+                    GameObject effectPrefab = Main.raidTeleportEffect;
                     if (effectPrefab)
                         EffectManager.SimpleEffect(effectPrefab, teleportPos.Value, Quaternion.identity, true);
                 }
+            }
+            else
+            {
+                Debug.LogWarning("FathomlessVoidling :NextDonut: GetPlayerBodies() returned empty list");
             }
             KillBarnacles();
         }

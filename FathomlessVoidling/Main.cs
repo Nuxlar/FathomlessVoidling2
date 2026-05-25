@@ -25,6 +25,7 @@ using FathomlessVoidling.EntityStates.Special;
 using FathomlessVoidling.EntityStates.Barnacle;
 using FathomlessVoidling.Components;
 using FathomlessVoidling.Hooks;
+
 /*
   STUFF TO REFERENCE
     SFX
@@ -47,7 +48,7 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "1.0.6";
+    public const string PluginVersion = "1.1.0";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
@@ -140,7 +141,7 @@ namespace FathomlessVoidling
       Main.jointBody.bodyFlags |= CharacterBody.BodyFlags.ImmuneToExecutes | CharacterBody.BodyFlags.ImmuneToVoidDeath | CharacterBody.BodyFlags.IgnoreKnockup;
       Main.bossBody.bodyFlags |= CharacterBody.BodyFlags.ImmuneToExecutes | CharacterBody.BodyFlags.ImmuneToVoidDeath | CharacterBody.BodyFlags.IgnoreKnockup;
       Main.bossBody.baseNameToken = "[ Voidling ]";
-      Main.bossBody.subtitleNameToken = "Augur of the Abyss";
+      Main.bossBody.subtitleNameToken = "Augur of the Abyss ";
       Main.jointBody = null;
       Main.bossBody = null;
 
@@ -198,21 +199,20 @@ namespace FathomlessVoidling
 
       missileProjectile.GetComponent<ProjectileController>().ghostPrefab = missileProjectileGhost;
 
-      missileProjectile.AddComponent<StasisMissileComponent>();
+      missileProjectile.AddComponent<RadialOutwardOscillation>();
       ProjectileSimple ps = missileProjectile.GetComponent<ProjectileSimple>();
-      /*
-       ps.oscillate = true;
-       ps.oscillateSpeed = 5f;
-       ps.oscillateMagnitude = 30f; // 20f orig
-       */
-      //ps.lifetime =
-      ps.desiredForwardSpeed = 125f; // 70f orig
+
+      // ps.oscillateMagnitude = 20f; // 20f orig
+      // ps.desiredForwardSpeed = 80f; // 70f 
+      ps.oscillate = true;
+      ps.oscillateSpeed = 5f;
+      ps.lifetime = 6f;
 
       ProjectileImpactExplosion pie = missileProjectile.AddComponent<ProjectileImpactExplosion>();
       pie.blastRadius = 6f;
       pie.impactEffect = missileImpact;
       pie.destroyOnWorld = true;
-      pie.lifetime = 5f;
+      pie.lifetime = 6f;
       pie.blastDamageCoefficient = 1f;
       pie.falloffModel = BlastAttack.FalloffModel.SweetSpot;
 
@@ -220,7 +220,7 @@ namespace FathomlessVoidling
 
       ProjectileSteerTowardTarget steer = missileProjectile.GetComponent<ProjectileSteerTowardTarget>();
       steer.rotationSpeed = 10f;
-      steer.enabled = false;
+      steer.enabled = true;
       ProjectileDirectionalTargetFinder targetFinder = missileProjectile.GetComponent<ProjectileDirectionalTargetFinder>();
       targetFinder.lookCone = 360f;
       targetFinder.lookRange = 100f;
@@ -446,6 +446,8 @@ namespace FathomlessVoidling
       barnacleDccs.AddCategory("BarnacleMania", 4f);
       barnacleDccs.AddCard(0, barnacleDirectorCard);
       combatDirector.customName = "Barnacle Director";
+      combatDirector.skipSpawnIfTooCheap = false;
+      combatDirector.eliteBias = 0f;
       combatDirector.expRewardCoefficient = 0.2f;
       combatDirector.minSeriesSpawnInterval = 0.1f;
       combatDirector.maxSeriesSpawnInterval = 1f;
@@ -695,7 +697,7 @@ namespace FathomlessVoidling
       newPortalPrefab.GetComponent<DestroyOnTimer>().duration = 5f;
       foreach (ParticleSystem ps in newPortalPrefab.GetComponentsInChildren<ParticleSystem>())
       {
-        var mainModule = ps.main;
+        ParticleSystem.MainModule mainModule = ps.main;
         mainModule.startSizeMultiplier *= 2f;
         mainModule.startLifetimeMultiplier *= 4f;
       }
@@ -721,16 +723,26 @@ namespace FathomlessVoidling
       Transform voidRainRing = voidRainPortalEffect.transform.Find("Ring");
       ParticleSystemRenderer voidRainPsr = voidRainRing.GetChild(0).GetComponent<ParticleSystemRenderer>();
       voidRainPsr.sharedMaterial = voidRainPortalMat;
+
+      GameObject.Destroy(voidRainPortalEffect.GetComponent<ShakeEmitter>());
+      GameObject.Destroy(voidRainWarning.GetComponent<RayAttackIndicator>());
+
       ContentAddition.AddEffect(voidRainPortalEffect);
 
       Transform hitIndicator = voidRainWarning.transform.Find("HitIndicator");
       if (hitIndicator)
       {
+        Transform originRecipient = voidRainWarning.transform.Find("OriginRecipient");
         Transform furthestHitRecipient = voidRainWarning.transform.Find("FurthestHitRecipient");
-        if (furthestHitRecipient)
+
+        if (furthestHitRecipient && originRecipient)
         {
           hitIndicator.SetParent(furthestHitRecipient);
           hitIndicator.localPosition = Vector3.zero;
+
+          VoidRainComponent vrc = voidRainWarning.AddComponent<VoidRainComponent>();
+          vrc.originRecipient = originRecipient;
+          vrc.furthestHitRecipient = furthestHitRecipient;
         }
       }
 
@@ -769,7 +781,7 @@ namespace FathomlessVoidling
 
       sdWardWipe = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabWardWipe_asset).WaitForCompletion();
       sdWardWipe.activationState = new SerializableEntityStateType(typeof(ChargeWardWipeNux));
-      //sdWardWipe.interruptPriority = InterruptPriority.Death;
+      sdWardWipe.interruptPriority = InterruptPriority.Death;
 
       sdSingularity = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabVacuumAttack_asset).WaitForCompletion();
       sdSingularity.activationState = new SerializableEntityStateType(typeof(WanderingSingularity));

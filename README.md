@@ -20,7 +20,7 @@ Report bugs using the GitHub link above. Please include a detailed description a
 
 ### Voidling Skills
 
-- **Eye Blast:** fires a volley of mortars that rain down with slight tracking
+- **Eye Blast:** fires an oscillating ring of projectiles with expanding spread, slight tracking
 - **Portal Beams:** spawns portals that fire predictive laser beams
 - **Maze:** laser pizza
 - **Wandering Singularity:** spawns a black hole that slowly follows enemies
