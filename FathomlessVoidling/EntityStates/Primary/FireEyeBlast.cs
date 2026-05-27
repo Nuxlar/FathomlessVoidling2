@@ -101,22 +101,6 @@ namespace FathomlessVoidling.EntityStates.Primary
             this.outer.SetNextStateToMain();
         }
 
-        public override void OnExit()
-        {
-            base.OnExit();
-            if (this.isAuthority)
-            {
-                FathomlessSkillDriverController sdc = this.characterBody.GetComponent<FathomlessSkillDriverController>();
-                if (sdc)
-                {
-                    if (sdc.IsSingularityEnabled() && this.skillLocator.special.IsReady())
-                        this.skillLocator.special.ExecuteIfReady();
-                    else if (sdc.IsMazeEnabled() && this.skillLocator.utility.IsReady())
-                        this.skillLocator.utility.ExecuteIfReady();
-                }
-            }
-        }
-
         public override InterruptPriority GetMinimumInterruptPriority()
         {
             return InterruptPriority.PrioritySkill;

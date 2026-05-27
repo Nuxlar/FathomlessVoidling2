@@ -216,12 +216,6 @@ namespace FathomlessVoidling.Hooks
             jtc.reachedThreshold = true;
 
             FathomlessMissionController mc = FathomlessMissionController.instance;
-            FathomlessSkillDriverController sdc = mc?.voidlingBody?.GetComponent<FathomlessSkillDriverController>();
-            if (sdc != null)
-            {
-                if (phase == 0) sdc.EnableSingularity();
-                if (phase == 1) sdc.EnableMaze();
-            }
 
             if (JointThresholdController.AllJointsReachedThreshold())
             {
@@ -233,7 +227,6 @@ namespace FathomlessVoidling.Hooks
                 EntityStateMachine esm = bossBody.gameObject.GetComponents<EntityStateMachine>().First((esm) => esm.customName == "Body");
                 bossBody.skillLocator.special.SetSkillOverride(esm, Main.sdWardWipe, GenericSkill.SkillOverridePriority.Contextual);
                 bossBody.skillLocator.special.AddOneStock();
-                sdc?.TriggerWardWipe();
             }
         }
 

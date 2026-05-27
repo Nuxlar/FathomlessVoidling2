@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using EntityStates;
 using RoR2;
 using RoR2.CharacterAI;
 using UnityEngine;
@@ -7,70 +8,150 @@ namespace FathomlessVoidling.Controllers;
 
 public class FathomlessSkillDriverController : MonoBehaviour
 {
-    private List<AISkillDriver> skillDrivers = [];
-    private CharacterBody characterBody;
+    private const string bodyStateMachineName = "Body";
+
+    private CharacterBody body;
+    private HealthComponent healthComponent;
+    private CharacterMaster master;
+    private EntityStateMachine bodyStateMachine;
+
+    private List<JointThresholdController> jtcs = [];
+
+    private List<AISkillDriver> weaponDrivers = [];
+    private AISkillDriver wardWipeDriver;
+    private AISkillDriver singularityDriver;
+    private AISkillDriver mazeDriver;
+
+    private bool isWardWipeAvailable;
+    private bool singularityUnlocked;
+    private bool mazeUnlocked;
 
     private void Start()
     {
-        this.characterBody = this.GetComponent<CharacterBody>();
-        if (!this.characterBody) return;
-
-        CharacterMaster master = this.characterBody.master;
-        List<string> driverNames = ["WardWipe", "Vacuum Attack", "SpinBeam", "FireMissiles", "FireMultiBeam"];
-        foreach (AISkillDriver driver in master.GetComponents<AISkillDriver>())
+        this.body = this.GetComponent<CharacterBody>();
+        this.master = this.body.master;
+        this.healthComponent = this.body.healthComponent;
+        foreach (AISkillDriver driver in this.master.GetComponents<AISkillDriver>())
         {
-            if (driverNames.Contains(driver.customName))
-                this.skillDrivers.Add(driver);
+            switch (driver.customName)
+            {
+                case "WardWipe":
+                    this.wardWipeDriver = driver;
+                    break;
+                case "FireMissiles":
+                case "FireMultiBeam":
+                    this.weaponDrivers.Add(driver);
+                    break;
+                case "SpinBeam":
+                    this.mazeDriver = driver;
+                    break;
+                case "Vacuum Attack":
+                    this.singularityDriver = driver;
+                    break;
+            }
+        }
+        foreach (TeamComponent tc in TeamComponent.GetTeamMembers(TeamIndex.Void))
+        {
+            CharacterBody cb = tc.GetComponent<CharacterBody>();
+            if (cb && cb.name == "VoidRaidCrabJointBody(Clone)")
+            {
+                JointThresholdController jtc = cb.GetComponent<JointThresholdController>();
+                if (jtc)
+                    jtcs.Add(jtc);
+            }
         }
     }
 
-    public void TriggerWardWipe()
+    private void FixedUpdate()
     {
-        foreach (AISkillDriver driver in this.skillDrivers)
-            driver.enabled = driver.customName == "WardWipe";
+        if (!this.body || !this.master)
+            return;
+        if (!this.bodyStateMachine)
+        {
+            this.bodyStateMachine = EntityStateMachine.FindByCustomName(this.gameObject, bodyStateMachineName);
+            if (!this.bodyStateMachine)
+                return;
+        }
+
+        this.isWardWipeAvailable = this.CanUseWardWipe();
+
+        CheckMazeUnlock();
+        CheckSingularityUnlock();
+
+        SetEnabled(this.wardWipeDriver, isWardWipeAvailable);
+        SetEnabled(this.weaponDrivers, this.CanUseWeaponSkills());
+        SetEnabled(this.singularityDriver, this.CanUseBodySkills() && this.singularityUnlocked);
+        SetEnabled(this.mazeDriver, this.CanUseBodySkills() && this.mazeUnlocked);
     }
 
-    public void EndWardWipe()
+    private static void SetEnabled(List<AISkillDriver> drivers, bool enabled)
     {
-        int itemCount = this.characterBody.inventory.GetItemCountEffective(RoR2Content.Items.MinHealthPercentage);
-        foreach (AISkillDriver driver in this.skillDrivers)
+        foreach (AISkillDriver driver in drivers)
         {
-            if (driver.customName == "WardWipe")
-                driver.enabled = false;
-            else if (driver.customName == "SpinBeam")
-                driver.enabled = itemCount == 5;
-            else
-                driver.enabled = true;
+            if (driver.enabled != enabled)
+                driver.enabled = enabled;
         }
     }
 
-    public void EnableSingularity()
+    private static void SetEnabled(AISkillDriver driver, bool enabled)
     {
-        AISkillDriver singularityDriver = this.skillDrivers.Find(d => d.customName == "Vacuum Attack");
-        if (singularityDriver)
-            singularityDriver.enabled = true;
-        else
-            Debug.LogWarning("FathomlessVoidling: Singularity driver not present in FathomlessSkillDriverController");
+        if (driver.enabled != enabled)
+            driver.enabled = enabled;
     }
 
-    public void EnableMaze()
+    private bool CanUseWardWipe()
     {
-        AISkillDriver mazeDriver = this.skillDrivers.Find(d => d.customName == "SpinBeam");
-        if (mazeDriver)
-            mazeDriver.enabled = true;
-        else
-            Debug.LogWarning("FathomlessVoidling: Maze driver not present in FathomlessSkillDriverController");
+        bool allJointsReachedThreshold = true;
+        foreach (JointThresholdController jtc in jtcs)
+        {
+            if (!jtc.reachedThreshold)
+            {
+                allJointsReachedThreshold = false;
+                break;
+            }
+        }
+        return allJointsReachedThreshold;
     }
 
-    public bool IsSingularityEnabled()
+    private bool CheckSingularityUnlock()
     {
-        AISkillDriver singularityDriver = this.skillDrivers.Find(d => d.customName == "Vacuum Attack");
-        return singularityDriver && singularityDriver.enabled;
+        if (!this.singularityUnlocked)
+        {
+            foreach (JointThresholdController jtc in jtcs)
+            {
+                if (jtc.reachedThreshold)
+                {
+                    this.singularityUnlocked = true;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    // maze unlocks at the full threshold
+    private bool CheckMazeUnlock()
+    {
+        if (!this.mazeUnlocked && this.healthComponent.combinedHealthFraction < 1f && !this.isWardWipeAvailable)
+        {
+            foreach (JointThresholdController jtc in jtcs)
+            {
+                if (jtc.reachedThreshold)
+                {
+                    this.mazeUnlocked = true;
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    public bool IsMazeEnabled()
+    public bool CanUseWeaponSkills()
     {
-        AISkillDriver mazeDriver = this.skillDrivers.Find(d => d.customName == "SpinBeam");
-        return mazeDriver && mazeDriver.enabled;
+        return this.bodyStateMachine.state is GenericCharacterMain && !this.isWardWipeAvailable;
+    }
+
+    public bool CanUseBodySkills()
+    {
+        return this.bodyStateMachine.IsInMainState() && !this.isWardWipeAvailable;
     }
 }

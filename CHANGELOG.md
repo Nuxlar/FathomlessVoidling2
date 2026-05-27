@@ -1,3 +1,8 @@
+**1.1.1**
+
+- Actually fixes softlocking and "dead AI" issues
+- Stopped being lazy and refactored how Voidling manages its skills
+
 **1.1.0**
 
 - Adds Inferno as a soft dependency internally to prevent compat from potentially not working

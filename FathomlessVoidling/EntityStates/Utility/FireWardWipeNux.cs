@@ -161,7 +161,6 @@ namespace FathomlessVoidling.EntityStates.Utility
                     phasedInventorySetter.AdvancePhase();
             }
             JointThresholdController.RemoveImmunityFromAllJoints();
-            this.characterBody.GetComponent<FathomlessSkillDriverController>()?.EndWardWipe();
             FathomlessMissionController mc = FathomlessMissionController.instance;
             if (mc)
             {
