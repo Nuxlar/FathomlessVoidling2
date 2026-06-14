@@ -12,6 +12,8 @@ using R2API;
 using System.Linq;
 using System.Collections.Generic;
 using RoR2.EntityLogic;
+using MonoMod.Cil;
+using Mono.Cecil.Cil;
 
 namespace FathomlessVoidling.Hooks
 {
@@ -29,6 +31,7 @@ namespace FathomlessVoidling.Hooks
             On.RoR2.VoidRaidGauntletController.RpcActivateDonut += DeactivateDonutRoof;
             On.RoR2.VoidRaidGauntletController.TryOpenGauntlet += BlockGauntletInPhase3;
             On.RoR2.Projectile.ProjectileDirectionalTargetFinder.SearchForTarget += TweakSingularitySearch;
+            IL.RoR2.ScriptedCombatEncounter.Spawn += IgnoreSwarms;
 
             On.EntityStates.VoidBarnacle.Weapon.ChargeFire.OnEnter += LazyMf;
             On.EntityStates.VoidRaidCrab.DeathState.OnEnter += FixDeathState;
@@ -44,20 +47,42 @@ namespace FathomlessVoidling.Hooks
             */
         }
 
+        private void IgnoreSwarms(ILContext il)
+        {
+            ILCursor c = new ILCursor(il);
+            if (c.TryGotoNext(MoveType.Before,
+                x => x.MatchCallOrCallvirt<DirectorCore>(nameof(DirectorCore.TrySpawnObject))))
+            {
+                c.Emit(OpCodes.Dup);
+                c.EmitDelegate<System.Action<DirectorSpawnRequest>>(req =>
+                {
+                    if (req != null && req.spawnCard == Main.bigVoidlingCard && req.placementRule != null)
+                        req.placementRule.IgnoreSwarmsArtifact = true;
+                });
+            }
+            else
+                Debug.LogError("FathomlessVoidling: IgnoreSwarms Hook failed (TrySpawnObject call not found)");
+        }
+
         private void ArenaTweaks(On.RoR2.VoidRaidGauntletController.orig_Start orig, VoidRaidGauntletController self)
         {
             orig(self);
             // Remove BB Donut
             int abyssalDonutIdx = -1;
+            int blackbeachIdx = -1;
             List<VoidRaidGauntletController.DonutInfo> donutList = self.followingDonuts.ToList();
             for (int i = 0; i < donutList.Count; i++)
             {
                 VoidRaidGauntletController.DonutInfo followingDonut = donutList[i];
                 if (followingDonut.root.name == "RaidBB")
-                    donutList.RemoveAt(i);
+                    blackbeachIdx = i;
                 if (followingDonut.root.name == "RaidDC")
                     abyssalDonutIdx = i;
             }
+
+            if (blackbeachIdx != -1)
+                donutList.RemoveAt(blackbeachIdx);
+
             self.followingDonuts = donutList.ToArray();
 
             // Abyssal Styling

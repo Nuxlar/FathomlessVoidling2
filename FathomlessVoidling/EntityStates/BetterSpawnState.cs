@@ -68,6 +68,7 @@ namespace FathomlessVoidling.EntityStates
             DirectorPlacementRule placementRule = new DirectorPlacementRule()
             {
                 placementMode = DirectorPlacementRule.PlacementMode.Direct,
+                IgnoreSwarmsArtifact = true,
                 spawnOnTarget = this.GetModelTransform()
             };
             this.SpawnJointBodyForLegServer(this.leg1Name, modelChildLocator, placementRule);

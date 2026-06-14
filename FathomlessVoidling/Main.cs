@@ -48,7 +48,7 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "1.1.1";
+    public const string PluginVersion = "1.1.2";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
@@ -219,11 +219,12 @@ namespace FathomlessVoidling
       GameObject.Destroy(missileProjectile.GetComponent<ProjectileSingleTargetImpact>());
 
       ProjectileSteerTowardTarget steer = missileProjectile.GetComponent<ProjectileSteerTowardTarget>();
-      steer.rotationSpeed = 10f;
+      steer.rotationSpeed = 20f;
       steer.enabled = true;
       ProjectileDirectionalTargetFinder targetFinder = missileProjectile.GetComponent<ProjectileDirectionalTargetFinder>();
       targetFinder.lookCone = 360f;
       targetFinder.lookRange = 100f;
+      targetFinder.allowTargetLoss = false;
       // allowTargetLoss is true
       // sortMode is distance and angle
       missileProjectile.transform.localScale *= 4;
@@ -770,6 +771,7 @@ namespace FathomlessVoidling
       GameObject jointBodyPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabJointBody_prefab).WaitForCompletion();
       JointThresholdController thresholdController = jointBodyPrefab.AddComponent<JointThresholdController>();
       jointBodyPrefab.AddComponent<LegControllerNetworkHelper>();
+      jointBodyPrefab.AddComponent<JointBodyPositionNormalizer>();
       CharacterBody jointBody = jointBodyPrefab.GetComponent<CharacterBody>();
       jointBody.baseMaxHealth = ModConfig.jointBaseHealth.Value;
       jointBody.levelMaxHealth = ModConfig.jointLevelHealth.Value;

@@ -1,3 +1,14 @@
+**1.1.2**
+
+- Fixed multiplayer issue of client players not teleporting through phase switch
+- Fixed Luminous Shot bug and any other potential issues that use the body's position within code (the way the joints "move" doesn't include moving the actual body, so now the body matches the position of the lowest joint)
+- Fixed (maybe) abyssal donut not having its materials swapped occasionally 
+- Added compat with Artifact of Swarms (only spawns 1 body even with the artifact instead of soft-locking)
+- Reduced max ring spread of Eye Blast (10 -> 6)
+- Increased homing of Eye Blast missiles (10 -> 20)
+- Increased Eye Blast missile damage by 25%
+- Enhanced Portal Beam's predictive code, should be more predictive rather than falling back to player position so often (credits to .score and AdvancedPrediction)
+
 **1.1.1**
 
 - Actually fixes softlocking and "dead AI" issues

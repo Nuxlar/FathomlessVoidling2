@@ -118,9 +118,7 @@ namespace FathomlessVoidling.EntityStates.Utility
             {
                 foreach (CharacterBody playerBody in playerBodies)
                 {
-                    bool hostHasAuthority = Util.HasEffectiveAuthority(playerBody.gameObject);
-                    Debug.Log($"WARD WIPE MP TEST playerBody='{playerBody.name}' netId={playerBody.netId} alive={playerBody.healthComponent?.alive} hostHasAuthority={hostHasAuthority}");
-
+                    Debug.Log($"WARD WIPE MP TEST playerBody='{playerBody.name}' netId={playerBody.netId} alive={playerBody.healthComponent?.alive}");
                     Vector3? teleportPos = TeleportHelper.FindSafeTeleportDestination(VoidRaidGauntletController.instance.currentDonut.returnPoint.position, playerBody, Run.instance.runRNG);
                     if (!teleportPos.HasValue)
                     {
@@ -132,8 +130,8 @@ namespace FathomlessVoidling.EntityStates.Utility
                     {
                         body = playerBody,
                         targetPosition = teleportPos.Value,
-                        forceOutOfVehicle = true,
                         teleportMinions = true,
+                        resetStateMachines = true
                     };
                     Debug.Log($"WARD WIPE MP TEST Sending CallRpcTeleportWithLocalAuthority to '{playerBody.name}' targetPos={teleportPos.Value}");
                     playerBody.CallRpcTeleportWithLocalAuthority(teleportArgs);

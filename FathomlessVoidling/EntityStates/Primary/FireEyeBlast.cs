@@ -14,11 +14,11 @@ namespace FathomlessVoidling.EntityStates.Primary
         public static int numWaves = 5;
         public static int numMissilesPerWave = ModConfig.eyeBlastMissileCount.Value;
         public static float startRingRadius = 2f;
-        public static float endRingRadius = 10f;
+        public static float endRingRadius = 6f;
         public string muzzleName = "EyeProjectileCenter";
         public GameObject muzzleFlashPrefab = Main.eyeBlastMuzzleFlash;
         public GameObject projectilePrefab = Main.eyeMissileProjectile;
-        public float damageCoefficient = 0.75f;
+        public float damageCoefficient = 1f;
         public float force = 1000f;
         public string animationLayerName = "Gesture";
         public string animationStateName = "ChargeEyeBlast";

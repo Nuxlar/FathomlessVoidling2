@@ -199,59 +199,58 @@ namespace FathomlessVoidling.EntityStates.Secondary
 
         protected void CalcBeamPathPredictive(Ray aimRay, out Vector3 direction, out Vector3 beamEndPoint)
         {
-            BullseyeSearch search = new BullseyeSearch();
-
-            search.teamMaskFilter = TeamMask.GetEnemyTeams(this.GetTeam());
-            search.filterByDistinctEntity = true;
-            search.viewer = null;
-            search.filterByLoS = true;
-            search.searchOrigin = aimRay.origin;
-            search.sortMode = BullseyeSearch.SortMode.DistanceAndAngle;
-            search.maxDistanceFilter = 500f;
-            search.minAngleFilter = 0.0f;
-            search.maxAngleFilter = 180f;
-            search.RefreshCandidates();
-
-            HurtBox targetHurtBox;
-            targetHurtBox = search.GetResults().FirstOrDefault((hurtBox) =>
+            int counter = 0;
+            HurtBox targetHurtBox = null;
+            while (targetHurtBox == null || counter < 10)
             {
-                if (hurtBox.healthComponent && hurtBox.healthComponent.body && hurtBox.healthComponent.body.isPlayerControlled)
-                    return true;
-                else return false;
-            });
+                BullseyeSearch search = new BullseyeSearch();
+
+                search.teamMaskFilter = TeamMask.GetEnemyTeams(this.GetTeam());
+                search.filterByDistinctEntity = true;
+                search.viewer = null;
+                search.filterByLoS = false;
+                search.searchOrigin = aimRay.origin;
+                search.sortMode = BullseyeSearch.SortMode.DistanceAndAngle;
+                search.maxDistanceFilter = 600f;
+                search.minAngleFilter = 0.0f;
+                search.maxAngleFilter = 360f;
+                search.RefreshCandidates();
+
+                targetHurtBox = search.GetResults().FirstOrDefault((hurtBox) =>
+                {
+                    if (hurtBox.healthComponent && hurtBox.healthComponent.body && hurtBox.healthComponent.body.isPlayerControlled)
+                        return true;
+                    else return false;
+                });
+
+                counter++;
+            }
 
             bool hasHurtbox = targetHurtBox && targetHurtBox.healthComponent.body.characterMotor;
 
             if (hasHurtbox)
             {
                 CharacterBody targetBody = targetHurtBox.healthComponent.body;
-                Vector3 targetPosition = targetHurtBox.transform.position;
-                Vector3 targetVelocity = targetBody.characterMotor.velocity;
-                if (targetVelocity.sqrMagnitude > 0f && !(targetBody && targetBody.hasCloakBuff))
-                {
-                    Vector3 lateralVelocity = new Vector3(targetVelocity.x, 0f, targetVelocity.z);
-                    Vector3 futurePosition = targetPosition + lateralVelocity;
+                CharacterMotor motor = targetBody.characterMotor;
+                Vector3 pT = targetHurtBox.transform.position;
+                Vector3 vT = (motor.Motor && motor.Motor.enabled) ? motor.velocity : (pT - targetBody.previousPosition) / Time.fixedDeltaTime;
 
-                    if (targetBody.characterMotor && !targetBody.characterMotor.isGrounded && targetVelocity.y > 0f)
-                    {
-                        Vector3 predictedPosition = targetPosition + targetVelocity * 0.5f;
-                        direction = (predictedPosition - aimRay.origin).normalized;
-                        beamEndPoint = predictedPosition;
-                    }
-                    else
-                    {
-                        direction = (futurePosition - aimRay.origin).normalized;
-                        beamEndPoint = futurePosition;
-                    }
+                if (vT.sqrMagnitude > 0f)
+                {
+                    float t = FireVoidRain.shotDelay;
+                    Vector3 predicted = pT + vT * t;
+                    direction = (predicted - aimRay.origin).normalized;
+                    beamEndPoint = predicted;
                 }
                 else
                 {
-                    direction = (targetPosition - aimRay.origin).normalized;
-                    beamEndPoint = targetPosition;
+                    direction = (pT - aimRay.origin).normalized;
+                    beamEndPoint = pT;
                 }
             }
             else
             {
+                Debug.LogWarning("FathomlessVoidling: FireVoidRain.CalcBeamPathPredictive couldn't find a target after 10 tries.");
                 direction = Vector3.zero;
                 beamEndPoint = Vector3.zero;
             }

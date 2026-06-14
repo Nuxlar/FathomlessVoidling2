@@ -4,6 +4,10 @@ BASE STATS BALANCED AROUND A STAGE 6 BOSS, IF LOOPING INCREASE THE HP IN THE CON
 
 Reworked Voidling fight that uses the unused large voidling model. Spawns a void locus portal on stage 5, locus acts as an alternative moon. No void fog during void pillars by default, configurable. Locus has moon cauldrons. Risk of Options support for in-game configs.
 
+## Known Issues
+
+- Operator's CMD-SWARM paints its indicators using random hurtboxes so it paints weirdly with the joints. Target the lower joints to actually "hit", but it'll probably put the indicator on the upper joints
+
 ## Bug Reports
 
 Report bugs using the GitHub link above. Please include a detailed description and a log file. For multiplayer bugs, provide logs from **both the host and a client**.
