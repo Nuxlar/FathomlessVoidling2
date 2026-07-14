@@ -64,7 +64,7 @@ public class VoidlingHauntManager : BaseState
         }
         else
         {
-            if ((double)Random.value < this.chanceToFirePerSecond)
+            if (Random.value < this.chanceToFirePerSecond)
                 this.FireProjectile();
         }
     }

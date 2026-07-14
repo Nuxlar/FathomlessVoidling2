@@ -48,7 +48,7 @@ namespace FathomlessVoidling.EntityStates.Secondary
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            if (!this.isAuthority || (double)this.fixedAge < (double)this.duration)
+            if (!this.isAuthority || this.fixedAge < this.duration)
                 return;
             this.outer.SetNextState(new FireVoidRain());
         }

@@ -43,7 +43,7 @@ namespace FathomlessVoidling.EntityStates.Barnacle
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            if ((double)this.stopwatch < (double)this._animationDuration || this.numberOfFireballs <= 0)
+            if (this.stopwatch < this._animationDuration || this.numberOfFireballs <= 0)
                 return;
             this._animationDuration += this._animationDuration;
             this.PlayAnimation(this._animationDuration);

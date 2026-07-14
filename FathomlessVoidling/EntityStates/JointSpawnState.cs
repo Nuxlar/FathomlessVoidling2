@@ -22,13 +22,13 @@ namespace FathomlessVoidling.EntityStates
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            if ((double)this.fixedAge >= (double)this.duration && !visible)
+            if (this.fixedAge >= this.duration && !visible)
             {
                 if ((bool)this.characterModel)
                     --this.characterModel.invisibilityCount;
                 this.visible = true;
             }
-            if ((double)this.fixedAge < (double)this.duration || !this.isAuthority)
+            if (this.fixedAge < this.duration || !this.isAuthority)
                 return;
             this.characterBody.SetBuffCount(RoR2Content.Buffs.HiddenInvincibility.buffIndex, 0);
             this.outer.SetNextStateToMain();

@@ -96,7 +96,7 @@ namespace FathomlessVoidling.EntityStates.Primary
                     }
                 }
             }
-            if (!this.isAuthority || (double)this.fixedAge < this.duration)
+            if (!this.isAuthority || this.fixedAge < this.duration)
                 return;
             this.outer.SetNextStateToMain();
         }

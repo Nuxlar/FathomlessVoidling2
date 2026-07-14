@@ -139,10 +139,6 @@ namespace FathomlessVoidling
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         public static ConfigEntry<T> BindOption<T>(this ConfigFile myConfig, string section, string name, T defaultValue, string description = "", bool restartRequired = true)
         {
-            if (defaultValue is int or float)
-            {
-                return myConfig.BindOptionSlider(section, name, defaultValue, description, 0, 20, restartRequired);
-            }
             if (string.IsNullOrEmpty(description))
                 description = name;
 
@@ -209,25 +205,9 @@ namespace FathomlessVoidling
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         public static void TryRegisterOption<T>(ConfigEntry<T> entry, bool restartRequired)
         {
-            if (entry is ConfigEntry<string> stringEntry)
-            {
-                RiskOfOptions.ModSettingsManager.AddOption(new RiskOfOptions.Options.StringInputFieldOption(stringEntry, new RiskOfOptions.OptionConfigs.InputFieldConfig()
-                {
-                    submitOn = RiskOfOptions.OptionConfigs.InputFieldConfig.SubmitEnum.OnExitOrSubmit,
-                    restartRequired = restartRequired
-                }), Main.PluginGUID, Main.PluginName);
-            }
-            else if (entry is ConfigEntry<bool> boolEntry)
+            if (entry is ConfigEntry<bool> boolEntry)
             {
                 RiskOfOptions.ModSettingsManager.AddOption(new RiskOfOptions.Options.CheckBoxOption(boolEntry, restartRequired), Main.PluginGUID, Main.PluginName);
-            }
-            else if (entry is ConfigEntry<KeyboardShortcut> shortCutEntry)
-            {
-                RiskOfOptions.ModSettingsManager.AddOption(new RiskOfOptions.Options.KeyBindOption(shortCutEntry, restartRequired), Main.PluginGUID, Main.PluginName);
-            }
-            else if (typeof(T).IsEnum)
-            {
-                RiskOfOptions.ModSettingsManager.AddOption(new RiskOfOptions.Options.ChoiceOption(entry, restartRequired), Main.PluginGUID, Main.PluginName);
             }
         }
 
@@ -241,16 +221,6 @@ namespace FathomlessVoidling
                     min = (int)min,
                     max = (int)max,
                     formatString = "{0:0.00}",
-                    restartRequired = restartRequired
-                }), Main.PluginGUID, Main.PluginName);
-            }
-            else if (entry is ConfigEntry<float> floatEntry)
-            {
-                RiskOfOptions.ModSettingsManager.AddOption(new RiskOfOptions.Options.SliderOption(floatEntry, new RiskOfOptions.OptionConfigs.SliderConfig()
-                {
-                    min = min,
-                    max = max,
-                    FormatString = "{0:0.00}",
                     restartRequired = restartRequired
                 }), Main.PluginGUID, Main.PluginName);
             }

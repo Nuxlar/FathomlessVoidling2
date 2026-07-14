@@ -508,7 +508,7 @@ namespace FathomlessVoidling.Hooks
                     Vector3 airborneForceVector;
                     Vector3 groundedForceVector;
                     bool preventAirControl = false;
-                    bool isLeft = (double)UnityEngine.Random.value > 0.5;
+                    bool isLeft = UnityEngine.Random.value > 0.5;
                     Vector3 vector3 = Vector3.Cross(direction.forward, Vector3.up);
 
                     if (!isLeft)

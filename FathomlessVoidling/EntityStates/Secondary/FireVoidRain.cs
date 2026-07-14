@@ -117,9 +117,9 @@ namespace FathomlessVoidling.EntityStates.Secondary
             this.stopwatch += Time.fixedDeltaTime;
             this.missileStopwatch += Time.fixedDeltaTime;
 
-            if ((double)this.stopwatch <= (double)FireVoidRain.baseDuration)
+            if (this.stopwatch <= FireVoidRain.baseDuration)
             {
-                if ((double)this.missileStopwatch >= 1.0 / (double)FireVoidRain.missileSpawnFrequency)
+                if (this.missileStopwatch >= 1.0 / FireVoidRain.missileSpawnFrequency)
                 {
                     this.missileStopwatch -= 1f / FireVoidRain.missileSpawnFrequency;
                     Transform child = this.childLocator.FindChild(FireVoidRain.muzzleString);
@@ -176,7 +176,7 @@ namespace FathomlessVoidling.EntityStates.Secondary
                 }
             }
 
-            if ((double)this.stopwatch >= (double)FireVoidRain.baseDuration && this.pendingShots.Count == 0 && this.isAuthority)
+            if (this.stopwatch >= FireVoidRain.baseDuration && this.pendingShots.Count == 0 && this.isAuthority)
                 this.outer.SetNextStateToMain();
         }
 
@@ -201,7 +201,7 @@ namespace FathomlessVoidling.EntityStates.Secondary
         {
             int counter = 0;
             HurtBox targetHurtBox = null;
-            while (targetHurtBox == null || counter < 10)
+            while (targetHurtBox == null && counter < 10)
             {
                 BullseyeSearch search = new BullseyeSearch();
 
@@ -266,7 +266,7 @@ namespace FathomlessVoidling.EntityStates.Secondary
             {
                 ref RaycastHit local = ref raycastHitArray[index];
                 float distance = local.distance;
-                if ((double)distance < (double)a && local.collider.transform.root != root)
+                if (distance < a && local.collider.transform.root != root)
                     a = distance;
             }
             float distance1 = Mathf.Min(a, BaseMultiBeamState.beamMaxDistance);

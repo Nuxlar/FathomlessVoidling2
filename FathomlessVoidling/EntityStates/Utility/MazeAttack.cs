@@ -19,7 +19,6 @@ namespace FathomlessVoidling.EntityStates.Utility
         public static float beamDpsCoefficient = 40f; // 40 orig
         public static float beamTickFrequency = 30f; // 30 orig
         public static int waveCount = 3;
-        public static GameObject beamImpactEffectPrefab = Main.mazeImpactEffect;
         public static GameObject portalEffectPrefab = Main.mazePortalEffect;
         public static GameObject chargeEffectPrefab = Main.mazeChargeUpPrefab;
         public static GameObject muzzleEffectPrefab = Main.mazeMuzzleEffect;
@@ -42,17 +41,6 @@ namespace FathomlessVoidling.EntityStates.Utility
         private GameObject eyeEffectInstance;
         private Transform targetedAnchor;
         private Quaternion originalAnchorRotation;
-        private List<List<int>> positionMatrix = new List<List<int>>()
-        {
-            // Top Left, Top Right
-            new List<int>() { 1, 1 },
-            // Bottom Left, Bottom Right
-            new List<int>() { 1, 1 },
-            // Bottom Up Left, Top Down Left
-            new List<int>() { 1, 1 },
-            // Bottom Up Right, Top Down Right
-            new List<int>() { 1, 1 },
-        };
         private List<List<int>> selectedAnchors = new List<List<int>>();
         private System.Random rng;
         private Xoroshiro128Plus rngRng;
@@ -213,8 +201,7 @@ namespace FathomlessVoidling.EntityStates.Utility
             for (int i = 0; i < beamCount; i++)
             {
                 int rowIndex = availableRows[i];
-                List<int> row = positionMatrix[rowIndex];
-                int posIndex = this.rng.Next(row.Count);
+                int posIndex = this.rng.Next(2); // 2 anchors per row
                 int selectedIndex = rowIndex * 2 + posIndex;
                 selected.Add(selectedIndex);
             }

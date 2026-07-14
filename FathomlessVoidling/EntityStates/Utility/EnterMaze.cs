@@ -23,7 +23,7 @@ namespace FathomlessVoidling.EntityStates.Utility
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            if ((double)this.fixedAge < this.duration || !this.isAuthority)
+            if (this.fixedAge < this.duration || !this.isAuthority)
                 return;
             this.outer.SetNextState(new MazeAttack());
         }

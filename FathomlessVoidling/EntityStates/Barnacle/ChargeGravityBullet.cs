@@ -55,7 +55,7 @@ namespace FathomlessVoidling.EntityStates.Barnacle
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            if ((double)this.fixedAge < (double)this._totalDuration || !this.isAuthority)
+            if (this.fixedAge < this._totalDuration || !this.isAuthority)
                 return;
             this.outer.SetNextState(new FireGravityBullet());
         }

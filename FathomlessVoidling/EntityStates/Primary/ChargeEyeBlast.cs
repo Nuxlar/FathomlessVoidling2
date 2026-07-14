@@ -45,7 +45,7 @@ namespace FathomlessVoidling.EntityStates.Primary
         public override void FixedUpdate()
         {
             base.FixedUpdate();
-            if (!this.isAuthority || (double)this.fixedAge < this.duration)
+            if (!this.isAuthority || this.fixedAge < this.duration)
                 return;
             this.outer.SetNextState(new FireEyeBlast());
         }

@@ -69,7 +69,7 @@ namespace FathomlessVoidling.EntityStates.Special
                 this.PlayAnimation(this.animLayerName, this.animExitStateName, this.animPlaybackRateParamName, this.windDuration);
                 this.hasPlayedExit = true;
             }
-            if (!this.isAuthority || (double)this.fixedAge < (double)this.duration + this.windDuration)
+            if (!this.isAuthority || this.fixedAge < this.duration + this.windDuration)
                 return;
             this.outer.SetNextStateToMain();
         }

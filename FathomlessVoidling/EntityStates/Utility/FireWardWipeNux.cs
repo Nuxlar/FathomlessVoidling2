@@ -25,6 +25,9 @@ namespace FathomlessVoidling.EntityStates.Utility
         public float teleportDelay = 0.55f;
         private float teleportStopwatch = 0f;
         private bool teleportFired = false;
+        private float teleportRetryStopwatch = 0f;
+        private int lastDonutIndex = -1;
+        private readonly List<(CharacterBody body, Vector3 pos)> pendingTeleports = new();
 
         public override void OnEnter()
         {
@@ -57,6 +60,28 @@ namespace FathomlessVoidling.EntityStates.Utility
                 this.teleportFired = true;
                 this.NextDonut();
             }
+            
+            if (this.pendingTeleports.Count > 0 && NetworkServer.active)
+            {
+                this.teleportRetryStopwatch += Time.fixedDeltaTime;
+                if (this.teleportRetryStopwatch >= 1f)
+                {
+                    this.teleportRetryStopwatch = 0f;
+                    this.pendingTeleports.RemoveAll(p => !p.body || !p.body.healthComponent.alive || (p.body.footPosition - p.pos).sqrMagnitude < 10000f);
+                    foreach ((CharacterBody body, Vector3 pos) in this.pendingTeleports)
+                    {
+                        if (VoidRaidGauntletController.instance && this.lastDonutIndex >= 0)
+                            VoidRaidGauntletController.instance.CallRpcActivateDonut(this.lastDonutIndex);
+                        body.CallRpcTeleportWithLocalAuthority(new TeleportHelper.TeleportBodyArgs
+                        {
+                            body = body,
+                            targetPosition = pos,
+                            teleportMinions = true,
+                            resetStateMachines = true
+                        });
+                    }
+                }
+            }
             if (!this.isAuthority || this.fixedAge < this.duration)
                 return;
             this.outer.SetNextStateToMain();
@@ -85,6 +110,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                 VoidRaidGauntletController.instance.previousDonut.combatDirector.enabled = false;
             }
             int donutIndex = VoidRaidGauntletController.instance.gauntletIndex % VoidRaidGauntletController.instance.followingDonuts.Length;
+            this.lastDonutIndex = donutIndex;
             VoidRaidGauntletController.instance.currentDonut = VoidRaidGauntletController.instance.followingDonuts[donutIndex];
             VoidRaidGauntletController.instance.currentGauntlet = VoidRaidGauntletController.instance.gauntlets[VoidRaidGauntletController.instance.gauntletIndex % VoidRaidGauntletController.instance.gauntlets.Length];
             ++VoidRaidGauntletController.instance.gauntletIndex;
@@ -113,37 +139,25 @@ namespace FathomlessVoidling.EntityStates.Utility
             }
 
             List<CharacterBody> playerBodies = Main.GetPlayerBodies();
-            Debug.Log($"WARD WIPE MP TEST NetworkServer.active={NetworkServer.active}, playerBodies.Count={playerBodies.Count}, returnPoint={VoidRaidGauntletController.instance.currentDonut.returnPoint?.position}");
-            if (playerBodies.Count > 0)
+            foreach (CharacterBody playerBody in playerBodies)
             {
-                foreach (CharacterBody playerBody in playerBodies)
+                Vector3? teleportPos = TeleportHelper.FindSafeTeleportDestination(VoidRaidGauntletController.instance.currentDonut.returnPoint.position, playerBody, Run.instance.runRNG);
+                if (!teleportPos.HasValue)
+                    continue;
+
+                TeleportHelper.TeleportBodyArgs teleportArgs = new()
                 {
-                    Debug.Log($"WARD WIPE MP TEST playerBody='{playerBody.name}' netId={playerBody.netId} alive={playerBody.healthComponent?.alive}");
-                    Vector3? teleportPos = TeleportHelper.FindSafeTeleportDestination(VoidRaidGauntletController.instance.currentDonut.returnPoint.position, playerBody, Run.instance.runRNG);
-                    if (!teleportPos.HasValue)
-                    {
-                        Debug.LogWarning($"WARD WIPE MP TEST FindSafeTeleportDestination returned null for '{playerBody.name}' skipping teleport");
-                        continue;
-                    }
+                    body = playerBody,
+                    targetPosition = teleportPos.Value,
+                    teleportMinions = true,
+                    resetStateMachines = true
+                };
+                playerBody.CallRpcTeleportWithLocalAuthority(teleportArgs);
+                this.pendingTeleports.Add((playerBody, teleportPos.Value));
 
-                    TeleportHelper.TeleportBodyArgs teleportArgs = new()
-                    {
-                        body = playerBody,
-                        targetPosition = teleportPos.Value,
-                        teleportMinions = true,
-                        resetStateMachines = true
-                    };
-                    Debug.Log($"WARD WIPE MP TEST Sending CallRpcTeleportWithLocalAuthority to '{playerBody.name}' targetPos={teleportPos.Value}");
-                    playerBody.CallRpcTeleportWithLocalAuthority(teleportArgs);
-
-                    GameObject effectPrefab = Main.raidTeleportEffect;
-                    if (effectPrefab)
-                        EffectManager.SimpleEffect(effectPrefab, teleportPos.Value, Quaternion.identity, true);
-                }
-            }
-            else
-            {
-                Debug.LogWarning("FathomlessVoidling :NextDonut: GetPlayerBodies() returned empty list");
+                GameObject effectPrefab = Main.raidTeleportEffect;
+                if (effectPrefab)
+                    EffectManager.SimpleEffect(effectPrefab, teleportPos.Value, Quaternion.identity, true);
             }
             KillBarnacles();
         }
