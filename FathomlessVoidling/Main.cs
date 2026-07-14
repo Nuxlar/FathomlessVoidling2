@@ -48,7 +48,7 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "1.1.2";
+    public const string PluginVersion = "1.1.3";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }

@@ -68,64 +68,42 @@ namespace FathomlessVoidling.Hooks
         {
             orig(self);
             // Remove BB Donut
-            int abyssalDonutIdx = -1;
-            int blackbeachIdx = -1;
             List<VoidRaidGauntletController.DonutInfo> donutList = self.followingDonuts.ToList();
-            for (int i = 0; i < donutList.Count; i++)
-            {
-                VoidRaidGauntletController.DonutInfo followingDonut = donutList[i];
-                if (followingDonut.root.name == "RaidBB")
-                    blackbeachIdx = i;
-                if (followingDonut.root.name == "RaidDC")
-                    abyssalDonutIdx = i;
-            }
-
-            if (blackbeachIdx != -1)
-                donutList.RemoveAt(blackbeachIdx);
-
+            donutList.RemoveAll(d => d.root && d.root.name == "RaidBB");
             self.followingDonuts = donutList.ToArray();
 
             // Abyssal Styling
-            if (abyssalDonutIdx != -1)
+            VoidRaidGauntletController.DonutInfo abyssalDonut = donutList.FirstOrDefault(d => d.root && d.root.name == "RaidDC");
+            if (abyssalDonut != null)
             {
-                if (self.followingDonuts[abyssalDonutIdx].root)
+                MeshRenderer[] meshList = abyssalDonut.root.GetComponentsInChildren<MeshRenderer>();
+                foreach (MeshRenderer renderer in meshList)
                 {
-                    MeshRenderer[] meshList = self.followingDonuts[abyssalDonutIdx].root.GetComponentsInChildren<MeshRenderer>();
-                    foreach (MeshRenderer renderer in meshList)
+                    GameObject meshBase = renderer.gameObject;
+                    Transform meshParent = meshBase.transform.parent;
+                    if (!renderer.sharedMaterial)
+                        continue;
+                    if (meshParent != null)
                     {
-                        GameObject meshBase = renderer.gameObject;
-                        Transform meshParent = meshBase.transform.parent;
-                        if (meshBase != null)
-                        {
-                            if (meshParent != null)
-                            {
-                                if (meshBase.name.Contains("Mesh") && meshParent.name.Contains("Ruin") && renderer.sharedMaterial)
-                                    renderer.sharedMaterial = Main.abyssalRuinMat;
-                                if (meshBase.name.Contains("RuinBowl") && meshParent.name.Contains("RuinMarker") && renderer.sharedMaterial)
-                                    renderer.sharedMaterial = Main.abyssalRuinMat;
-                            }
-                            /*
-                            if (meshBase.name.Contains("Grass") && renderer.sharedMaterial)
-                            {
-                                GameObject.Destroy(meshBase);
-                            }
-                            */
-                            if ((meshBase.name.Contains("TerrainHG") || meshBase.name.Contains("GiantStoneSlab")) && renderer.sharedMaterial)
-                                renderer.sharedMaterial = Main.abyssalTerrainMat;
-                            if (meshBase.name.Contains("HeroPillar") && renderer.sharedMaterial)
-                                renderer.sharedMaterial = Main.abyssalPillarMat;
-                            if (meshBase.name.Contains("Bridge") && renderer.sharedMaterial)
-                                renderer.sharedMaterial = Main.abyssalBridgeMat;
-                            if (meshBase.name.Contains("Column") && renderer.sharedMaterial)
-                                renderer.sharedMaterial = Main.abyssalColumnMat;
-                            if ((meshBase.name.Contains("Boulder") || meshBase.name.Contains("mdlGeyser") || meshBase.name.Contains("Pebble") || (meshBase.name.Contains("GiantRock") && !meshBase.name.Contains("Slab"))) && renderer.sharedMaterial)
-                                renderer.sharedMaterial = Main.abyssalBoulderMat;
-                            if (meshBase.name.Contains("Stalagmite") && renderer.sharedMaterial)
-                                renderer.sharedMaterial = Main.abyssalStalagmiteMat;
-                            if ((meshBase.name.Contains("Ruin") || meshBase.name.Contains("Chain")) && renderer.sharedMaterial)
-                                renderer.sharedMaterial = Main.abyssalRuinMat;
-                        }
+                        if (meshBase.name.Contains("Mesh") && meshParent.name.Contains("Ruin"))
+                            renderer.sharedMaterial = Main.abyssalRuinMat;
+                        if (meshBase.name.Contains("RuinBowl") && meshParent.name.Contains("RuinMarker"))
+                            renderer.sharedMaterial = Main.abyssalRuinMat;
                     }
+                    if (meshBase.name.Contains("TerrainHG") || meshBase.name.Contains("GiantStoneSlab"))
+                        renderer.sharedMaterial = Main.abyssalTerrainMat;
+                    if (meshBase.name.Contains("HeroPillar"))
+                        renderer.sharedMaterial = Main.abyssalPillarMat;
+                    if (meshBase.name.Contains("Bridge"))
+                        renderer.sharedMaterial = Main.abyssalBridgeMat;
+                    if (meshBase.name.Contains("Column"))
+                        renderer.sharedMaterial = Main.abyssalColumnMat;
+                    if (meshBase.name.Contains("Boulder") || meshBase.name.Contains("mdlGeyser") || meshBase.name.Contains("Pebble") || (meshBase.name.Contains("GiantRock") && !meshBase.name.Contains("Slab")))
+                        renderer.sharedMaterial = Main.abyssalBoulderMat;
+                    if (meshBase.name.Contains("Stalagmite"))
+                        renderer.sharedMaterial = Main.abyssalStalagmiteMat;
+                    if (meshBase.name.Contains("Ruin") || meshBase.name.Contains("Chain"))
+                        renderer.sharedMaterial = Main.abyssalRuinMat;
                 }
             }
         }

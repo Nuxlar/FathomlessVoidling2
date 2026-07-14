@@ -1,8 +1,14 @@
+**1.1.3**
+
+- Fixed occasional crash during portal lasers
+- Fixed abyssal donut occasionally not swapping materials
+- Fixed multiplayer issue of client players not teleporting through phase switch
+
 **1.1.2**
 
 - Fixed multiplayer issue of client players not teleporting through phase switch
 - Fixed Luminous Shot bug and any other potential issues that use the body's position within code (the way the joints "move" doesn't include moving the actual body, so now the body matches the position of the lowest joint)
-- Fixed (maybe) abyssal donut not having its materials swapped occasionally 
+- Fixed (maybe) abyssal donut not having its materials swapped occasionally
 - Added compat with Artifact of Swarms (only spawns 1 body even with the artifact instead of soft-locking)
 - Reduced max ring spread of Eye Blast (10 -> 6)
 - Increased homing of Eye Blast missiles (10 -> 20)
@@ -18,24 +24,24 @@
 
 - Adds Inferno as a soft dependency internally to prevent compat from potentially not working
 - Bunch of internal code refactors
-- Some multiplayer issues *might* be fixed with the refactors, report multiplayer bugs with logs from client and host in the Github or on Discord please!!!
+- Some multiplayer issues _might_ be fixed with the refactors, report multiplayer bugs with logs from client and host in the Github or on Discord please!!!
 - Fixes multiplayer lag with Maze (removes the little hit VFX from the maze laser)
 - Fixes lack of space between "Abyss" and the cloud in the boss subtitle
 - Fixes Ward Wipe occasionally not firing and softlocking players
 - Tweaks barnacle director so more should spawn (no elite barnacles)
 - Eye Blast
-    - Completely reworked
-    - Now an oscillating ring of projectiles
-    - Spread increases with every shot
-    - Projectiles move slower
-    - Slight tracking
-    - You can now fight fathomless without needing an absurd amount of speed
+  - Completely reworked
+  - Now an oscillating ring of projectiles
+  - Spread increases with every shot
+  - Projectiles move slower
+  - Slight tracking
+  - You can now fight fathomless without needing an absurd amount of speed
 - Portal Beams
-    - No longer has "ghost" hits where the indicator doesn't match explosion
-    - Changed positioning to be more in-view of players (a wall in front of Voidling)
-    - Can hit mid-air now
-    - Can go through terrain/objects
-    - Reduced laser spawn frequency since they're more likely to hit now
+  - No longer has "ghost" hits where the indicator doesn't match explosion
+  - Changed positioning to be more in-view of players (a wall in front of Voidling)
+  - Can hit mid-air now
+  - Can go through terrain/objects
+  - Reduced laser spawn frequency since they're more likely to hit now
 
 **1.0.6**
 
@@ -102,7 +108,7 @@
 - Removes Eye Blast phase changes (waves and projectile count remain constant)
 - Removes Portal Beam phase changes (frequency is now constant)
 - Removes lunar coin cost for petting the frog
-- Removes Voidling Haunt's gravity bomb spawn increase after P2 
+- Removes Voidling Haunt's gravity bomb spawn increase after P2
 - Removes Portal Beam fire frequency increase in P3
 
 **0.9.15**
@@ -119,14 +125,14 @@
 - Wandering Singularity now lasts longer (20s -> 30s)
 - Portal Beams now properly show the indicator of where the attack will land (vanilla bug apparently)
 - Reworks joint mechanic
-    - You will now need to damage each joint down to its threshold to advance the phase
-    - Joints now have 2 thresholds, 75% HP and 50% HP
-    - Barnacles no longer spawn on the joints on thresholds
-    - After phase advance, joints are no longer immune and no longer heal
-    - Joints now cleanse debuffs when they lose 10% HP (like mithrix's dash)
+  - You will now need to damage each joint down to its threshold to advance the phase
+  - Joints now have 2 thresholds, 75% HP and 50% HP
+  - Barnacles no longer spawn on the joints on thresholds
+  - After phase advance, joints are no longer immune and no longer heal
+  - Joints now cleanse debuffs when they lose 10% HP (like mithrix's dash)
 - Tweaks Eye Blast mortars
-    - Mortar count and fire delay no longer change between phases
-    - Wave count (amount of times it fires a barrage) has been reduced to 3 in P1 then increases to 5 in P2/P3
+  - Mortar count and fire delay no longer change between phases
+  - Wave count (amount of times it fires a barrage) has been reduced to 3 in P1 then increases to 5 in P2/P3
 
 **0.9.13**
 
