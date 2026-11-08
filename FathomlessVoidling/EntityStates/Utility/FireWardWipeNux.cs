@@ -2,6 +2,7 @@ using EntityStates;
 using EntityStates.VoidRaidCrab;
 using FathomlessVoidling.Controllers;
 using RoR2;
+using RoR2.Navigation;
 using RoR2.Skills;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,7 +61,7 @@ namespace FathomlessVoidling.EntityStates.Utility
                 this.teleportFired = true;
                 this.NextDonut();
             }
-            
+
             if (this.pendingTeleports.Count > 0 && NetworkServer.active)
             {
                 this.teleportRetryStopwatch += Time.fixedDeltaTime;
@@ -68,10 +69,10 @@ namespace FathomlessVoidling.EntityStates.Utility
                 {
                     this.teleportRetryStopwatch = 0f;
                     this.pendingTeleports.RemoveAll(p => !p.body || !p.body.healthComponent.alive || (p.body.footPosition - p.pos).sqrMagnitude < 10000f);
+                    if (this.pendingTeleports.Count > 0 && VoidRaidGauntletController.instance && this.lastDonutIndex >= 0)
+                        VoidRaidGauntletController.instance.CallRpcActivateDonut(this.lastDonutIndex);
                     foreach ((CharacterBody body, Vector3 pos) in this.pendingTeleports)
                     {
-                        if (VoidRaidGauntletController.instance && this.lastDonutIndex >= 0)
-                            VoidRaidGauntletController.instance.CallRpcActivateDonut(this.lastDonutIndex);
                         body.CallRpcTeleportWithLocalAuthority(new TeleportHelper.TeleportBodyArgs
                         {
                             body = body,
@@ -139,25 +140,30 @@ namespace FathomlessVoidling.EntityStates.Utility
             }
 
             List<CharacterBody> playerBodies = Main.GetPlayerBodies();
-            foreach (CharacterBody playerBody in playerBodies)
+            Transform returnPoint = VoidRaidGauntletController.instance.currentDonut.returnPoint;
+            NodeGraph groundNodes = SceneInfo.instance.groundNodes;
+            List<NodeGraph.NodeIndex> nodes = groundNodes.FindNodesInRangeWithFlagConditions(returnPoint.position, 0f, 25f, HullMask.Human, NodeFlags.None, NodeFlags.NoCharacterSpawn, true);
+            for (int i = 0; i < playerBodies.Count; i++)
             {
-                Vector3? teleportPos = TeleportHelper.FindSafeTeleportDestination(VoidRaidGauntletController.instance.currentDonut.returnPoint.position, playerBody, Run.instance.runRNG);
-                if (!teleportPos.HasValue)
-                    continue;
-
+                CharacterBody playerBody = playerBodies[i];
+                if (nodes.Count == 0 || !groundNodes.GetNodePosition(nodes[i * nodes.Count / playerBodies.Count], out Vector3 pos))
+                    pos = returnPoint.position;
                 TeleportHelper.TeleportBodyArgs teleportArgs = new()
                 {
                     body = playerBody,
-                    targetPosition = teleportPos.Value,
+                    targetPosition = pos,
+                    targetRotation = returnPoint.rotation,
+                    forceOutOfVehicle = true,
                     teleportMinions = true,
                     resetStateMachines = true
                 };
-                playerBody.CallRpcTeleportWithLocalAuthority(teleportArgs);
-                this.pendingTeleports.Add((playerBody, teleportPos.Value));
-
-                GameObject effectPrefab = Main.raidTeleportEffect;
-                if (effectPrefab)
-                    EffectManager.SimpleEffect(effectPrefab, teleportPos.Value, Quaternion.identity, true);
+                if (Util.HasEffectiveAuthority(playerBody.gameObject))
+                    TeleportHelper.TeleportBody(teleportArgs);
+                else
+                    playerBody.CallRpcTeleportWithLocalAuthority(teleportArgs);
+                this.pendingTeleports.Add((playerBody, pos));
+                if (Main.raidTeleportEffect)
+                    EffectManager.SimpleEffect(Main.raidTeleportEffect, pos, Quaternion.identity, true);
             }
             KillBarnacles();
         }

@@ -48,46 +48,46 @@ namespace FathomlessVoidling
     public const string PluginGUID = PluginAuthor + "." + PluginName;
     public const string PluginAuthor = "Nuxlar";
     public const string PluginName = "FathomlessVoidling";
-    public const string PluginVersion = "1.1.3";
+    public const string PluginVersion = "1.1.4";
 
     internal static Main Instance { get; private set; }
     public static string PluginDirectory { get; private set; }
     public static bool RooInstalled => BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.rune580.riskofoptions");
 
     public static DamageAPI.ModdedDamageType gravityDamageType = DamageAPI.ReserveDamageType();
-    public static Material abyssalTerrainMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matDCTerrainFloorInfiniteTower_mat).WaitForCompletion();
-    public static Material abyssalPillarMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matDCTerrainGiantColumnsInfiniteTower_mat).WaitForCompletion();
-    public static Material abyssalColumnMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matDCTerrainSmallColumnInfiniteTower_mat).WaitForCompletion();
-    public static Material abyssalBoulderMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matDCBoulderInfiniteTower_mat).WaitForCompletion();
-    public static Material abyssalBridgeMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matDCTerrainWallsInfiniteTower_mat).WaitForCompletion();
-    public static Material abyssalRuinMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matTrimSheetLemurianRuinsHeavyInfiniteTower_mat).WaitForCompletion();
-    public static Material abyssalChainMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matTrimSheetLemurianMetalLightInfiniteTower_mat).WaitForCompletion();
-    public static Material abyssalStalagmiteMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_itdampcave.matDCStalagmiteInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalTerrainMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_itdampcave.matDCTerrainFloorInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalPillarMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_itdampcave.matDCTerrainGiantColumnsInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalColumnMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_itdampcave.matDCTerrainSmallColumnInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalBoulderMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_itdampcave.matDCBoulderInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalBridgeMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_itdampcave.matDCTerrainWallsInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalRuinMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_itdampcave.matTrimSheetLemurianRuinsHeavyInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalChainMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_itdampcave.matTrimSheetLemurianMetalLightInfiniteTower_mat).WaitForCompletion();
+    public static Material abyssalStalagmiteMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_itdampcave.matDCStalagmiteInfiniteTower_mat).WaitForCompletion();
     public static GameObject spawnEffect;
-    public static CharacterSpawnCard jointCard = Addressables.LoadAssetAsync<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrabJoint_asset).WaitForCompletion();
-    public static SpawnCard bigVoidlingCard = Addressables.LoadAssetAsync<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrab_asset).WaitForCompletion();
-    public static TimelineAsset introTimeline = Addressables.LoadAssetAsync<TimelineAsset>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabIntroTimeiline_playable).WaitForCompletion();
+    public static CharacterSpawnCard jointCard = Addressables.LoadAssetAsync<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrabJoint_asset).WaitForCompletion();
+    public static SpawnCard bigVoidlingCard = Addressables.LoadAssetAsync<CharacterSpawnCard>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.cscVoidRaidCrab_asset).WaitForCompletion();
+    public static TimelineAsset introTimeline = Addressables.LoadAssetAsync<TimelineAsset>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabIntroTimeiline_playable).WaitForCompletion();
     public static GameObject chargeVoidRain;
-    public static GameObject voidRainTracer = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.TracerVoidRaidCrabTripleBeamSmall_prefab).WaitForCompletion();
-    public static GameObject voidRainExplosion = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabTripleBeamExplosion_prefab).WaitForCompletion();
-    public static GameObject voidRainWarning = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.MultiBeamRayIndicator_prefab).WaitForCompletion();
+    public static GameObject voidRainTracer = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.TracerVoidRaidCrabTripleBeamSmall_prefab).WaitForCompletion();
+    public static GameObject voidRainExplosion = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabTripleBeamExplosion_prefab).WaitForCompletion();
+    public static GameObject voidRainWarning = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.MultiBeamRayIndicator_prefab).WaitForCompletion();
     public static GameObject voidRainPortalEffect;
     public static GameObject eyeMissileProjectile;
     public static GameObject eyeBlastChargeEffect;
     public static GameObject eyeBlastMuzzleFlash;
     public static GameObject raidTeleportEffect;
-    public static LoopSoundDef lsdVoidMegaCrabDeathBomb = Addressables.LoadAssetAsync<LoopSoundDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidMegaCrab.lsdVoidMegaCrabDeathBomb_asset).WaitForCompletion();
-    public static GameObject chargeWardWipeChargeEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabWardWipeChargeup_prefab).WaitForCompletion();
-    public static GameObject fireWardWipeMuzzleFlash = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabWardWipeMuzzleflash_prefab).WaitForCompletion();
-    public static BuffDef bdWardWipeFog = Addressables.LoadAssetAsync<BuffDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.bdVoidRaidCrabWardWipeFog_asset).WaitForCompletion();
-    public static InteractableSpawnCard iscSafeWard = Addressables.LoadAssetAsync<InteractableSpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.iscVoidRaidSafeWard_asset).WaitForCompletion();
+    public static LoopSoundDef lsdVoidMegaCrabDeathBomb = Addressables.LoadAssetAsync<LoopSoundDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidMegaCrab.lsdVoidMegaCrabDeathBomb_asset).WaitForCompletion();
+    public static GameObject chargeWardWipeChargeEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabWardWipeChargeup_prefab).WaitForCompletion();
+    public static GameObject fireWardWipeMuzzleFlash = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabWardWipeMuzzleflash_prefab).WaitForCompletion();
+    public static BuffDef bdWardWipeFog = Addressables.LoadAssetAsync<BuffDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.bdVoidRaidCrabWardWipeFog_asset).WaitForCompletion();
+    public static InteractableSpawnCard iscSafeWard = Addressables.LoadAssetAsync<InteractableSpawnCard>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.iscVoidRaidSafeWard_asset).WaitForCompletion();
     public static SkillDef sdWardWipe;
     public static SkillDef sdSingularity;
     private static SkillDef sdMaze;
     private static SkillDef sdMultiBeam;
 
     // Voidling Haunt Variables
-    public static GameObject barnacleMuzzleFlash = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleMuzzleflash_prefab).WaitForCompletion();
+    public static GameObject barnacleMuzzleFlash = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidBarnacle.VoidBarnacleMuzzleflash_prefab).WaitForCompletion();
     public static GameObject gravityBulletChargeEffect;
     public static GameObject gravityBulletProjectile;
     public static GameObject gravityBombProjectile;
@@ -106,7 +106,7 @@ namespace FathomlessVoidling
     // Wandering Singularity Variables
     public static GameObject wSingularityProjectile;
 
-    public static SpawnCard locusPortalCard = Addressables.LoadAssetAsync<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_PortalVoid.iscVoidPortal_asset).WaitForCompletion();
+    public static SpawnCard locusPortalCard = Addressables.LoadAssetAsync<SpawnCard>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_PortalVoid.iscVoidPortal_asset).WaitForCompletion();
 
     private static CharacterBody jointBody;
     private static CharacterBody bossBody;
@@ -145,7 +145,7 @@ namespace FathomlessVoidling
       Main.jointBody = null;
       Main.bossBody = null;
 
-      GameObject frog = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_moon.FrogInteractable_prefab).WaitForCompletion();
+      GameObject frog = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_moon.FrogInteractable_prefab).WaitForCompletion();
       PurchaseInteraction purchaseInteraction = frog.GetComponent<PurchaseInteraction>();
       purchaseInteraction.costType = CostTypeIndex.None;
       purchaseInteraction.cost = 0;
@@ -190,14 +190,16 @@ namespace FathomlessVoidling
 
     private static void CreateNewEyeMissiles()
     {
-      GameObject missileImpact = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabImpact1_prefab).WaitForCompletion();
-      GameObject missileProjectileGhost = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMissileGhost_prefab).WaitForCompletion();
-      GameObject missileProjectile = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMissileProjectile_prefab).WaitForCompletion();
+      GameObject missileImpact = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabImpact1_prefab).WaitForCompletion();
+      GameObject missileProjectileGhost = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMissileGhost_prefab).WaitForCompletion();
+      GameObject missileProjectile = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMissileProjectile_prefab).WaitForCompletion();
       missileProjectile = PrefabAPI.InstantiateClone(missileProjectile, "FathomlessEyeProjectile", true);
       missileProjectileGhost = PrefabAPI.InstantiateClone(missileProjectileGhost, "FathomlessEyeProjectileGhost", false);
       missileImpact = PrefabAPI.InstantiateClone(missileImpact, "FathomlessEyeProjectileImpact", false);
 
-      missileProjectile.GetComponent<ProjectileController>().ghostPrefab = missileProjectileGhost;
+      ProjectileController pc = missileProjectile.GetComponent<ProjectileController>();
+      pc.ghostPrefab = missileProjectileGhost;
+      pc.ghostPrefabAddress = null;
 
       missileProjectile.AddComponent<RadialOutwardOscillation>();
       ProjectileSimple ps = missileProjectile.GetComponent<ProjectileSimple>();
@@ -256,7 +258,7 @@ namespace FathomlessVoidling
 
     private static void TweakBigVoidlingMaster()
     {
-      GameObject masterPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMaster_prefab).WaitForCompletion();
+      GameObject masterPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMaster_prefab).WaitForCompletion();
 
       GameObject.Destroy(masterPrefab.GetComponent<VoidRaidCrabAISkillDriverController>());
 
@@ -331,27 +333,27 @@ namespace FathomlessVoidling
 
     private static void CreateGravityProjectiles()
     {
-      groundedGravityEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabGravityBumpExplosionGround_prefab).WaitForCompletion();
+      groundedGravityEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabGravityBumpExplosionGround_prefab).WaitForCompletion();
       groundedGravityEffect.GetComponent<EffectComponent>().soundName = "Play_voidDevastator_death";
-      airborneGravityEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabGravityBumpExplosionAir_prefab).WaitForCompletion();
+      airborneGravityEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabGravityBumpExplosionAir_prefab).WaitForCompletion();
       airborneGravityEffect.GetComponent<EffectComponent>().soundName = "Play_voidDevastator_death";
 
-      Material matGravitySphere = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabGravityBumpSphere_mat).WaitForCompletion();
-      Material matGravitySphere2 = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabGravityBumpGem_mat).WaitForCompletion();
-      Material matGravityStar = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabParticleBlue_mat).WaitForCompletion();
-      Material matGravityIndicator = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabGravityBumpWarning_mat).WaitForCompletion();
+      Material matGravitySphere = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabGravityBumpSphere_mat).WaitForCompletion();
+      Material matGravitySphere2 = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabGravityBumpGem_mat).WaitForCompletion();
+      Material matGravityStar = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabParticleBlue_mat).WaitForCompletion();
+      Material matGravityIndicator = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabGravityBumpWarning_mat).WaitForCompletion();
 
-      GameObject preBombGhost = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierPreBombGhost_prefab).WaitForCompletion();
-      GameObject explosionEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierExplosion_prefab).WaitForCompletion();
-      GameObject bombProjectile = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierBombProjectile_prefab).WaitForCompletion();
+      GameObject preBombGhost = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Nullifier.NullifierPreBombGhost_prefab).WaitForCompletion();
+      GameObject explosionEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Nullifier.NullifierExplosion_prefab).WaitForCompletion();
+      GameObject bombProjectile = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Nullifier.NullifierBombProjectile_prefab).WaitForCompletion();
 
       Material[] gravSphereMatArray = new Material[] { matGravitySphere, matGravitySphere2 };
       // Gravity Bullets  // Ghost Charge Explosion
-      GameObject explosionEffect2 = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleImpactExplosion_prefab).WaitForCompletion();
-      GameObject chargeEffect2 = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleCharge_prefab).WaitForCompletion();
-      GameObject bulletPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleBullet_prefab).WaitForCompletion();
+      GameObject explosionEffect2 = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidBarnacle.VoidBarnacleImpactExplosion_prefab).WaitForCompletion();
+      GameObject chargeEffect2 = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidBarnacle.VoidBarnacleCharge_prefab).WaitForCompletion();
+      GameObject bulletPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidBarnacle.VoidBarnacleBullet_prefab).WaitForCompletion();
 
-      GameObject ghostPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.VoidBarnacleBulletGhost_prefab).WaitForCompletion();
+      GameObject ghostPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidBarnacle.VoidBarnacleBulletGhost_prefab).WaitForCompletion();
       GameObject newGhost = PrefabAPI.InstantiateClone(ghostPrefab, "GravityBulletGhostNux", false);
       newGhost.transform.GetChild(3).GetComponent<MeshRenderer>().sharedMaterials = gravSphereMatArray;
       newGhost.transform.Find("Point Light").GetComponent<Light>().color = new Color(18f / 255f, 18f / 255f, 1f, 1f); // 255 18 18 255
@@ -368,21 +370,24 @@ namespace FathomlessVoidling
       newExplosion.transform.Find("ExplosionSphere, Stars (1)").GetComponent<ParticleSystemRenderer>().sharedMaterial = matGravitySphere;
 
       gravityBulletProjectile = PrefabAPI.InstantiateClone(bulletPrefab, "GravityBulletNux", true);
-      gravityBulletProjectile.GetComponent<ProjectileController>().ghostPrefab = newGhost;
+      ProjectileController pc1 = gravityBulletProjectile.GetComponent<ProjectileController>();
+      pc1.ghostPrefab = newGhost;
+      pc1.ghostPrefabAddress = null;
       gravityBulletProjectile.GetComponent<ProjectileImpactExplosion>().impactEffect = newExplosion;
 
       ContentAddition.AddEffect(newExplosion);
       ContentAddition.AddProjectile(gravityBulletProjectile);
 
       // Gravity Bombs
-      GameObject preBombPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierPreBombProjectile_prefab).WaitForCompletion();
+      GameObject preBombPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Nullifier.NullifierPreBombProjectile_prefab).WaitForCompletion();
       GameObject newPrebombProjectile = PrefabAPI.InstantiateClone(preBombPrefab, "GravityPreBombProjectileNux", true);
       GameObject newPrebombGhost = PrefabAPI.InstantiateClone(preBombGhost, "GravityPreBombGhostNux", false);
       GameObject newExplosionEffect = PrefabAPI.InstantiateClone(explosionEffect, "GravityBombExplosionEffectNux", false);
 
-      ProjectileController controller = newPrebombProjectile.GetComponent<ProjectileController>();
-      controller.ghostPrefab = newPrebombGhost;
-      controller.cannotBeDeleted = true;
+      ProjectileController pc2 = newPrebombProjectile.GetComponent<ProjectileController>();
+      pc2.ghostPrefab = newPrebombGhost;
+      pc2.ghostPrefabAddress = null;
+      pc2.cannotBeDeleted = true;
 
       ProjectileImpactExplosion pie = newPrebombProjectile.GetComponent<ProjectileImpactExplosion>();
       pie.blastRadius = 10f;
@@ -427,15 +432,15 @@ namespace FathomlessVoidling
 
     private static void CreateVoidlingHaunt()
     {
-      SpawnCard barnacleSpawnCard = Addressables.LoadAssetAsync<SpawnCard>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidBarnacle.cscVoidBarnacle_asset).WaitForCompletion();
+      SpawnCard barnacleSpawnCard = Addressables.LoadAssetAsync<SpawnCard>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidBarnacle.cscVoidBarnacle_asset).WaitForCompletion();
       DirectorCard barnacleDirectorCard = new DirectorCard
       {
         selectionWeight = 1,
         spawnCard = barnacleSpawnCard,
       };
 
-      GameObject hauntMaster = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_BrotherHaunt.BrotherHauntMaster_prefab).WaitForCompletion();
-      GameObject hauntBodyPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_BrotherHaunt.BrotherHauntBody_prefab).WaitForCompletion();
+      GameObject hauntMaster = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_BrotherHaunt.BrotherHauntMaster_prefab).WaitForCompletion();
+      GameObject hauntBodyPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_BrotherHaunt.BrotherHauntBody_prefab).WaitForCompletion();
       GameObject voidlingHaunt = PrefabAPI.InstantiateClone(hauntBodyPrefab, "VoidlingHauntNux", true);
       GameObject voidlingHauntMaster = PrefabAPI.InstantiateClone(hauntMaster, "VoidlingHauntNuxMaster", true);
 
@@ -526,7 +531,7 @@ namespace FathomlessVoidling
 
     private static void TweakBigVoidling()
     {
-      GameObject body = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabBody_prefab).WaitForCompletion();
+      GameObject body = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabBody_prefab).WaitForCompletion();
       body.AddComponent<FathomlessSkillDriverController>();
       ModelLocator modelLocator = body.GetComponent<ModelLocator>();
 
@@ -590,10 +595,12 @@ namespace FathomlessVoidling
 
     private static void LoadAssets()
     {
-      SceneDef voidRaid = Addressables.LoadAssetAsync<SceneDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_voidraid.voidraid_asset).WaitForCompletion();
+      GameObject voidCrabStep = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabStep_prefab).WaitForCompletion();
+      voidCrabStep.GetComponent<EffectComponent>().soundName = "Play_voidRaid_step";
+      SceneDef voidRaid = Addressables.LoadAssetAsync<SceneDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_voidraid.voidraid_asset).WaitForCompletion();
       voidRaid.blockOrbitalSkills = false;
 
-      raidTeleportEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_gauntlets.VoidRaidCrabGauntletTeleportEffect_prefab).WaitForCompletion();
+      raidTeleportEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_gauntlets.VoidRaidCrabGauntletTeleportEffect_prefab).WaitForCompletion();
       raidTeleportEffect.GetComponent<EffectComponent>().soundName = "Play_voidRaid_fog_explode";
       ParticleSystem.MinMaxGradient omniSparksColor = raidTeleportEffect.transform.Find("OmniSparks").GetComponent<ParticleSystem>().main.startColor;
       ParticleSystem.MainModule sphereBrief = raidTeleportEffect.transform.Find("Sphere, Brief").GetComponent<ParticleSystem>().main;
@@ -601,22 +608,22 @@ namespace FathomlessVoidling
       sphereBrief.startColor = omniSparksColor;
       sphereLong.startColor = omniSparksColor;
 
-      GameObject safeWard = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidSafeWard_prefab).WaitForCompletion();
+      GameObject safeWard = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidSafeWard_prefab).WaitForCompletion();
       //  Transform indicatorTransform = safeWard.transform.Find("Indicator").GetChild(0);
       // indicatorTransform.localScale = new Vector3(8f, 120f, 8f); // 2 120 2
       safeWard.GetComponent<VerticalTubeZone>().radius = 16f; // 4
 
-      Material spinBeamSphereMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabSpinBeamSphere1_mat).WaitForCompletion();
-      Material voidRainPortalMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_PortalVoid.matPortalVoidCenter_mat).WaitForCompletion();
+      // Material spinBeamSphereMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.matVoidRaidCrabSpinBeamSphere1_mat).WaitForCompletion();
+      Material voidRainPortalMat = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_PortalVoid.matPortalVoidCenter_mat).WaitForCompletion();
 
-      mazeChargeUpPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamChargeUp_prefab).WaitForCompletion(), "MazeChargeUpEffectNux", false);
+      mazeChargeUpPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamChargeUp_prefab).WaitForCompletion(), "MazeChargeUpEffectNux", false);
       foreach (ParticleSystem item in mazeChargeUpPrefab.transform.GetComponentsInChildren<ParticleSystem>())
       {
         ParticleSystem.MainModule main = item.main;
         main.startSizeMultiplier *= 1.5f;
       }
 
-      mazeImpactEffect = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.LaserImpactEffect_prefab).WaitForCompletion(), "MazeImpactEffectNux", false);
+      mazeImpactEffect = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.LaserImpactEffect_prefab).WaitForCompletion(), "MazeImpactEffectNux", false);
       foreach (ParticleSystem item in mazeImpactEffect.transform.GetComponentsInChildren<ParticleSystem>())
       {
         ParticleSystem.MainModule main = item.main;
@@ -624,17 +631,18 @@ namespace FathomlessVoidling
       }
       ContentAddition.AddEffect(mazeImpactEffect);
 
-      PostProcessProfile ppProfile = Addressables.LoadAssetAsync<PostProcessProfile>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_title_PostProcessing.ppLocalNullifier_asset).WaitForCompletion();
+      PostProcessProfile ppProfile = Addressables.LoadAssetAsync<PostProcessProfile>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_title_PostProcessing.ppLocalNullifier_asset).WaitForCompletion();
 
-      PostProcessProfile ppVoidRaidProfile = Addressables.LoadAssetAsync<PostProcessProfile>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_voidraid.ppSceneVoidRaidStageStarry_asset).WaitForCompletion();
+      PostProcessProfile ppVoidRaidProfile = Addressables.LoadAssetAsync<PostProcessProfile>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_voidraid.ppSceneVoidRaidStageStarry_asset).WaitForCompletion();
       ppVoidRaidProfile.GetSetting<RampFog>().fogColorStart.value = new Color(0.2687f, 0.2429f, 0.2429f, 0.075f);
 
-      mazeLaserPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamVFX_prefab).WaitForCompletion(), "MazeLaserVFXNux");
+      mazeLaserPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamVFX_prefab).WaitForCompletion(), "MazeLaserVFXNux");
       mazeLaserPrefab.AddComponent<NetworkIdentity>();
       Transform meshTransform = mazeLaserPrefab.transform.Find("Mesh, Additive");
-      meshTransform.localScale *= 3f;
-      meshTransform.localPosition = new Vector3(0f, 0f, 50.16f); // 16.72 -> 33.44
-      // 0 0 33.5
+      mazeLaserPrefab.transform.localScale *= 3f;
+      meshTransform.localPosition = new Vector3(0f, 0f, 0.774f); // 0.258 orig
+      meshTransform.localScale = new Vector3(1f, 1f, 0.0462f);
+      // 0 0 33.5 0.0154
       Transform ppTransform = mazeLaserPrefab.transform.Find("Point Light, End").GetChild(0);
       ppTransform.gameObject.SetActive(true);
       ppTransform.GetComponent<PostProcessVolume>().sharedProfile = ppProfile; //ppLocalNullifier_asset or ppLocalDoppelganger_asset
@@ -647,7 +655,7 @@ namespace FathomlessVoidling
         }
       }
 
-      mazeWarningPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamVFX_prefab).WaitForCompletion(), "MazeWarningVFXNux");
+      mazeWarningPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamVFX_prefab).WaitForCompletion(), "MazeWarningVFXNux");
       for (int i = mazeWarningPrefab.transform.childCount - 1; i >= 0; i--)
       {
         Transform child = mazeWarningPrefab.transform.GetChild(i);
@@ -661,14 +669,14 @@ namespace FathomlessVoidling
       if (warningTimer)
         warningTimer.duration = 2f;
 
-      Material matWarning = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_voidstage.matVoidBoostPath_mat).WaitForCompletion();
-      Material matWarningInner = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Common.matVoidDeathBombAreaIndicatorFront_mat).WaitForCompletion();
-
+      Material matWarning = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_voidstage.matVoidBoostPath_mat).WaitForCompletion();
+      Material matWarningInner = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Common.matVoidDeathBombAreaIndicatorFront_mat).WaitForCompletion();
+      mazeWarningPrefab.transform.localScale *= 3f;
       Transform warningMeshTransform = mazeWarningPrefab.transform.Find("Mesh, Additive");
       if (warningMeshTransform)
       {
-        warningMeshTransform.localScale *= 3f;
-        warningMeshTransform.localPosition = new Vector3(0f, 0f, 50.16f);
+        warningMeshTransform.localScale = new Vector3(1f, 1f, 0.0462f);
+        warningMeshTransform.localPosition = new Vector3(0f, 0f, 0.7746f); // 0.2582 orig
         MeshRenderer warningMeshRenderer = warningMeshTransform.GetComponent<MeshRenderer>();
         warningMeshTransform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial = matWarningInner;
         ObjectScaleCurve scaleCurve = warningMeshTransform.gameObject.AddComponent<ObjectScaleCurve>();
@@ -684,7 +692,7 @@ namespace FathomlessVoidling
 
       }
 
-      GameObject newMuzzlePrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamChargeUp_prefab).WaitForCompletion(), "MazeMuzzleEffectNux", false);
+      GameObject newMuzzlePrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpinBeamChargeUp_prefab).WaitForCompletion(), "MazeMuzzleEffectNux", false);
       newMuzzlePrefab.transform.eulerAngles = new Vector3(90f, 0f, 0f);
       foreach (ParticleSystem item in newMuzzlePrefab.transform.GetComponentsInChildren<ParticleSystem>())
       {
@@ -694,7 +702,7 @@ namespace FathomlessVoidling
       }
       mazeMuzzleEffect = newMuzzlePrefab;
 
-      GameObject newPortalPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidMegaCrab.VoidMegaCrabSpawnEffect_prefab).WaitForCompletion(), "MazePortalEffectNux", false);
+      GameObject newPortalPrefab = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidMegaCrab.VoidMegaCrabSpawnEffect_prefab).WaitForCompletion(), "MazePortalEffectNux", false);
       newPortalPrefab.GetComponent<DestroyOnTimer>().duration = 5f;
       foreach (ParticleSystem ps in newPortalPrefab.GetComponentsInChildren<ParticleSystem>())
       {
@@ -708,10 +716,10 @@ namespace FathomlessVoidling
       mazePortalEffect = newPortalPrefab;
       ContentAddition.AddEffect(mazePortalEffect);
 
-      eyeBlastMuzzleFlash = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMuzzleflashEyeMissiles_prefab).WaitForCompletion(), "EyeBlastMuzzleFlashNux", false);
+      eyeBlastMuzzleFlash = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMuzzleflashEyeMissiles_prefab).WaitForCompletion(), "EyeBlastMuzzleFlashNux", false);
       ContentAddition.AddEffect(eyeBlastMuzzleFlash);
 
-      eyeBlastChargeEffect = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabChargeEyeMissiles_prefab).WaitForCompletion(), "EyeBlastChargeEffectNux", false);
+      eyeBlastChargeEffect = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabChargeEyeMissiles_prefab).WaitForCompletion(), "EyeBlastChargeEffectNux", false);
       foreach (ParticleSystem item in eyeBlastChargeEffect.transform.GetComponentsInChildren<ParticleSystem>())
       {
         ParticleSystem.MainModule main = item.main;
@@ -720,7 +728,7 @@ namespace FathomlessVoidling
 
       // ContentAddition.AddEffect(eyeBlastChargeEffect);
 
-      voidRainPortalEffect = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_Nullifier.NullifierSpawnEffect_prefab).WaitForCompletion(), "VoidRainPortalEffect", false);
+      voidRainPortalEffect = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_Nullifier.NullifierSpawnEffect_prefab).WaitForCompletion(), "VoidRainPortalEffect", false);
       Transform voidRainRing = voidRainPortalEffect.transform.Find("Ring");
       ParticleSystemRenderer voidRainPsr = voidRainRing.GetChild(0).GetComponent<ParticleSystemRenderer>();
       voidRainPsr.sharedMaterial = voidRainPortalMat;
@@ -747,7 +755,7 @@ namespace FathomlessVoidling
         }
       }
 
-      chargeVoidRain = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabTripleBeamChargeUp_prefab).WaitForCompletion(), "ChargeVoidRainNuxEffect", false);
+      chargeVoidRain = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabTripleBeamChargeUp_prefab).WaitForCompletion(), "ChargeVoidRainNuxEffect", false);
       foreach (ParticleSystem item in chargeVoidRain.transform.GetComponentsInChildren<ParticleSystem>())
       {
         ParticleSystem.MainModule main = item.main;
@@ -757,7 +765,7 @@ namespace FathomlessVoidling
       }
       // ContentAddition.AddEffect(chargeVoidRain);
 
-      spawnEffect = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpawnEffect_prefab).WaitForCompletion(), "FathomlessVoidlingSpawnEffect", false);
+      spawnEffect = PrefabAPI.InstantiateClone(Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSpawnEffect_prefab).WaitForCompletion(), "FathomlessVoidlingSpawnEffect", false);
       spawnEffect.transform.localScale = new Vector3(15, 15, 15);
       spawnEffect.GetComponent<DestroyOnTimer>().duration = 12f; // 6f orig
       foreach (ParticleSystem item in spawnEffect.transform.GetChild(0).GetChild(1).GetComponentsInChildren<ParticleSystem>())
@@ -768,7 +776,7 @@ namespace FathomlessVoidling
       }
       ContentAddition.AddEffect(spawnEffect);
 
-      GameObject jointBodyPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabJointBody_prefab).WaitForCompletion();
+      GameObject jointBodyPrefab = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabJointBody_prefab).WaitForCompletion();
       JointThresholdController thresholdController = jointBodyPrefab.AddComponent<JointThresholdController>();
       jointBodyPrefab.AddComponent<LegControllerNetworkHelper>();
       jointBodyPrefab.AddComponent<JointBodyPositionNormalizer>();
@@ -781,37 +789,37 @@ namespace FathomlessVoidling
 
       jointBodyPrefab.GetComponent<EntityStateMachine>().initialStateType = new SerializableEntityStateType(typeof(JointSpawnState));
 
-      sdWardWipe = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabWardWipe_asset).WaitForCompletion();
+      sdWardWipe = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.RaidCrabWardWipe_asset).WaitForCompletion();
       sdWardWipe.activationState = new SerializableEntityStateType(typeof(ChargeWardWipeNux));
       sdWardWipe.interruptPriority = InterruptPriority.Death;
 
-      sdSingularity = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabVacuumAttack_asset).WaitForCompletion();
+      sdSingularity = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.RaidCrabVacuumAttack_asset).WaitForCompletion();
       sdSingularity.activationState = new SerializableEntityStateType(typeof(WanderingSingularity));
       sdSingularity.interruptPriority = InterruptPriority.PrioritySkill;
       if (ModConfig.singularityCooldown.Value > 0f)
         sdSingularity.baseRechargeInterval = ModConfig.singularityCooldown.Value;
 
-      sdMaze = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabSpinBeam_asset).WaitForCompletion();
+      sdMaze = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.RaidCrabSpinBeam_asset).WaitForCompletion();
       sdMaze.activationState = new SerializableEntityStateType(typeof(EnterMaze));
       sdMaze.baseRechargeInterval = ModConfig.mazeCooldown.Value;
       sdMaze.interruptPriority = InterruptPriority.PrioritySkill;
 
-      sdMultiBeam = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.RaidCrabMultiBeam_asset).WaitForCompletion();
+      sdMultiBeam = Addressables.LoadAssetAsync<SkillDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.RaidCrabMultiBeam_asset).WaitForCompletion();
       sdMultiBeam.activationState = new SerializableEntityStateType(typeof(ChargeVoidRain));
       sdMultiBeam.baseRechargeInterval = ModConfig.multiBeamCooldown.Value;
     }
 
     private static void CreateSingularityProjectile()
     {
-      GameObject sphereEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.KillSphereVfxPlaceholder_prefab).WaitForCompletion();
+      GameObject sphereEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.KillSphereVfxPlaceholder_prefab).WaitForCompletion();
       sphereEffect = PrefabAPI.InstantiateClone(sphereEffect, "WSingularitySphere", false);
-      GameObject centerEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSuckLoopFX_prefab).WaitForCompletion();
+      GameObject centerEffect = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabSuckLoopFX_prefab).WaitForCompletion();
       centerEffect = PrefabAPI.InstantiateClone(centerEffect, "WSingularityCenter", false);
-      GameObject projectile = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMissileProjectile_prefab).WaitForCompletion();
+      GameObject projectile = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.VoidRaidCrabMissileProjectile_prefab).WaitForCompletion();
       projectile = PrefabAPI.InstantiateClone(projectile, "WSingularityProjectile", true);
-      GameObject ghost = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_Base_LunarWisp.LunarWispTrackingBombGhost_prefab).WaitForCompletion();
+      GameObject ghost = Addressables.LoadAssetAsync<GameObject>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_Base_LunarWisp.LunarWispTrackingBombGhost_prefab).WaitForCompletion();
       ghost = PrefabAPI.InstantiateClone(ghost, "WSingularityGhost", false);
-      LoopSoundDef singularityLSD = Addressables.LoadAssetAsync<LoopSoundDef>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_VoidRaidCrab.lsdVoidRaidCrabVacuumAttack_asset).WaitForCompletion();
+      LoopSoundDef singularityLSD = Addressables.LoadAssetAsync<LoopSoundDef>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_VoidRaidCrab.lsdVoidRaidCrabVacuumAttack_asset).WaitForCompletion();
 
       Destroy(sphereEffect.GetComponent<VFXHelper.VFXTransformController>());
       Destroy(centerEffect.GetComponent<VFXHelper.VFXTransformController>());
@@ -846,6 +854,7 @@ namespace FathomlessVoidling
       targetFinder.lookRange = 1000f;
       ProjectileController projectileController = projectile.GetComponent<ProjectileController>();
       projectileController.ghostPrefab = ghost;
+      projectileController.ghostPrefabAddress = null;
       projectileController.cannotBeDeleted = true;
       projectileController.flightSoundLoop = singularityLSD;
       projectileController.myColliders = new Collider[1] { sphereCollider };
@@ -869,7 +878,7 @@ namespace FathomlessVoidling
       gameObject.transform.position = Vector3.zero;
       gameObject.transform.localPosition = new Vector3(-2.5f, 0.0f, 0.0f);
       GameObject primitive = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-      primitive.GetComponent<MeshRenderer>().material = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPaths.Version_1_39_0.RoR2_DLC1_GameModes_InfiniteTowerRun_ITAssets.matITSafeWardAreaIndicator1_mat).WaitForCompletion();
+      primitive.GetComponent<MeshRenderer>().material = Addressables.LoadAssetAsync<Material>(RoR2BepInExPack.GameAssetPathsBetter.RoR2_DLC1_GameModes_InfiniteTowerRun_ITAssets.matITSafeWardAreaIndicator1_mat).WaitForCompletion();
       UnityEngine.Object.Destroy(primitive.GetComponent<CapsuleCollider>());
       MeshCollider collider = primitive.AddComponent<MeshCollider>();
       primitive.transform.localScale = new Vector3(115f, 1250f, 115f); // 110 orig

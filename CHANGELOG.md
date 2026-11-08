@@ -1,3 +1,8 @@
+**1.1.4**
+
+- Updated for Hallowed Concepts
+- Might've fixed mp teleport issue, who knows, I sure don't
+
 **1.1.3**
 
 - Fixed occasional crash during portal lasers
